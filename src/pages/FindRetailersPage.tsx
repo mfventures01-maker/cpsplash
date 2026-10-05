@@ -18,9 +18,9 @@ export function FindRetailersPage() {
   }, []);
 
   const filtered = retailers.filter(r => 
-    r.city.toLowerCase().includes(searchCity.toLowerCase()) ||
-    r.state.toLowerCase().includes(searchCity.toLowerCase()) ||
-    r.name.toLowerCase().includes(searchCity.toLowerCase())
+    (r.city || '').toLowerCase().includes(searchCity.toLowerCase()) ||
+    (r.state || '').toLowerCase().includes(searchCity.toLowerCase()) ||
+    (r.name || '').toLowerCase().includes(searchCity.toLowerCase())
   );
 
   return (
@@ -126,8 +126,8 @@ export function FindRetailersPage() {
                   <span>{retailer.address}</span>
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className="font-semibold text-stone-700">Stock Availability:</span>
-                  <span className="text-emerald-700 font-medium">{retailer.availability}</span>
+                  <span className="font-semibold text-stone-700">Hub:</span>
+                  <span className="text-emerald-700 font-medium">{[retailer.city, retailer.state].filter(Boolean).join(', ') || 'Nigeria'}</span>
                 </p>
               </div>
 

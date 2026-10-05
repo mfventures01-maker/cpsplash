@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ordersService } from '../../services/ordersService';
-import { CustomerOrder, OrderStatus } from '../../types/database.types';
+import { Order, OrderItem, OrderStatus } from '../../types/database.types';
 import { 
   ShoppingBag, 
   Search, 
@@ -21,11 +21,11 @@ import {
 import { subscribeToSync } from '../../lib/supabase';
 
 export function AdminOrdersManager() {
-  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedOrder, setSelectedOrder] = useState<CustomerOrder | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const fetchOrders = async () => {
@@ -38,9 +38,9 @@ export function AdminOrdersManager() {
   useEffect(() => {
     fetchOrders();
 
-    // Real-time synchronization subscription for customer_orders
+    // Real-time synchronization subscription for orders
     const unsubscribe = subscribeToSync((event) => {
-      if (['customer_orders', '*'].includes(event.table)) {
+      if (['orders', 'order_items', '*'].includes(event.table)) {
         fetchOrders();
       }
     });
@@ -52,7 +52,7 @@ export function AdminOrdersManager() {
     await ordersService.updateOrderStatus(orderId, newStatus);
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
     if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder(prev => prev ? { ...prev, status: newStatus } : null);
+      setSelectedOrder((prev: Order | null) => prev ? { ...prev, status: newStatus } : null);
     }
     setUpdatingId(null);
   };
@@ -75,17 +75,17 @@ export function AdminOrdersManager() {
           icon: <CheckCircle2 className="w-3 h-3 text-emerald-600" />,
           label: 'Delivered',
         };
-      case 'out_for_delivery':
+      case 'shipped':
         return {
           bg: 'bg-blue-50 text-blue-800 border-blue-300',
           icon: <Truck className="w-3 h-3 text-blue-600" />,
-          label: 'Out for Delivery',
+          label: 'Shipped',
         };
-      case 'bottled':
+      case 'processing':
         return {
           bg: 'bg-purple-50 text-purple-800 border-purple-300',
           icon: <PackageCheck className="w-3 h-3 text-purple-600" />,
-          label: 'Bottled & Chilled',
+          label: 'Processing',
         };
       case 'confirmed':
         return {
@@ -114,16 +114,13 @@ export function AdminOrdersManager() {
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
     const query = searchQuery.toLowerCase().trim();
     const matchesSearch = !query || 
-      order.customer_name.toLowerCase().includes(query) ||
-      order.customer_phone.includes(query) ||
       order.order_number.toLowerCase().includes(query) ||
-      order.customer_location.toLowerCase().includes(query) ||
-      (order.delivery_address && order.delivery_address.toLowerCase().includes(query));
+      (order.notes && order.notes.toLowerCase().includes(query));
 
     return matchesStatus && matchesSearch;
   });
 
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.status !== 'cancelled' ? o.total_amount : 0), 0);
+  const totalRevenue = orders.reduce((sum, o) => sum + (o.status !== 'cancelled' ? (o.grand_total || 0) : 0), 0);
   const pendingCount = orders.filter(o => o.status === 'pending').length;
 
   return (
@@ -274,28 +271,25 @@ export function AdminOrdersManager() {
 
                       <td className="py-3.5 px-4 font-semibold text-stone-900">
                         <div className="flex flex-col">
-                          <span>{order.customer_name}</span>
+                          <span>{order.notes || 'Direct Commerce'}</span>
                           <span className="text-[11px] font-mono text-stone-500 font-normal">
-                            {order.customer_phone}
-                          </span>
-                          <span className="text-[10px] text-stone-400 font-normal truncate max-w-[180px]">
-                            {order.customer_location}
+                            Channel: {order.channel}
                           </span>
                         </div>
                       </td>
 
                       <td className="py-3.5 px-4 text-stone-700">
                         <div className="space-y-0.5 max-w-xs">
-                          {order.items.map((item, idx) => (
+                          {order.items?.map((item: OrderItem, idx: number) => (
                             <div key={idx} className="truncate text-[11px]">
-                              <span className="font-bold text-stone-900">{item.quantity}x</span> {item.product_name} ({item.volume_ml}mL)
+                              <span className="font-bold text-stone-900">{item.quantity}x</span> {item.product_name_snapshot}
                             </div>
                           ))}
                         </div>
                       </td>
 
                       <td className="py-3.5 px-4 font-mono font-black text-stone-900 text-sm">
-                        ₦{Number(order.total_amount).toLocaleString()}
+                        ₦{Number(order.grand_total).toLocaleString()}
                       </td>
 
                       <td className="py-3.5 px-4">
@@ -307,8 +301,8 @@ export function AdminOrdersManager() {
                         >
                           <option value="pending">Pending</option>
                           <option value="confirmed">Confirmed</option>
-                          <option value="bottled">Bottled</option>
-                          <option value="out_for_delivery">Out for Delivery</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
                           <option value="delivered">Delivered</option>
                           <option value="cancelled">Cancelled</option>
                         </select>
@@ -330,7 +324,7 @@ export function AdminOrdersManager() {
                         </button>
 
                         <a
-                          href={`https://wa.me/${order.customer_phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(order.customer_name)},%20this%20is%20CP%20Fruit%20Splash%20regarding%20your%20order%20${order.order_number}!`}
+                          href={`https://wa.me/${(order.customer_phone || '').replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(order.customer_name || 'Customer')},%20this%20is%20CP%20Fruit%20Splash%20regarding%20your%20order%20${order.order_number}!`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-700 transition-colors inline-block"
@@ -420,14 +414,14 @@ export function AdminOrdersManager() {
               {/* Action Buttons for Customer Contact */}
               <div className="pt-2 flex gap-2">
                 <a
-                  href={`tel:${selectedOrder.customer_phone}`}
+                  href={`tel:${selectedOrder.customer_phone || ''}`}
                   className="flex-1 py-2 px-3 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>Call Customer</span>
                 </a>
                 <a
-                  href={`https://wa.me/${selectedOrder.customer_phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(selectedOrder.customer_name)},%20this%20is%20CP%20Fruit%20Splash%20regarding%20your%20order%20${selectedOrder.order_number}!`}
+                  href={`https://wa.me/${(selectedOrder.customer_phone || '').replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(selectedOrder.customer_name || 'Customer')},%20this%20is%20CP%20Fruit%20Splash%20regarding%20your%20order%20${selectedOrder.order_number}!`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
@@ -454,16 +448,15 @@ export function AdminOrdersManager() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100">
-                    {selectedOrder.items.map((item, idx) => (
+                    {selectedOrder.items?.map((item: OrderItem, idx: number) => (
                       <tr key={idx}>
                         <td className="py-2.5 px-3 font-semibold text-stone-900">
-                          {item.product_name}
-                          <span className="block text-[10px] text-stone-400 font-mono">{item.volume_ml}mL chilled</span>
+                          {item.product_name_snapshot}
                         </td>
                         <td className="py-2.5 px-3 font-mono">{item.quantity}</td>
                         <td className="py-2.5 px-3 font-mono">₦{item.unit_price.toLocaleString()}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-stone-900">
-                          ₦{item.subtotal.toLocaleString()}
+                          ₦{item.line_total.toLocaleString()}
                         </td>
                       </tr>
                     ))}
@@ -472,7 +465,7 @@ export function AdminOrdersManager() {
                     <tr>
                       <td colSpan={3} className="py-3 px-3 uppercase text-[11px] text-stone-600">Total Order Value</td>
                       <td className="py-3 px-3 text-right font-mono font-black text-rose-700 text-sm">
-                        ₦{selectedOrder.total_amount.toLocaleString()}
+                        ₦{Number(selectedOrder.grand_total).toLocaleString()}
                       </td>
                     </tr>
                   </tfoot>
@@ -486,7 +479,7 @@ export function AdminOrdersManager() {
                 Update Fulfillment Status (Mutates Supabase)
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-                {(['pending', 'confirmed', 'bottled', 'out_for_delivery', 'delivered', 'cancelled'] as OrderStatus[]).map(st => (
+                {(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] as OrderStatus[]).map(st => (
                   <button
                     key={st}
                     onClick={() => handleStatusChange(selectedOrder.id, st)}

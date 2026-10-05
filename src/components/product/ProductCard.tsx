@@ -2,6 +2,12 @@ import React from 'react';
 import { Product } from '../../types/database.types';
 import { MessageCircle, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService';
+import {
+  getProductPrice,
+  getProductVolume,
+  getProductHeroMediaUrl,
+  getProductClaims
+} from '../../services/productHelpers';
 
 interface ProductCardProps {
   product: Product;
@@ -10,15 +16,10 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onNavigate, onOpenOrderModal }: ProductCardProps) {
-  const primaryMedia = product.media?.find(m => m.is_primary) || product.media?.[0];
-  const imageUrl = primaryMedia?.url || 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80';
-
-  // Authoritative price directly from Supabase record
-  const currentPrice = product.sale_price !== null && product.sale_price !== undefined
-    ? product.sale_price
-    : product.base_price;
-
-  const verifiedClaims = product.claims?.filter(c => c.status === 'verified').slice(0, 2) || [];
+  const imageUrl = getProductHeroMediaUrl(product);
+  const price = getProductPrice(product);
+  const volumeInfo = getProductVolume(product);
+  const verifiedClaims = getProductClaims(product, true).slice(0, 2);
 
   const handleCardClick = () => {
     analyticsService.trackEvent('product_view', {
@@ -46,14 +47,14 @@ export function ProductCard({ product, onNavigate, onOpenOrderModal }: ProductCa
       <div className="relative aspect-square w-full bg-stone-100 overflow-hidden">
         <img
           src={imageUrl}
-          alt={primaryMedia?.alt_text || product.name}
+          alt={product.name}
           className="w-full h-full object-cover transition-transform duration-750 group-hover:scale-108"
           loading="lazy"
         />
 
-        {/* Volume badge */}
+        {/* Volume badge from product_variants */}
         <div className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full bg-stone-900/80 backdrop-blur-md text-white font-mono text-[11px] font-bold border border-white/20">
-          {product.volume_ml}mL
+          {volumeInfo.volume}{volumeInfo.unit}
         </div>
 
         {/* Status or Featured badge */}
@@ -101,11 +102,11 @@ export function ProductCard({ product, onNavigate, onOpenOrderModal }: ProductCa
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-xl font-black text-stone-900">
-                ₦{Number(currentPrice).toLocaleString()}
+                ₦{price.amount.toLocaleString()}
               </span>
-              {product.sale_price && (
+              {price.compare_at_amount && (
                 <span className="text-xs text-stone-400 line-through">
-                  ₦{Number(product.base_price).toLocaleString()}
+                  ₦{price.compare_at_amount.toLocaleString()}
                 </span>
               )}
             </div>

@@ -1,6 +1,8 @@
-import { Product, ProductMedia, ProductClaim, ProductPrice, BlogPost, Influencer, Campaign, SocialContent, Retailer, CustomerOrder } from '../types/database.types';
-
-export const INITIAL_PRODUCTS: Product[] = [
+/**
+ * LEGACY TEST FIXTURE ONLY - ISOLATED FROM PRODUCTION RUNTIME
+ * Governed under HOEOS Phase G4
+ */
+export const INITIAL_PRODUCTS: Record<string, unknown>[] = [
   {
     id: 'prod-001-zobo-sweet',
     name: 'CP Fruit Splash Zobo Sweet',
@@ -75,7 +77,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   }
 ];
 
-export const INITIAL_PRODUCT_MEDIA: ProductMedia[] = [
+export const INITIAL_PRODUCT_MEDIA: Record<string, unknown>[] = [
   // Zobo Sweet Media
   {
     id: 'med-001',
@@ -191,7 +193,7 @@ export const INITIAL_PRODUCT_MEDIA: ProductMedia[] = [
   }
 ];
 
-export const INITIAL_PRODUCT_CLAIMS: ProductClaim[] = [
+export const INITIAL_PRODUCT_CLAIMS: Record<string, unknown>[] = [
   // Zobo Sweet Verified Claims (Direct from Artwork)
   {
     id: 'clm-001',
@@ -285,7 +287,7 @@ export const INITIAL_PRODUCT_CLAIMS: ProductClaim[] = [
   }
 ];
 
-export const INITIAL_PRODUCT_PRICES: ProductPrice[] = [
+export const INITIAL_PRODUCT_PRICES: Record<string, unknown>[] = [
   {
     id: 'prc-001',
     product_id: 'prod-001-zobo-sweet',
@@ -310,7 +312,7 @@ export const INITIAL_PRODUCT_PRICES: ProductPrice[] = [
   }
 ];
 
-export const INITIAL_BLOG_POSTS: BlogPost[] = [
+export const INITIAL_BLOG_POSTS: Record<string, unknown>[] = [
   {
     id: 'blog-001',
     title: 'Taste Nature, Feel Refreshed: Why Real Hibiscus (Zobo) Is the King of Natural Refreshment',
@@ -362,7 +364,7 @@ Each 500mL bottle is fortified with Extra Vitamin C to support your daily vitali
   }
 ];
 
-export const INITIAL_INFLUENCERS: Influencer[] = [
+export const INITIAL_INFLUENCERS: Record<string, unknown>[] = [
   {
     id: 'inf-001',
     name: 'Kapeni Joy',
@@ -387,7 +389,7 @@ export const INITIAL_INFLUENCERS: Influencer[] = [
   }
 ];
 
-export const INITIAL_CAMPAIGNS: Campaign[] = [
+export const INITIAL_CAMPAIGNS: Record<string, unknown>[] = [
   {
     id: 'cmp-001-taste-nature',
     name: 'Taste Nature, Feel Refreshed',
@@ -424,7 +426,7 @@ export const INITIAL_CAMPAIGNS: Campaign[] = [
   }
 ];
 
-export const INITIAL_SOCIAL_CONTENT: SocialContent[] = [
+export const INITIAL_SOCIAL_CONTENT: Record<string, unknown>[] = [
   {
     id: 'soc-001',
     platform: 'instagram',
@@ -463,7 +465,7 @@ export const INITIAL_SOCIAL_CONTENT: SocialContent[] = [
   }
 ];
 
-export const INITIAL_RETAILERS: Retailer[] = [
+export const INITIAL_RETAILERS: Record<string, unknown>[] = [
   {
     id: 'ret-001',
     name: 'CP Fruit Splash Flagship Hub',
@@ -522,7 +524,7 @@ export const INITIAL_RETAILERS: Retailer[] = [
   }
 ];
 
-export const INITIAL_CUSTOMER_ORDERS: CustomerOrder[] = [
+export const INITIAL_CUSTOMER_ORDERS: Record<string, unknown>[] = [
   {
     id: 'ord-001',
     order_number: 'CPS-2026-0901',

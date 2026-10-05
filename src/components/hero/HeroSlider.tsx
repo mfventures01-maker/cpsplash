@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Product } from '../../types/database.types';
 import { MessageCircle, ArrowRight, ShieldCheck, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService';
+import { getProductPrice, getProductVolume, getProductHeroMediaUrl } from '../../services/productHelpers';
 
 interface HeroSliderProps {
   products: Product[];
@@ -12,7 +13,6 @@ interface HeroSliderProps {
 export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Match the two required slides
   const zoboProduct = products.find(p => p.slug === 'zobo-sweet') || products[0];
   const luxuryProduct = products.find(p => p.slug === 'luxury-juice-mix') || products[1] || products[0];
 
@@ -30,8 +30,8 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
       badge: 'Hibiscus Drink • 100% Fresh & Natural',
       badgeColor: 'bg-rose-900/60 border-rose-500/40 text-rose-200',
       highlights: ['Rich in Antioxidants', 'Extra Vitamin C', 'No Artificial Preservatives'],
-      imageSrc: zoboProduct?.media?.find(m => m.type === 'hero_image')?.url || 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1200&q=80',
-      lifestyleSrc: zoboProduct?.media?.find(m => m.type === 'lifestyle_image')?.url || 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=800&q=80',
+      imageSrc: getProductHeroMediaUrl(zoboProduct),
+      lifestyleSrc: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=800&q=80',
     },
     {
       id: 'slide-2',
@@ -46,8 +46,8 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
       badge: 'Luxury Cold Blend • 500mL',
       badgeColor: 'bg-amber-900/60 border-amber-500/40 text-amber-200',
       highlights: ['Pomegranate Arils', 'Whole Orchard Apples', 'Mountain Strawberries', 'Wild Blueberries'],
-      imageSrc: luxuryProduct?.media?.find(m => m.type === 'hero_image')?.url || 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=1200&q=80',
-      lifestyleSrc: luxuryProduct?.media?.find(m => m.type === 'lifestyle_image')?.url || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80',
+      imageSrc: getProductHeroMediaUrl(luxuryProduct),
+      lifestyleSrc: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80',
     }
   ];
 
@@ -60,6 +60,8 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
 
   const slide = slides[currentSlide];
   const activeProduct = slide.product;
+  const activePrice = getProductPrice(activeProduct);
+  const activeVolume = getProductVolume(activeProduct);
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -119,7 +121,7 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
             </p>
 
             {/* Authoritative Price Display dynamically from Supabase */}
-            {activeProduct && (
+            {activeProduct && activePrice.amount > 0 && (
               <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm inline-flex items-center gap-4">
                 <div>
                   <span className="text-[11px] uppercase tracking-wider text-stone-400 block font-semibold">
@@ -127,15 +129,15 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
                   </span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl sm:text-3xl font-black text-white">
-                      ₦{((activeProduct.sale_price || activeProduct.base_price) as number).toLocaleString()}
+                      ₦{activePrice.amount.toLocaleString()}
                     </span>
-                    {activeProduct.sale_price && (
+                    {activePrice.compare_at_amount && (
                       <span className="text-sm text-stone-400 line-through">
-                        ₦{(activeProduct.base_price as number).toLocaleString()}
+                        ₦{activePrice.compare_at_amount.toLocaleString()}
                       </span>
                     )}
                     <span className="text-xs text-emerald-400 font-semibold px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/30">
-                      {activeProduct.volume_ml}mL
+                      {activeVolume.volume}{activeVolume.unit}
                     </span>
                   </div>
                 </div>

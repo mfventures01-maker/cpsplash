@@ -24,9 +24,8 @@ export function SocialProofFeed({ items, onProductClick }: SocialProofFeedProps)
 
   const handlePostClick = (item: SocialContent) => {
     analyticsService.trackEvent('social_click', {
-      productId: item.product_id,
-      content: item.post_url,
-      metadata: { creator: item.creator, platform: item.platform }
+      content: item.url,
+      metadata: { platform: item.platform }
     });
   };
 
@@ -54,7 +53,7 @@ export function SocialProofFeed({ items, onProductClick }: SocialProofFeedProps)
           >
             <div className="relative aspect-4/3 overflow-hidden bg-stone-100">
               <img
-                src={item.thumbnail}
+                src={item.url}
                 alt={item.caption || 'Social post'}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
@@ -68,7 +67,7 @@ export function SocialProofFeed({ items, onProductClick }: SocialProofFeedProps)
             <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
               <div>
                 <span className="text-xs font-bold text-stone-900 block mb-1">
-                  {item.creator || 'CP Splash Fan'}
+                  CP Splash Community
                 </span>
                 <p className="text-xs text-stone-600 leading-relaxed line-clamp-3">
                   "{item.caption}"
@@ -77,7 +76,7 @@ export function SocialProofFeed({ items, onProductClick }: SocialProofFeedProps)
 
               <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs">
                 <a
-                  href={item.post_url}
+                  href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => handlePostClick(item)}
@@ -86,15 +85,6 @@ export function SocialProofFeed({ items, onProductClick }: SocialProofFeedProps)
                   <span>View Post</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
-
-                {item.product_id && (
-                  <button
-                    onClick={() => onProductClick && onProductClick(item.product_id!)}
-                    className="text-stone-500 hover:text-stone-900 font-medium"
-                  >
-                    View Product
-                  </button>
-                )}
               </div>
             </div>
           </div>

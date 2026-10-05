@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { ProductMedia } from '../../types/database.types';
-import { Play, Image as ImageIcon, Volume2, VolumeX } from 'lucide-react';
+import { ProductMediaRelation } from '../../types/database.types';
+import { Play, Volume2, VolumeX } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService';
+import { mediaService } from '../../services/mediaService';
 
 interface ProductGalleryProps {
-  media: ProductMedia[];
+  media?: ProductMediaRelation[];
   productName: string;
   productId?: string;
 }
@@ -21,14 +22,16 @@ export function ProductGallery({ media, productName, productId }: ProductGallery
     );
   }
 
-  const activeMedia = media[selectedIndex] || media[0];
-  const isVideo = activeMedia.type === 'hero_video' || activeMedia.type === 'short_video' || activeMedia.url.endsWith('.mp4');
+  const activeItem = media[selectedIndex] || media[0];
+  const activeAsset = activeItem.media_assets || activeItem.asset;
+  const activeUrl = mediaService.getMediaAssetUrl(activeAsset);
+  const isVideo = activeAsset?.media_type?.includes('video') || activeUrl.endsWith('.mp4');
 
   const handleVideoPlay = () => {
-    if (productId) {
+    if (productId && activeAsset) {
       analyticsService.trackEvent('product_video_play', {
         productId,
-        metadata: { media_id: activeMedia.id, url: activeMedia.url }
+        metadata: { media_id: activeAsset.id, url: activeUrl }
       });
     }
   };
@@ -40,8 +43,7 @@ export function ProductGallery({ media, productName, productId }: ProductGallery
         {isVideo ? (
           <div className="relative w-full h-full">
             <video
-              src={activeMedia.url}
-              poster={activeMedia.thumbnail_url || undefined}
+              src={activeUrl}
               className="w-full h-full object-cover"
               controls
               autoPlay
@@ -59,36 +61,40 @@ export function ProductGallery({ media, productName, productId }: ProductGallery
           </div>
         ) : (
           <img
-            src={activeMedia.url}
-            alt={activeMedia.alt_text || productName}
+            src={activeUrl || 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80'}
+            alt={activeAsset?.alt_text || productName}
             className="w-full h-full object-cover transition-all duration-300"
           />
         )}
 
         {/* Media Type Badge */}
-        <div className="absolute bottom-4 left-4 px-3 py-1 rounded-full bg-stone-900/80 backdrop-blur-md text-white text-[11px] font-mono border border-white/20">
-          {activeMedia.type.replace('_', ' ').toUpperCase()}
-        </div>
+        {activeAsset && (
+          <div className="absolute bottom-4 left-4 px-3 py-1 rounded-full bg-stone-900/80 backdrop-blur-md text-white text-[11px] font-mono border border-white/20 uppercase">
+            {activeAsset.media_type}
+          </div>
+        )}
       </div>
 
       {/* Thumbnails row */}
       {media.length > 1 && (
         <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
           {media.map((item, index) => {
-            const isItemVideo = item.type.includes('video') || item.url.endsWith('.mp4');
+            const asset = item.media_assets || item.asset;
+            const itemUrl = mediaService.getMediaAssetUrl(asset);
+            const isItemVideo = asset?.media_type?.includes('video') || itemUrl.endsWith('.mp4');
             const isSelected = selectedIndex === index;
 
             return (
               <button
-                key={item.id || index}
+                key={item.media_id || index}
                 onClick={() => setSelectedIndex(index)}
                 className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
                   isSelected ? 'border-rose-600 scale-105 shadow-md' : 'border-stone-200 hover:border-stone-300 opacity-70 hover:opacity-100'
                 }`}
               >
                 <img
-                  src={item.thumbnail_url || item.url}
-                  alt={item.alt_text || `Thumb ${index + 1}`}
+                  src={itemUrl}
+                  alt={asset?.alt_text || `Thumb ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
                 {isItemVideo && (

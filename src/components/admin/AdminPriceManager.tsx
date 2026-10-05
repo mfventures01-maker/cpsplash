@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { productsService } from '../../services/productsService';
-import { supabase } from '../../lib/supabase';
+import { supabase, TENANT_ID } from '../../lib/supabase';
 import { Product, ProductPrice } from '../../types/database.types';
-import { DollarSign, History, RefreshCw, CheckCircle2, TrendingUp } from 'lucide-react';
+import { getProductPrice } from '../../services/productHelpers';
+import { DollarSign, History, RefreshCw, CheckCircle2 } from 'lucide-react';
+
+interface PriceHistoryRow extends ProductPrice {
+  variant?: {
+    name: string;
+    product?: {
+      name: string;
+    };
+  };
+}
 
 export function AdminPriceManager() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [priceHistory, setPriceHistory] = useState<ProductPrice[]>([]);
+  const [priceHistory, setPriceHistory] = useState<PriceHistoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [newBasePrice, setNewBasePrice] = useState<number>(1000);
@@ -21,16 +31,18 @@ export function AdminPriceManager() {
     setProducts(prods);
     if (prods.length > 0 && !selectedProduct) {
       setSelectedProduct(prods[0].id);
-      setNewBasePrice(prods[0].base_price);
-      setNewSalePrice(prods[0].sale_price || '');
+      const pr = getProductPrice(prods[0]);
+      setNewBasePrice(pr.amount);
+      setNewSalePrice(pr.compare_at_amount || '');
     }
 
     const { data: history } = await supabase
       .from('product_prices')
-      .select('*')
+      .select('*, variant:product_variants(name, product:products(name))')
+      .eq('tenant_id', TENANT_ID)
       .order('created_at', { ascending: false });
 
-    setPriceHistory((history as ProductPrice[]) || []);
+    setPriceHistory((history as unknown as PriceHistoryRow[]) || []);
     setLoading(false);
   };
 
@@ -42,8 +54,9 @@ export function AdminPriceManager() {
     setSelectedProduct(prodId);
     const found = products.find(p => p.id === prodId);
     if (found) {
-      setNewBasePrice(found.base_price);
-      setNewSalePrice(found.sale_price || '');
+      const pr = getProductPrice(found);
+      setNewBasePrice(pr.amount);
+      setNewSalePrice(pr.compare_at_amount || '');
     }
   };
 
@@ -81,7 +94,7 @@ export function AdminPriceManager() {
           Authoritative Price Engine
         </h1>
         <p className="text-xs text-stone-500 mt-0.5">
-          "Prices must originate from Supabase. Never write price: 900 into production UI components."
+          "Prices must originate from Supabase. Never write price directly into production UI components."
         </p>
       </div>
 
@@ -107,9 +120,14 @@ export function AdminPriceManager() {
                 onChange={(e) => handleProductChange(e.target.value)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white font-semibold text-xs"
               >
-                {products.map(p => (
-                  <option key={p.id} value={p.id}>{p.name} (Now: ₦{p.sale_price || p.base_price})</option>
-                ))}
+                {products.map(p => {
+                  const pr = getProductPrice(p);
+                  return (
+                    <option key={p.id} value={p.id}>
+                      {p.name} (Now: ₦{pr.amount.toLocaleString()})
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -172,7 +190,7 @@ export function AdminPriceManager() {
           </div>
           <button
             onClick={fetchData}
-            className="text-stone-400 hover:text-stone-700 p-1"
+            className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -182,36 +200,33 @@ export function AdminPriceManager() {
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-stone-200 text-stone-400 font-mono uppercase tracking-wider">
-                <th className="py-2.5 font-bold">Product</th>
-                <th className="py-2.5 font-bold">Base Price</th>
-                <th className="py-2.5 font-bold">Sale Price</th>
+                <th className="py-2.5 font-bold">Product / Variant</th>
+                <th className="py-2.5 font-bold">Amount</th>
+                <th className="py-2.5 font-bold">Compare-at</th>
                 <th className="py-2.5 font-bold">Reason</th>
                 <th className="py-2.5 font-bold text-right">Timestamp</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
-              {priceHistory.map((item) => {
-                const prod = products.find(p => p.id === item.product_id);
-                return (
-                  <tr key={item.id} className="hover:bg-stone-50/70">
-                    <td className="py-3 font-semibold text-stone-900">
-                      {prod?.name || item.product_id}
-                    </td>
-                    <td className="py-3 font-mono font-bold text-stone-900">
-                      ₦{Number(item.base_price).toLocaleString()}
-                    </td>
-                    <td className="py-3 font-mono text-rose-700">
-                      {item.sale_price ? `₦${Number(item.sale_price).toLocaleString()}` : '—'}
-                    </td>
-                    <td className="py-3 text-stone-600 max-w-xs truncate">
-                      {item.reason || 'Price configuration'}
-                    </td>
-                    <td className="py-3 text-right font-mono text-[10px] text-stone-400">
-                      {new Date(item.created_at).toLocaleString()}
-                    </td>
-                  </tr>
-                );
-              })}
+              {priceHistory.map((item) => (
+                <tr key={item.id} className="hover:bg-stone-50/70">
+                  <td className="py-3 font-semibold text-stone-900">
+                    {item.variant?.product?.name || item.variant?.name || 'Standard Variant'}
+                  </td>
+                  <td className="py-3 font-mono font-bold text-stone-900">
+                    ₦{Number(item.amount).toLocaleString()}
+                  </td>
+                  <td className="py-3 font-mono text-rose-700">
+                    {item.compare_at_amount ? `₦${Number(item.compare_at_amount).toLocaleString()}` : '—'}
+                  </td>
+                  <td className="py-3 text-stone-600 max-w-xs truncate">
+                    {item.change_reason || 'Price configuration'}
+                  </td>
+                  <td className="py-3 text-right font-mono text-[10px] text-stone-400">
+                    {new Date(item.created_at).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

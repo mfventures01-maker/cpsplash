@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase, TENANT_ID } from '../lib/supabase';
 import { Campaign, Influencer } from '../types/database.types';
 
 const getErrMsg = (err: unknown, fallback: string): string => {
@@ -10,43 +10,33 @@ const getErrMsg = (err: unknown, fallback: string): string => {
 
 export const campaignService = {
   async getActiveCampaigns(): Promise<Campaign[]> {
-    const { data: rawCampaigns } = await supabase
+    const { data } = await supabase
       .from('campaigns')
       .select('*')
+      .eq('tenant_id', TENANT_ID)
       .eq('status', 'active');
     
-    if (!rawCampaigns || !Array.isArray(rawCampaigns)) return [];
-
-    const enriched = await Promise.all(
-      (rawCampaigns as Campaign[]).map(async (cmp) => {
-        let inf: Influencer | undefined = undefined;
-        if (cmp.influencer_id) {
-          const { data: infData } = await supabase.from('influencers').select('*').eq('id', cmp.influencer_id).single();
-          if (infData) inf = infData as Influencer;
-        }
-        return { ...cmp, influencer: inf };
-      })
-    );
-
-    return enriched;
+    return (data as Campaign[]) || [];
   },
 
   async getAllCampaigns(): Promise<Campaign[]> {
-    const { data } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase
+      .from('campaigns')
+      .select('*')
+      .eq('tenant_id', TENANT_ID)
+      .order('created_at', { ascending: false });
     return (data as Campaign[]) || [];
   },
 
   async getCampaignBySlug(slug: string): Promise<Campaign | null> {
-    const { data: cmp } = await supabase.from('campaigns').select('*').eq('slug', slug).single();
+    const { data: cmp } = await supabase
+      .from('campaigns')
+      .select('*')
+      .eq('tenant_id', TENANT_ID)
+      .eq('slug', slug)
+      .single();
     if (!cmp) return null;
-
-    const typedCmp = cmp as Campaign;
-    let inf: Influencer | undefined = undefined;
-    if (typedCmp.influencer_id) {
-      const { data: infData } = await supabase.from('influencers').select('*').eq('id', typedCmp.influencer_id).single();
-      if (infData) inf = infData as Influencer;
-    }
-    return { ...typedCmp, influencer: inf };
+    return cmp as Campaign;
   },
 
   async createCampaign(campaign: Partial<Campaign>): Promise<{ data: Campaign | null; error: string | null }> {
@@ -57,26 +47,24 @@ export const campaignService = {
         .replace(/(^-|-$)/g, '');
 
       const record = {
+        tenant_id: TENANT_ID,
         name: campaign.name || 'New Campaign',
         slug,
-        hero_headline: campaign.hero_headline || '',
-        hero_subheadline: campaign.hero_subheadline || null,
-        video_url: campaign.video_url || null,
-        influencer_id: campaign.influencer_id || null,
-        product_id: campaign.product_id || null,
-        promotion_code: campaign.promotion_code || null,
-        discount_percent: campaign.discount_percent || 0,
+        description: campaign.description || null,
         status: campaign.status || 'draft',
-        utm_source: campaign.utm_source || 'social',
-        utm_medium: campaign.utm_medium || 'influencer',
-        utm_campaign: campaign.utm_campaign || slug,
+        starts_at: campaign.starts_at || null,
+        ends_at: campaign.ends_at || null,
+        landing_path: campaign.landing_path || `/campaign/${slug}`,
+        default_utm_source: campaign.default_utm_source || 'social',
+        default_utm_medium: campaign.default_utm_medium || 'influencer',
+        default_utm_campaign: campaign.default_utm_campaign || slug,
       };
 
-      const { data, error } = await supabase.from('campaigns').insert(record);
+      const { data, error } = await supabase.from('campaigns').insert(record).select().single();
       if (error || !data) {
         return { data: null, error: error ? getErrMsg(error, 'Failed to create campaign') : 'Failed to create campaign' };
       }
-      return { data: Array.isArray(data) ? (data[0] as Campaign) : (data as Campaign), error: null };
+      return { data: data as Campaign, error: null };
     } catch (e: unknown) {
       return { data: null, error: e instanceof Error ? e.message : 'Error creating campaign' };
     }
@@ -84,26 +72,31 @@ export const campaignService = {
 
   // Influencers API
   async getInfluencers(): Promise<Influencer[]> {
-    const { data } = await supabase.from('influencers').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase
+      .from('influencers')
+      .select('*')
+      .eq('tenant_id', TENANT_ID)
+      .order('created_at', { ascending: false });
     return (data as Influencer[]) || [];
   },
 
   async createInfluencer(influencer: Partial<Influencer>): Promise<{ data: Influencer | null; error: string | null }> {
     try {
       const record = {
+        tenant_id: TENANT_ID,
         name: influencer.name || '',
-        handle: influencer.handle || '',
+        handle: influencer.handle || null,
         platform: influencer.platform || 'instagram',
-        bio: influencer.bio || '',
-        avatar_url: influencer.avatar_url || null,
-        reach_count: influencer.reach_count || 0,
+        profile_url: influencer.profile_url || null,
+        phone: influencer.phone || null,
+        email: influencer.email || null,
         status: influencer.status || 'active',
       };
-      const { data, error } = await supabase.from('influencers').insert(record);
+      const { data, error } = await supabase.from('influencers').insert(record).select().single();
       if (error || !data) {
         return { data: null, error: error ? getErrMsg(error, 'Failed to create influencer') : 'Failed to create influencer' };
       }
-      return { data: Array.isArray(data) ? (data[0] as Influencer) : (data as Influencer), error: null };
+      return { data: data as Influencer, error: null };
     } catch (e: unknown) {
       return { data: null, error: e instanceof Error ? e.message : 'Error creating influencer' };
     }

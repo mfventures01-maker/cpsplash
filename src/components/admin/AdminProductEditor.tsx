@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { productsService } from '../../services/productsService';
 import { mediaService } from '../../services/mediaService';
 import { claimsService } from '../../services/claimsService';
-import { Product, ProductStatus, AvailabilityStatus, MediaType, ProductClaim } from '../../types/database.types';
-import { ArrowLeft, Save, Upload, Trash2, Star, Plus, ShieldCheck, Sparkles, Image as ImageIcon, Video, CheckCircle2 } from 'lucide-react';
+import { Product, ProductStatus, ClaimType, ProductClaim, ProductMediaRelation, ProductCategory } from '../../types/database.types';
+import { getProductPrice, getProductVolume } from '../../services/productHelpers';
+import { ArrowLeft, Save, Upload, Trash2, Star, Plus, ShieldCheck, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
 
 interface AdminProductEditorProps {
   productId?: string | null;
@@ -21,35 +22,37 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [sku, setSku] = useState('');
+  const [brand, setBrand] = useState('CP Fruit Splash');
+  const [categoryId, setCategoryId] = useState<string>('');
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [shortDescription, setShortDescription] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<ProductStatus>('draft');
   const [featured, setFeatured] = useState(false);
   const [basePrice, setBasePrice] = useState<number>(1200);
   const [salePrice, setSalePrice] = useState<number | ''>('');
-  const [availabilityStatus, setAvailabilityStatus] = useState<AvailabilityStatus>('in_stock');
   const [volumeMl, setVolumeMl] = useState<number>(500);
   const [seoTitle, setSeoTitle] = useState('');
   const [seoDescription, setSeoDescription] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState('2348127700724');
 
   // Media & Claims lists
-  const [mediaList, setMediaList] = useState<Product['media']>([]);
+  const [mediaList, setMediaList] = useState<ProductMediaRelation[]>([]);
   const [claimsList, setClaimsList] = useState<ProductClaim[]>([]);
 
-  // New Media state
-  const [uploadUrl, setUploadUrl] = useState('');
-  const [mediaType, setMediaType] = useState<MediaType>('product_image');
-  const [altText, setAltText] = useState('');
+  // Media upload state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [mediaAltText, setMediaAltText] = useState('');
   const [uploadingMedia, setUploadingMedia] = useState(false);
 
   // New Claim state
   const [newClaimText, setNewClaimText] = useState('');
   const [newClaimSource, setNewClaimSource] = useState('');
-  const [newClaimBadge, setNewClaimBadge] = useState('leaf');
+  const [newClaimType, setNewClaimType] = useState<ClaimType>('health');
   const [addingClaim, setAddingClaim] = useState(false);
 
   useEffect(() => {
+    productsService.getCategories().then(setCategories);
+
     if (productId) {
       productsService.getProductById(productId).then(({ data, error: err }) => {
         if (err || !data) {
@@ -58,17 +61,22 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
           setName(data.name);
           setSlug(data.slug);
           setSku(data.sku || '');
+          setBrand(data.brand || 'CP Fruit Splash');
+          setCategoryId(data.category_id || '');
           setShortDescription(data.short_description || '');
           setDescription(data.description || '');
           setStatus(data.status);
           setFeatured(data.featured);
-          setBasePrice(data.base_price);
-          setSalePrice(data.sale_price || '');
-          setAvailabilityStatus(data.availability_status);
-          setVolumeMl(data.volume_ml);
           setSeoTitle(data.seo_title || '');
           setSeoDescription(data.seo_description || '');
-          setWhatsappNumber(data.whatsapp_order_number || '2348127700724');
+
+          const price = getProductPrice(data);
+          setBasePrice(price.amount || 1200);
+          setSalePrice(price.compare_at_amount || '');
+
+          const volume = getProductVolume(data);
+          setVolumeMl(volume.volume || 500);
+
           setMediaList(data.media || []);
           setClaimsList(data.claims || []);
         }
@@ -93,21 +101,22 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     setSaving(true);
     setError(null);
 
-    const payload: Partial<Product> = {
-      name,
-      slug,
-      sku,
-      short_description: shortDescription,
-      description,
+    const payload = {
+      name: name.trim(),
+      slug: slug.trim(),
+      sku: sku.trim() || undefined,
+      brand: brand.trim() || undefined,
+      category_id: categoryId || null,
+      short_description: shortDescription.trim() || undefined,
+      description: description.trim() || undefined,
       status,
       featured,
-      base_price: Number(basePrice),
-      sale_price: salePrice === '' ? null : Number(salePrice),
-      availability_status: availabilityStatus,
-      volume_ml: Number(volumeMl),
+      price: Number(basePrice),
+      compare_at_price: salePrice === '' ? null : Number(salePrice),
+      volume: Number(volumeMl),
+      volume_unit: 'ml',
       seo_title: seoTitle || name,
       seo_description: seoDescription || shortDescription,
-      whatsapp_order_number: whatsappNumber,
     };
 
     if (isEditing && productId) {
@@ -129,21 +138,38 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     setSaving(false);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
   const handleUploadMedia = async () => {
     if (!productId) {
       alert('Please save the product first before attaching media.');
       return;
     }
-    if (!uploadUrl) return;
+    if (!selectedFile) {
+      alert('Please select an image file to upload.');
+      return;
+    }
 
     setUploadingMedia(true);
-    const res = await mediaService.uploadMedia(productId, uploadUrl, mediaType, altText, mediaList?.length === 0);
+    const isPrimary = !mediaList || mediaList.length === 0;
+    const res = await mediaService.uploadMedia(
+      productId,
+      selectedFile,
+      'image',
+      mediaAltText || name,
+      isPrimary
+    );
+
     if (res.data) {
-      setMediaList(prev => [...(prev || []), res.data!]);
-      setUploadUrl('');
-      setAltText('');
+      setMediaList(prev => [...prev, res.data!]);
+      setSelectedFile(null);
+      setMediaAltText('');
     } else {
-      alert(res.error || 'Failed to add media');
+      alert(res.error || 'Failed to upload media');
     }
     setUploadingMedia(false);
   };
@@ -151,13 +177,14 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   const handleSetPrimaryMedia = async (mediaId: string) => {
     if (!productId) return;
     await mediaService.setPrimaryMedia(productId, mediaId);
-    setMediaList(prev => prev?.map(m => ({ ...m, is_primary: m.id === mediaId })));
+    setMediaList(prev => prev.map(m => ({ ...m, is_primary: m.media_id === mediaId })));
   };
 
   const handleDeleteMedia = async (mediaId: string) => {
+    if (!productId) return;
     if (!confirm('Remove this media asset?')) return;
-    await mediaService.deleteMedia(mediaId);
-    setMediaList(prev => prev?.filter(m => m.id !== mediaId));
+    await mediaService.deleteMedia(productId, mediaId);
+    setMediaList(prev => prev.filter(m => m.media_id !== mediaId));
   };
 
   const handleAddClaim = async () => {
@@ -171,7 +198,13 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     }
 
     setAddingClaim(true);
-    const res = await claimsService.addClaim(productId, newClaimText, newClaimSource, newClaimBadge, 'verified');
+    const res = await claimsService.addClaim(
+      productId,
+      newClaimText,
+      newClaimSource,
+      newClaimType,
+      'verified'
+    );
     if (res.data) {
       setClaimsList(prev => [...prev, res.data!]);
       setNewClaimText('');
@@ -228,7 +261,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
             </div>
 
             <div>
-              <label className="font-bold text-stone-700 block mb-1">URL Slug (Supabase Key) *</label>
+              <label className="font-bold text-stone-700 block mb-1">URL Slug (Authoritative) *</label>
               <input
                 type="text"
                 required
@@ -251,13 +284,17 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
             </div>
 
             <div>
-              <label className="font-bold text-stone-700 block mb-1">Volume (mL)</label>
-              <input
-                type="number"
-                value={volumeMl}
-                onChange={(e) => setVolumeMl(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-rose-500 font-mono"
-              />
+              <label className="font-bold text-stone-700 block mb-1">Category</label>
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-rose-500 bg-white"
+              >
+                <option value="">Uncategorized</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -286,15 +323,25 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
           </div>
         </div>
 
-        {/* 2. Price Engine */}
+        {/* 2. Physical Variant & Pricing */}
         <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-xs space-y-4">
           <h3 className="text-base font-bold text-stone-900 border-b border-stone-100 pb-2">
-            2. Price Engine (Supabase Authoritative Pricing)
+            2. Sellable Unit & Authoritative Pricing (product_variants & product_prices)
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
             <div>
-              <label className="font-bold text-stone-700 block mb-1">Base Price (₦ NGN) *</label>
+              <label className="font-bold text-stone-700 block mb-1">Volume (mL)</label>
+              <input
+                type="number"
+                value={volumeMl}
+                onChange={(e) => setVolumeMl(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-mono text-sm focus:ring-2 focus:ring-rose-500"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-stone-700 block mb-1">Retail Price (₦ NGN) *</label>
               <input
                 type="number"
                 required
@@ -305,7 +352,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
             </div>
 
             <div>
-              <label className="font-bold text-stone-700 block mb-1">Sale Price (Optional ₦)</label>
+              <label className="font-bold text-stone-700 block mb-1">Promotional / Sale Price (₦ NGN)</label>
               <input
                 type="number"
                 placeholder="Leave blank if no discount"
@@ -314,32 +361,18 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-mono text-base font-bold focus:ring-2 focus:ring-rose-500 text-rose-700"
               />
             </div>
-
-            <div>
-              <label className="font-bold text-stone-700 block mb-1">Availability</label>
-              <select
-                value={availabilityStatus}
-                onChange={(e) => setAvailabilityStatus(e.target.value as AvailabilityStatus)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-rose-500 bg-white"
-              >
-                <option value="in_stock">In Stock</option>
-                <option value="low_stock">Low Stock</option>
-                <option value="out_of_stock">Out of Stock</option>
-                <option value="pre_order">Pre-Order</option>
-              </select>
-            </div>
           </div>
         </div>
 
-        {/* 3. Publication & Conversion Channels */}
+        {/* 3. Publication State */}
         <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-xs space-y-4">
           <h3 className="text-base font-bold text-stone-900 border-b border-stone-100 pb-2">
-            3. Visibility & WhatsApp Conversion Settings
+            3. Visibility & Storefront Placement
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="font-bold text-stone-700 block mb-1">Status</label>
+              <label className="font-bold text-stone-700 block mb-1">Publication Status</label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as ProductStatus)}
@@ -351,27 +384,16 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
               </select>
             </div>
 
-            <div>
-              <label className="font-bold text-stone-700 block mb-1">WhatsApp Order Line</label>
-              <input
-                type="text"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
-                placeholder="2348127700724"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-mono text-xs focus:ring-2 focus:ring-rose-500"
-              />
-            </div>
-
             <div className="flex items-center gap-2 pt-5">
               <input
                 type="checkbox"
                 id="featuredCheck"
                 checked={featured}
                 onChange={(e) => setFeatured(e.target.checked)}
-                className="w-4 h-4 text-rose-600 rounded"
+                className="w-4 h-4 text-rose-600 rounded cursor-pointer"
               />
               <label htmlFor="featuredCheck" className="font-bold text-stone-700 cursor-pointer">
-                Feature on Hero Banner
+                Feature on Homepage Slider
               </label>
             </div>
           </div>
@@ -382,7 +404,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
           <button
             type="button"
             onClick={onBack}
-            className="px-6 py-3 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold text-xs"
+            className="px-6 py-3 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold text-xs cursor-pointer"
           >
             Cancel
           </button>
@@ -397,16 +419,16 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
         </div>
       </form>
 
-      {/* 4. Media Management (Only available when product exists) */}
+      {/* 4. Media Management (Deterministic Upload Engine) */}
       {isEditing && productId && (
         <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-stone-100 pb-2">
             <div>
               <h3 className="text-base font-bold text-stone-900">
-                4. Supabase Storage Media Engine
+                4. Supabase Storage & Media Assets
               </h3>
               <p className="text-xs text-stone-500">
-                Manage hero image, gallery assets, and short product videos.
+                Uploaded to <code>cp-public</code> bucket, registered in <code>media_assets</code>, and linked via <code>product_media</code>.
               </p>
             </div>
             <span className="text-xs font-mono text-stone-400">
@@ -416,85 +438,81 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
 
           {/* Current Media Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {mediaList?.map((media) => (
-              <div key={media.id} className="group relative rounded-2xl overflow-hidden border border-stone-200 aspect-square bg-stone-100">
-                <img src={media.url} alt={media.alt_text || 'Product Media'} className="w-full h-full object-cover" />
-                
-                {media.is_primary && (
-                  <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-black uppercase shadow-xs">
-                    Hero Media
-                  </span>
-                )}
+            {mediaList?.map((rel) => {
+              const asset = rel.media_assets || rel.asset;
+              const imgUrl = mediaService.getMediaAssetUrl(asset);
 
-                <div className="absolute inset-0 bg-stone-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
-                  {!media.is_primary && (
+              return (
+                <div key={rel.media_id} className="group relative rounded-2xl overflow-hidden border border-stone-200 aspect-square bg-stone-100">
+                  <img src={imgUrl} alt={asset?.alt_text || 'Product Media'} className="w-full h-full object-cover" />
+
+                  {rel.is_primary && (
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[9px] font-black uppercase shadow-xs">
+                      Primary
+                    </span>
+                  )}
+
+                  <div className="absolute inset-0 bg-stone-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                    {!rel.is_primary && (
+                      <button
+                        type="button"
+                        onClick={() => handleSetPrimaryMedia(rel.media_id)}
+                        className="p-1.5 rounded-lg bg-white/20 hover:bg-white text-white hover:text-stone-900 text-xs transition-colors cursor-pointer"
+                        title="Set as Hero Media"
+                      >
+                        <Star className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                     <button
                       type="button"
-                      onClick={() => handleSetPrimaryMedia(media.id)}
-                      className="p-1.5 rounded-lg bg-white/20 hover:bg-white text-white hover:text-stone-900 text-xs transition-colors"
-                      title="Set as Hero Media"
+                      onClick={() => handleDeleteMedia(rel.media_id)}
+                      className="p-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-xs transition-colors cursor-pointer"
+                      title="Delete Media"
                     >
-                      <Star className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteMedia(media.id)}
-                    className="p-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-xs transition-colors"
-                    title="Delete Media"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          {/* Add Media Box */}
+          {/* Upload File Box */}
           <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3 text-xs">
-            <h4 className="font-bold text-stone-800">Add New Media Asset</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="sm:col-span-2">
+            <h4 className="font-bold text-stone-800">Upload New Media Asset to Supabase Storage</h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="font-bold text-stone-700 block mb-1">Select File (Image / WebP / JPEG / PNG)</label>
                 <input
-                  type="text"
-                  placeholder="Paste Image URL or Storage Link..."
-                  value={uploadUrl}
-                  onChange={(e) => setUploadUrl(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 text-xs"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleFileUpload}
+                  className="w-full px-3 py-2 rounded-xl border border-stone-300 text-xs bg-white cursor-pointer"
                 />
               </div>
 
               <div>
-                <select
-                  value={mediaType}
-                  onChange={(e) => setMediaType(e.target.value as MediaType)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-300 bg-white text-xs"
-                >
-                  <option value="hero_image">Hero Image</option>
-                  <option value="product_image">Product Image</option>
-                  <option value="lifestyle_image">Lifestyle Image</option>
-                  <option value="short_video">Short Video Clip</option>
-                  <option value="gallery_image">Gallery Image</option>
-                </select>
+                <label className="font-bold text-stone-700 block mb-1">Alt Description / SEO</label>
+                <input
+                  type="text"
+                  placeholder="e.g. CP Splash Zobo bottle chilled"
+                  value={mediaAltText}
+                  onChange={(e) => setMediaAltText(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-stone-300 text-xs bg-white"
+                />
               </div>
             </div>
 
-            <div className="flex justify-between items-center">
-              <input
-                type="text"
-                placeholder="Alt description for SEO..."
-                value={altText}
-                onChange={(e) => setAltText(e.target.value)}
-                className="w-1/2 px-3 py-2 rounded-xl border border-stone-300 text-xs"
-              />
-
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={handleUploadMedia}
-                disabled={uploadingMedia || !uploadUrl}
-                className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs cursor-pointer disabled:opacity-50"
+                disabled={uploadingMedia || !selectedFile}
+                className="px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
-                {uploadingMedia ? 'Uploading...' : 'Link to Product'}
+                <Upload className="w-3.5 h-3.5" />
+                <span>{uploadingMedia ? 'Uploading to Storage...' : 'Upload & Attach to Product'}</span>
               </button>
             </div>
           </div>
@@ -507,7 +525,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
           <div className="flex items-center justify-between border-b border-stone-100 pb-2">
             <div>
               <h3 className="text-base font-bold text-stone-900">
-                5. HOEOS Health Claims Engine
+                5. Product Claims Engine (product_claims)
               </h3>
               <p className="text-xs text-stone-500">
                 Only verified claims with documented lab sources are published.
@@ -525,12 +543,17 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-stone-900">{claim.claim}</span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                      {claim.status}
+                      {claim.verification_status}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-stone-200 text-stone-700 text-[10px] font-mono">
+                      {claim.claim_type}
                     </span>
                   </div>
-                  <span className="text-stone-500 text-[11px] block mt-0.5">
-                    Source: {claim.source}
-                  </span>
+                  {claim.evidence_source && (
+                    <span className="text-stone-500 text-[11px] block mt-0.5">
+                      Source: {claim.evidence_source}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
@@ -558,14 +581,13 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
 
             <div className="flex justify-between items-center">
               <select
-                value={newClaimBadge}
-                onChange={(e) => setNewClaimBadge(e.target.value)}
+                value={newClaimType}
+                onChange={(e) => setNewClaimType(e.target.value as ClaimType)}
                 className="px-3 py-2 rounded-xl border border-emerald-300 bg-white text-xs"
               >
-                <option value="leaf">Leaf (Natural)</option>
-                <option value="shield">Shield (Antioxidant / Purity)</option>
-                <option value="heart">Heart (Botanical)</option>
-                <option value="zap">Zap (Energy / Vitamin C)</option>
+                <option value="health">Health Claim</option>
+                <option value="benefit">Functional Benefit</option>
+                <option value="marketing">Marketing Claim</option>
               </select>
 
               <button

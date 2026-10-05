@@ -33,8 +33,8 @@ export function AdminRetailerManager() {
       state,
       phone,
       whatsapp,
-      availability,
-      status: 'verified',
+      verification_status: 'verified',
+      status: 'active',
     });
 
     setName('');
@@ -44,8 +44,8 @@ export function AdminRetailerManager() {
     fetchRetailers();
   };
 
-  const handleToggleStatus = async (id: string, current: RetailerStatus) => {
-    const next: RetailerStatus = current === 'verified' ? 'inactive' : 'verified';
+  const handleToggleStatus = async (id: string, current: string) => {
+    const next: RetailerStatus = current === 'active' ? 'inactive' : 'active';
     await retailerService.updateRetailer(id, { status: next });
     fetchRetailers();
   };
@@ -194,13 +194,13 @@ export function AdminRetailerManager() {
                   {r.city}, {r.state}
                 </td>
                 <td className="py-4 px-4 text-stone-600 font-medium">
-                  {r.availability}
+                  {r.verification_status}
                 </td>
                 <td className="py-4 px-4">
                   <button
                     onClick={() => handleToggleStatus(r.id, r.status)}
                     className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                      r.status === 'verified' ? 'bg-emerald-50 text-emerald-800' : 'bg-stone-100 text-stone-600'
+                      r.status === 'active' ? 'bg-emerald-50 text-emerald-800' : 'bg-stone-100 text-stone-600'
                     }`}
                   >
                     {r.status}

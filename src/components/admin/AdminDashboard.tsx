@@ -4,6 +4,7 @@ import { claimsService } from '../../services/claimsService';
 import { analyticsService } from '../../services/analyticsService';
 import { retailerService } from '../../services/retailerService';
 import { Product, ProductClaim, Retailer } from '../../types/database.types';
+import { getProductPrice, getProductVolume, getProductHeroMediaUrl } from '../../services/productHelpers';
 import { AdminTab } from './AdminLayout';
 import { 
   Package, 
@@ -51,8 +52,8 @@ export function AdminDashboard({ onSelectTab }: AdminDashboardProps) {
   }, []);
 
   const publishedCount = products.filter(p => p.status === 'published').length;
-  const verifiedClaimsCount = claims.filter(c => c.status === 'verified').length;
-  const pendingClaimsCount = claims.filter(c => c.status === 'pending').length;
+  const verifiedClaimsCount = claims.filter(c => (c.verification_status || (c as any).status) === 'verified').length;
+  const pendingClaimsCount = claims.filter(c => (c.verification_status || (c as any).status) === 'pending').length;
 
   return (
     <div className="space-y-8">
@@ -221,13 +222,15 @@ export function AdminDashboard({ onSelectTab }: AdminDashboardProps) {
             </thead>
             <tbody className="divide-y divide-stone-100">
               {products.map(product => {
-                const currentPrice = product.sale_price || product.base_price;
+                const priceInfo = getProductPrice(product);
+                const volumeInfo = getProductVolume(product);
+                const heroUrl = getProductHeroMediaUrl(product);
                 return (
                   <tr key={product.id} className="hover:bg-stone-50/70 transition-colors">
                     <td className="py-3 font-semibold text-stone-900 flex items-center gap-2.5">
                       <div className="w-9 h-9 rounded-lg bg-stone-100 overflow-hidden shrink-0">
-                        {product.media?.[0]?.url && (
-                          <img src={product.media[0].url} alt={product.name} className="w-full h-full object-cover" />
+                        {heroUrl && (
+                          <img src={heroUrl} alt={product.name} className="w-full h-full object-cover" />
                         )}
                       </div>
                       <div>
@@ -245,15 +248,15 @@ export function AdminDashboard({ onSelectTab }: AdminDashboardProps) {
                       </span>
                     </td>
                     <td className="py-3 font-mono font-bold text-stone-900">
-                      ₦{Number(currentPrice).toLocaleString()}
-                      {product.sale_price && (
+                      ₦{Number(priceInfo.amount).toLocaleString()}
+                      {priceInfo.compareAtAmount && (
                         <span className="text-[10px] text-stone-400 line-through ml-1.5">
-                          ₦{Number(product.base_price).toLocaleString()}
+                          ₦{Number(priceInfo.compareAtAmount).toLocaleString()}
                         </span>
                       )}
                     </td>
                     <td className="py-3 font-mono text-stone-600">
-                      {product.volume_ml}mL
+                      {volumeInfo.volume ? `${volumeInfo.volume}${volumeInfo.unit}` : '—'}
                     </td>
                     <td className="py-3 text-right">
                       <button

@@ -3,7 +3,6 @@ import {
   getStoredConfig, 
   saveStoredConfig, 
   checkSupabaseConnection, 
-  resetAuthoritativeDatabase,
   SupabaseConfigState 
 } from '../../lib/supabase';
 import { Database, CheckCircle2, AlertTriangle, RefreshCw, Key, Shield, Terminal, ArrowUpRight } from 'lucide-react';
@@ -33,14 +32,6 @@ export function AdminSettings() {
     setIsTesting(false);
     setSaveMessage('Supabase client reconfigured successfully!');
     setTimeout(() => setSaveMessage(null), 3000);
-  };
-
-  const handleResetData = () => {
-    if (confirm('Reset all local database tables to authoritative initial seed data?')) {
-      resetAuthoritativeDatabase();
-      alert('Authoritative seed data restored!');
-      window.location.reload();
-    }
   };
 
   return (
@@ -153,26 +144,23 @@ export function AdminSettings() {
         </div>
       </form>
 
-      {/* Database Maintenance & Reset */}
+      {/* Database Maintenance & Live Architecture Status */}
       <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-xs space-y-4">
         <h3 className="text-base font-bold text-stone-900 border-b border-stone-100 pb-2">
-          Database Maintenance
+          Authoritative Production Architecture
         </h3>
 
         <div className="flex items-center justify-between text-xs">
           <div>
-            <span className="font-bold text-stone-900 block">Restore Authoritative Seed Data</span>
+            <span className="font-bold text-stone-900 block">Supabase ECOMMERCE Cloud Instance</span>
             <span className="text-stone-500 text-[11px]">
-              Restores initial products (Zobo Sweet, Luxury Juice Mix), verified claims, and retailers in Sapele.
+              Direct PostgREST synchronization active. Tenant: CP Fruit Splash (42d36cee-4cd6-43d1-af5d-334e5a07e37c).
             </span>
           </div>
 
-          <button
-            onClick={handleResetData}
-            className="px-4 py-2 rounded-xl border border-rose-300 text-rose-700 hover:bg-rose-50 font-bold text-xs cursor-pointer transition-colors"
-          >
-            Reset Database to Seed
-          </button>
+          <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold font-mono">
+            LIVE SYNCHRONIZED
+          </span>
         </div>
       </div>
     </div>

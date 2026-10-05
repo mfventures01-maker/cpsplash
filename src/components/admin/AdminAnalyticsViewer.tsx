@@ -140,7 +140,7 @@ export function AdminAnalyticsViewer() {
                       </span>
                     </td>
                     <td className="py-2 px-4 text-stone-600 truncate max-w-xs">
-                      {ev.landing_page || '/'}
+                      {ev.page_path || '/'}
                     </td>
                     <td className="py-2 px-4 text-stone-600">
                       {ev.source || 'direct'}

@@ -45,14 +45,9 @@ export function AdminCampaignManager() {
     await campaignService.createCampaign({
       name,
       slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      hero_headline: headline,
-      hero_subheadline: subheadline,
-      influencer_id: influencerId || null,
-      product_id: productId || null,
-      promotion_code: promoCode || null,
-      discount_percent: discountPercent,
-      utm_source: utmSource,
-      utm_campaign: utmCampaign || slug,
+      description: headline + (subheadline ? ` - ${subheadline}` : ''),
+      default_utm_source: utmSource,
+      default_utm_campaign: utmCampaign || slug,
       status: 'active',
     });
 
@@ -203,16 +198,13 @@ export function AdminCampaignManager() {
           <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 font-mono uppercase">
             <tr>
               <th className="py-3 px-6 font-bold">Campaign</th>
-              <th className="py-3 px-4 font-bold">Creator</th>
-              <th className="py-3 px-4 font-bold">Target Product</th>
-              <th className="py-3 px-4 font-bold">Promo Code</th>
+              <th className="py-3 px-4 font-bold">Description</th>
+              <th className="py-3 px-4 font-bold">Status</th>
               <th className="py-3 px-6 font-bold text-right">Route</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-100">
             {campaigns.map(cmp => {
-              const inf = influencers.find(i => i.id === cmp.influencer_id);
-              const prod = products.find(p => p.id === cmp.product_id);
               return (
                 <tr key={cmp.id} className="hover:bg-stone-50">
                   <td className="py-4 px-6 font-bold text-stone-900">
@@ -220,13 +212,10 @@ export function AdminCampaignManager() {
                     <span className="text-[10px] text-stone-400 font-mono">/campaign/{cmp.slug}</span>
                   </td>
                   <td className="py-4 px-4 text-stone-700">
-                    {inf ? `${inf.name} (${inf.handle})` : 'Organic'}
-                  </td>
-                  <td className="py-4 px-4 text-stone-700">
-                    {prod?.name || 'All Catalog'}
+                    {cmp.description || '—'}
                   </td>
                   <td className="py-4 px-4 font-mono font-bold text-amber-700">
-                    {cmp.promotion_code || 'None'}
+                    {cmp.status}
                   </td>
                   <td className="py-4 px-6 text-right">
                     <a

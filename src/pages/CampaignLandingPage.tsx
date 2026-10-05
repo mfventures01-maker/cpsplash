@@ -3,6 +3,7 @@ import { campaignService } from '../services/campaignService';
 import { productsService } from '../services/productsService';
 import { Campaign, Product } from '../types/database.types';
 import { analyticsService } from '../services/analyticsService';
+import { getProductPrice, getProductVolume, getProductHeroMediaUrl } from '../services/productHelpers';
 import { Sparkles, MessageCircle, ArrowRight, Tag, ShieldCheck, Play } from 'lucide-react';
 
 interface CampaignLandingPageProps {
@@ -19,18 +20,18 @@ export function CampaignLandingPage({ slug, onNavigate, onOpenOrderModal }: Camp
   useEffect(() => {
     campaignService.getCampaignBySlug(slug).then(async (cmp) => {
       setCampaign(cmp);
-      if (cmp && cmp.product_id) {
-        const { data: prod } = await productsService.getProductById(cmp.product_id);
-        setProduct(prod);
+      // Fetch default campaign featured product
+      const { data: prods } = await productsService.getPublishedProducts();
+      if (prods && prods.length > 0) {
+        setProduct(prods.find(p => p.featured) || prods[0]);
       }
       setLoading(false);
 
       if (cmp) {
         analyticsService.trackEvent('campaign_view', {
           campaign: cmp.name,
-          source: cmp.utm_source,
-          medium: cmp.utm_medium,
-          productId: cmp.product_id,
+          source: cmp.default_utm_source,
+          medium: cmp.default_utm_medium,
           landingPage: `/campaign/${slug}`
         });
       }
@@ -71,40 +72,13 @@ export function CampaignLandingPage({ slug, onNavigate, onOpenOrderModal }: Camp
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight max-w-3xl mx-auto">
-            {campaign.hero_headline}
+            {campaign.name}
           </h1>
 
-          {campaign.hero_subheadline && (
+          {campaign.description && (
             <p className="text-lg sm:text-xl font-serif italic text-rose-200 max-w-2xl mx-auto">
-              {campaign.hero_subheadline}
+              {campaign.description}
             </p>
-          )}
-
-          {/* Influencer Tag */}
-          {campaign.influencer && (
-            <div className="inline-flex items-center gap-3 p-2 pr-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
-              {campaign.influencer.avatar_url && (
-                <img
-                  src={campaign.influencer.avatar_url}
-                  alt={campaign.influencer.name}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              )}
-              <div className="text-left text-xs">
-                <span className="font-bold text-white block">{campaign.influencer.name}</span>
-                <span className="text-rose-300 text-[10px]">{campaign.influencer.handle}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Special Promotion Code */}
-          {campaign.promotion_code && (
-            <div className="pt-2">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-200 text-sm font-mono font-bold">
-                <Tag className="w-4 h-4 text-amber-400" />
-                <span>Promo Code: {campaign.promotion_code} ({campaign.discount_percent}% OFF)</span>
-              </div>
-            </div>
           )}
         </div>
       </div>
@@ -114,11 +88,13 @@ export function CampaignLandingPage({ slug, onNavigate, onOpenOrderModal }: Camp
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="p-8 sm:p-12 rounded-3xl bg-white border border-stone-200 shadow-xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
             <div className="md:col-span-5 aspect-square rounded-2xl overflow-hidden bg-stone-100">
-              <img
-                src={product.media?.[0]?.url || product.og_image || ''}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+              {getProductHeroMediaUrl(product) && (
+                <img
+                  src={getProductHeroMediaUrl(product)}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
 
             <div className="md:col-span-7 space-y-4">
@@ -133,17 +109,17 @@ export function CampaignLandingPage({ slug, onNavigate, onOpenOrderModal }: Camp
                   <span className="text-xs text-stone-500 block">Campaign Special Price</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-2xl font-black text-stone-900">
-                      ₦{((product.sale_price || product.base_price) as number).toLocaleString()}
+                      ₦{getProductPrice(product).amount.toLocaleString()}
                     </span>
-                    {product.sale_price && (
+                    {getProductPrice(product).compare_at_amount && (
                       <span className="text-xs text-stone-400 line-through">
-                        ₦{(product.base_price as number).toLocaleString()}
+                        ₦{getProductPrice(product).compare_at_amount?.toLocaleString()}
                       </span>
                     )}
                   </div>
                 </div>
                 <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                  {product.volume_ml}mL Fresh Bottle
+                  {getProductVolume(product).volume}{getProductVolume(product).unit} Fresh Bottle
                 </span>
               </div>
 

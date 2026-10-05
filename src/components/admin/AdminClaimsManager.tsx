@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { claimsService } from '../../services/claimsService';
 import { productsService } from '../../services/productsService';
-import { ProductClaim, Product, ClaimStatus } from '../../types/database.types';
-import { ShieldCheck, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Plus } from 'lucide-react';
+import { ProductClaim, Product, VerificationStatus, ClaimType } from '../../types/database.types';
+import { CheckCircle2, XCircle, RefreshCw, Plus } from 'lucide-react';
 
 export function AdminClaimsManager() {
   const [claims, setClaims] = useState<ProductClaim[]>([]);
@@ -13,7 +13,7 @@ export function AdminClaimsManager() {
   const [selectedProductId, setSelectedProductId] = useState('');
   const [claimText, setClaimText] = useState('');
   const [claimSource, setClaimSource] = useState('');
-  const [claimBadge, setClaimBadge] = useState('leaf');
+  const [claimType, setClaimType] = useState<ClaimType>('health');
 
   const fetchData = async () => {
     setLoading(true);
@@ -33,8 +33,8 @@ export function AdminClaimsManager() {
     fetchData();
   }, []);
 
-  const handleUpdateStatus = async (claimId: string, status: ClaimStatus) => {
-    await claimsService.updateClaimStatus(claimId, status, 'CP Chief Quality Officer (Sapele Hub)');
+  const handleUpdateStatus = async (claimId: string, status: VerificationStatus) => {
+    await claimsService.updateClaimStatus(claimId, status);
     fetchData();
   };
 
@@ -50,11 +50,11 @@ export function AdminClaimsManager() {
     if (!selectedProductId || !claimText || !claimSource) return;
 
     // Strict Anti-slop / unsubstantiated medical claims check
-    const prohibitedKeywords = ['cures', 'prevents illness', 'boosts immunity', 'detoxifies', 'miracle cure'];
+    const prohibitedKeywords = ['cures', 'prevents illness', 'miracle cure'];
     const hasForbidden = prohibitedKeywords.some(kw => claimText.toLowerCase().includes(kw));
 
     if (hasForbidden) {
-      alert('HOEOS REJECTION: Medical disease claims are strictly prohibited under Section 14 unless approved by relevant pharmaceutical regulatory bodies.');
+      alert('HOEOS REJECTION: Unsubstantiated medical disease claims are strictly prohibited under HOEOS governance.');
       return;
     }
 
@@ -62,7 +62,7 @@ export function AdminClaimsManager() {
       selectedProductId,
       claimText,
       claimSource,
-      claimBadge,
+      claimType,
       'verified'
     );
 
@@ -82,7 +82,7 @@ export function AdminClaimsManager() {
           Product Claims & Purity Engine
         </h1>
         <p className="text-xs text-stone-500 mt-0.5">
-          Control verified nutritional attributes. Only claims with status = 'verified' are visible on public pages.
+          Control verified nutritional attributes. Only claims with <code>verification_status = 'verified'</code> are visible on public pages.
         </p>
       </div>
 
@@ -134,17 +134,15 @@ export function AdminClaimsManager() {
             </div>
 
             <div>
-              <label className="font-bold text-stone-700 block mb-1">Badge Icon</label>
+              <label className="font-bold text-stone-700 block mb-1">Claim Type</label>
               <select
-                value={claimBadge}
-                onChange={(e) => setClaimBadge(e.target.value)}
+                value={claimType}
+                onChange={(e) => setClaimType(e.target.value as ClaimType)}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white text-xs"
               >
-                <option value="leaf">Leaf (Fresh/Natural)</option>
-                <option value="shield">Shield (Antioxidants)</option>
-                <option value="sparkles">Sparkles (No Preservatives)</option>
-                <option value="zap">Zap (Extra Vitamin C)</option>
-                <option value="heart">Heart (Botanical)</option>
+                <option value="health">Health Claim</option>
+                <option value="benefit">Functional Benefit</option>
+                <option value="marketing">Marketing Claim</option>
               </select>
             </div>
           </div>
@@ -165,9 +163,9 @@ export function AdminClaimsManager() {
       <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold text-stone-900">
-            Registered Product Claims Database
+            Registered Product Claims Database (product_claims)
           </h3>
-          <button onClick={fetchData} className="p-1 text-stone-400 hover:text-stone-700">
+          <button onClick={fetchData} className="p-1 text-stone-400 hover:text-stone-700 cursor-pointer">
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -178,6 +176,7 @@ export function AdminClaimsManager() {
               <tr className="border-b border-stone-200 text-stone-400 font-mono uppercase tracking-wider">
                 <th className="py-2.5 font-bold">Claim</th>
                 <th className="py-2.5 font-bold">Product</th>
+                <th className="py-2.5 font-bold">Type</th>
                 <th className="py-2.5 font-bold">Status</th>
                 <th className="py-2.5 font-bold">Substantiation Source</th>
                 <th className="py-2.5 font-bold text-right">Actions</th>
@@ -194,22 +193,25 @@ export function AdminClaimsManager() {
                     <td className="py-3 font-semibold text-stone-700">
                       {prod?.name || claim.product_id}
                     </td>
+                    <td className="py-3 font-mono text-[10px] text-stone-500 uppercase">
+                      {claim.claim_type}
+                    </td>
                     <td className="py-3">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                        claim.status === 'verified'
+                        claim.verification_status === 'verified'
                           ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
-                          : claim.status === 'rejected'
+                          : claim.verification_status === 'rejected'
                           ? 'bg-rose-50 text-rose-800 border border-rose-300'
                           : 'bg-amber-50 text-amber-800 border border-amber-300'
                       }`}>
-                        {claim.status}
+                        {claim.verification_status}
                       </span>
                     </td>
                     <td className="py-3 text-stone-600 max-w-xs truncate text-[11px]">
-                      {claim.source}
+                      {claim.evidence_source}
                     </td>
                     <td className="py-3 text-right space-x-1">
-                      {claim.status !== 'verified' && (
+                      {claim.verification_status !== 'verified' && (
                         <button
                           onClick={() => handleUpdateStatus(claim.id, 'verified')}
                           className="p-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[11px] font-bold px-2 inline-flex items-center gap-1 cursor-pointer"
@@ -217,7 +219,7 @@ export function AdminClaimsManager() {
                           <CheckCircle2 className="w-3 h-3" /> Verify
                         </button>
                       )}
-                      {claim.status !== 'rejected' && (
+                      {claim.verification_status !== 'rejected' && (
                         <button
                           onClick={() => handleUpdateStatus(claim.id, 'rejected')}
                           className="p-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 text-[11px] font-bold px-2 inline-flex items-center gap-1 cursor-pointer"
@@ -227,7 +229,7 @@ export function AdminClaimsManager() {
                       )}
                       <button
                         onClick={() => handleDeleteClaim(claim.id)}
-                        className="text-stone-400 hover:text-red-600 p-1 text-[11px]"
+                        className="text-stone-400 hover:text-red-600 p-1 text-[11px] cursor-pointer"
                       >
                         Delete
                       </button>

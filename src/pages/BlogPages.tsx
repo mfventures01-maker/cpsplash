@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { blogService } from '../services/blogService';
+import { mediaService } from '../services/mediaService';
 import { productsService } from '../services/productsService';
 import { BlogPost, Product } from '../types/database.types';
 import { analyticsService } from '../services/analyticsService';
+import { getProductPrice } from '../services/productHelpers';
 import { ArrowLeft, ArrowRight, MessageCircle, Calendar, Sparkles } from 'lucide-react';
 
 interface BlogIndexProps {
@@ -48,21 +50,27 @@ export function BlogIndexPage({ onNavigate }: BlogIndexProps) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {posts.map(post => (
-            <div
-              key={post.id}
-              onClick={() => onNavigate(`/blog/${post.slug}`)}
-              className="group bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer"
-            >
-              {post.featured_media && (
-                <div className="aspect-16/9 w-full bg-stone-100 overflow-hidden">
-                  <img
-                    src={post.featured_media}
-                    alt={post.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-              )}
+          {posts.map(post => {
+            const mediaUrl = typeof post.featured_media === 'string'
+              ? post.featured_media
+              : post.featured_media?.path
+                ? mediaService.getPublicUrl(post.featured_media.path)
+                : null;
+            return (
+              <div
+                key={post.id}
+                onClick={() => onNavigate(`/blog/${post.slug}`)}
+                className="group bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between cursor-pointer"
+              >
+                {mediaUrl && (
+                  <div className="aspect-16/9 w-full bg-stone-100 overflow-hidden">
+                    <img
+                      src={mediaUrl}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                )}
 
               <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
                 <div className="space-y-2">
@@ -84,7 +92,8 @@ export function BlogIndexPage({ onNavigate }: BlogIndexProps) {
                 </div>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       )}
     </div>
@@ -103,18 +112,13 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    blogService.getPostBySlug(slug).then(async (p) => {
+    blogService.getPostBySlug(slug).then((p) => {
       setPost(p);
       if (p) {
         analyticsService.trackEvent('blog_view', {
           landingPage: `/blog/${slug}`,
           content: p.title,
         });
-
-        if (p.related_product_id) {
-          const { data: prod } = await productsService.getProductById(p.related_product_id);
-          setRelatedProduct(prod);
-        }
       }
       setLoading(false);
     });
@@ -167,11 +171,18 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
         )}
       </div>
 
-      {post.featured_media && (
-        <div className="rounded-3xl overflow-hidden aspect-16/9 bg-stone-100 shadow-md">
-          <img src={post.featured_media} alt={post.title} className="w-full h-full object-cover" />
-        </div>
-      )}
+      {(() => {
+        const mediaUrl = typeof post.featured_media === 'string'
+          ? post.featured_media
+          : post.featured_media?.path
+            ? mediaService.getPublicUrl(post.featured_media.path)
+            : null;
+        return mediaUrl ? (
+          <div className="rounded-3xl overflow-hidden aspect-16/9 bg-stone-100 shadow-md">
+            <img src={mediaUrl} alt={post.title} className="w-full h-full object-cover" />
+          </div>
+        ) : null;
+      })()}
 
       {/* Main Post Body */}
       <div className="prose prose-stone max-w-none text-stone-800 text-sm sm:text-base leading-relaxed whitespace-pre-line py-4">
@@ -189,7 +200,7 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
               <h3 className="text-2xl font-black">{relatedProduct.name}</h3>
               <p className="text-xs text-stone-400 mt-0.5">{relatedProduct.short_description}</p>
               <div className="mt-2 text-xl font-black text-white">
-                ₦{((relatedProduct.sale_price || relatedProduct.base_price) as number).toLocaleString()}
+                ₦{getProductPrice(relatedProduct).amount.toLocaleString()}
               </div>
             </div>
 
@@ -198,7 +209,7 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
               className="py-3.5 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
               <MessageCircle className="w-4 h-4 fill-stone-950" />
-              <span>{post.cta_text || 'Order on WhatsApp'}</span>
+              <span>Order on WhatsApp</span>
             </button>
           </div>
         </div>

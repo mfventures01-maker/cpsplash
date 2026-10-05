@@ -7,7 +7,8 @@ import { Product, SocialContent, BlogPost } from '../types/database.types';
 import { socialService } from '../services/socialService';
 import { blogService } from '../services/blogService';
 import { analyticsService } from '../services/analyticsService';
-import { MessageCircle, ShieldCheck, ArrowLeft, Share2, Sparkles, MapPin, CheckCircle, Clock } from 'lucide-react';
+import { getProductPrice, getProductVolume } from '../services/productHelpers';
+import { MessageCircle, ShieldCheck, ArrowLeft, Share2, MapPin, CheckCircle } from 'lucide-react';
 
 interface ProductDetailPageProps {
   slug: string;
@@ -32,12 +33,12 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
 
       // Fetch related social proof
       socialService.getPublishedContent().then(items => {
-        setSocialItems(items.filter(i => i.product_id === product.id));
+        setSocialItems(items.slice(0, 3));
       });
 
       // Fetch related blog post
       blogService.getPublishedPosts().then(posts => {
-        setRelatedBlog(posts.filter(p => p.related_product_id === product.id));
+        setRelatedBlog(posts.slice(0, 2));
       });
     }
   }, [product, slug]);
@@ -69,7 +70,7 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
         </p>
         <button
           onClick={() => onNavigate('/products')}
-          className="px-6 py-2.5 rounded-full bg-stone-900 text-white text-xs font-bold"
+          className="px-6 py-2.5 rounded-full bg-stone-900 text-white text-xs font-bold cursor-pointer"
         >
           Return to Catalog
         </button>
@@ -77,11 +78,8 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
     );
   }
 
-  // Authoritative price directly from Supabase
-  const currentPrice = product.sale_price !== null && product.sale_price !== undefined
-    ? product.sale_price
-    : product.base_price;
-
+  const price = getProductPrice(product);
+  const volumeInfo = getProductVolume(product);
   const relatedProducts = allProducts.filter(p => p.id !== product.id).slice(0, 2);
 
   const handleShare = () => {
@@ -129,11 +127,11 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold uppercase tracking-wider">
-                  500mL Cold Bottle
+                  {volumeInfo.volume}{volumeInfo.unit} Cold Bottle
                 </span>
                 <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                   <CheckCircle className="w-3.5 h-3.5" />
-                  {product.availability_status.replace('_', ' ')}
+                  In Stock
                 </span>
               </div>
 
@@ -171,11 +169,11 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
                   </span>
                   <div className="flex items-baseline gap-3">
                     <span className="text-3xl sm:text-4xl font-black">
-                      ₦{Number(currentPrice).toLocaleString()}
+                      ₦{price.amount.toLocaleString()}
                     </span>
-                    {product.sale_price && (
+                    {price.compare_at_amount && (
                       <span className="text-sm text-stone-400 line-through">
-                        ₦{Number(product.base_price).toLocaleString()}
+                        ₦{price.compare_at_amount.toLocaleString()}
                       </span>
                     )}
                   </div>
@@ -214,7 +212,7 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
                 About The Blend & Formulation
               </h3>
               <div className="text-sm text-stone-700 leading-relaxed space-y-2 whitespace-pre-line bg-white p-5 rounded-3xl border border-stone-200">
-                {product.description}
+                {product.description || 'Natural Nigerian botanical blend handcrafted in Sapele, Delta State.'}
               </div>
             </div>
 
@@ -243,11 +241,8 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {socialItems.map(item => (
                 <div key={item.id} className="p-4 rounded-2xl bg-white border border-stone-200 shadow-xs space-y-2">
-                  <div className="aspect-video rounded-xl overflow-hidden bg-stone-100">
-                    <img src={item.thumbnail} alt="UGC" className="w-full h-full object-cover" />
-                  </div>
                   <p className="text-xs text-stone-700 font-medium">"{item.caption}"</p>
-                  <span className="text-[10px] text-stone-400 block">{item.creator}</span>
+                  <span className="text-[10px] text-stone-400 block">{item.platform}</span>
                 </div>
               ))}
             </div>
@@ -287,7 +282,7 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
             <h3 className="text-2xl font-black text-stone-900">You Might Also Love</h3>
             <button
               onClick={() => onNavigate('/products')}
-              className="text-xs font-bold text-rose-700 hover:underline"
+              className="text-xs font-bold text-rose-700 hover:underline cursor-pointer"
             >
               View Full Range
             </button>

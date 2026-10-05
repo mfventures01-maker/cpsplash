@@ -14,8 +14,8 @@ export function ClaimsPage() {
     });
   }, []);
 
-  const verifiedClaims = claims.filter(c => c.status === 'verified');
-  const pendingClaims = claims.filter(c => c.status === 'pending');
+  const verifiedClaims = claims.filter(c => c.verification_status === 'verified');
+  const pendingClaims = claims.filter(c => c.verification_status === 'pending');
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
@@ -75,14 +75,14 @@ export function ClaimsPage() {
 
                 <div className="space-y-1.5 text-xs text-stone-600">
                   <p>
-                    <strong className="text-stone-800">Substantiating Source:</strong> {claim.source}
+                    <strong className="text-stone-800">Substantiating Source:</strong> {claim.evidence_source || 'Quality Assurance Office'}
                   </p>
                   <p>
-                    <strong className="text-stone-800">Approved By:</strong> {claim.approved_by || 'Quality Assurance Office'}
+                    <strong className="text-stone-800">Verified By:</strong> {claim.verified_by || 'Quality Assurance Office'}
                   </p>
-                  {claim.approved_at && (
+                  {claim.verified_at && (
                     <p className="text-[11px] text-stone-400 font-mono">
-                      Certified: {new Date(claim.approved_at).toLocaleDateString()}
+                      Certified: {new Date(claim.verified_at).toLocaleDateString()}
                     </p>
                   )}
                 </div>
@@ -103,7 +103,7 @@ export function ClaimsPage() {
             {pendingClaims.map(claim => (
               <div key={claim.id} className="p-4 rounded-2xl bg-stone-50 border border-dashed border-stone-300 text-xs space-y-1">
                 <span className="font-bold text-stone-900 block">{claim.claim}</span>
-                <span className="text-stone-500 block">Pending verification: {claim.source}</span>
+                <span className="text-stone-500 block">Pending verification: {claim.evidence_source || 'Under review'}</span>
               </div>
             ))}
           </div>

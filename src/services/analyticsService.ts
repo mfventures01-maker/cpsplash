@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase, TENANT_ID } from '../lib/supabase';
 import { AnalyticsEvent } from '../types/database.types';
 
 export const analyticsService = {
@@ -26,12 +26,13 @@ export const analyticsService = {
       const utmContent = options.content || params?.get('utm_content') || null;
 
       const record: AnalyticsEvent = {
+        tenant_id: TENANT_ID,
         event_name: eventName,
         source: utmSource,
         medium: utmMedium,
         campaign: utmCampaign,
         content: utmContent,
-        landing_page: options.landingPage || (typeof window !== 'undefined' ? window.location.pathname : '/'),
+        page_path: options.landingPage || (typeof window !== 'undefined' ? window.location.pathname : '/'),
         product_id: options.productId || null,
         metadata: options.metadata || {},
         created_at: new Date().toISOString(),
@@ -50,6 +51,7 @@ export const analyticsService = {
     const { data } = await supabase
       .from('analytics_events')
       .select('*')
+      .eq('tenant_id', TENANT_ID)
       .order('created_at', { ascending: false })
       .limit(limit);
     return (data as unknown as AnalyticsEvent[]) || [];

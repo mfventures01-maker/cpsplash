@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase, TENANT_ID } from '../lib/supabase';
 import { SocialContent } from '../types/database.types';
 
 const getErrMsg = (err: unknown, fallback: string): string => {
@@ -13,6 +13,7 @@ export const socialService = {
     const { data } = await supabase
       .from('social_content')
       .select('*')
+      .eq('tenant_id', TENANT_ID)
       .eq('status', 'published')
       .order('published_at', { ascending: false });
     return (data as SocialContent[]) || [];
@@ -22,29 +23,30 @@ export const socialService = {
     const { data } = await supabase
       .from('social_content')
       .select('*')
-      .order('published_at', { ascending: false });
+      .eq('tenant_id', TENANT_ID)
+      .order('created_at', { ascending: false });
     return (data as SocialContent[]) || [];
   },
 
   async addSocialContent(item: Partial<SocialContent>): Promise<{ data: SocialContent | null; error: string | null }> {
     try {
       const record = {
+        tenant_id: TENANT_ID,
         platform: item.platform || 'instagram',
-        post_url: item.post_url || '',
-        thumbnail: item.thumbnail || '',
-        caption: item.caption || '',
-        creator: item.creator || '',
+        url: item.url || '',
+        caption: item.caption || null,
         campaign_id: item.campaign_id || null,
-        product_id: item.product_id || null,
+        influencer_id: item.influencer_id || null,
+        external_post_id: item.external_post_id || null,
         status: item.status || 'published',
-        published_at: new Date().toISOString(),
+        published_at: item.published_at || new Date().toISOString(),
       };
 
-      const { data, error } = await supabase.from('social_content').insert(record);
+      const { data, error } = await supabase.from('social_content').insert(record).select().single();
       if (error || !data) {
         return { data: null, error: error ? getErrMsg(error, 'Failed to save social content') : 'Failed to save social content' };
       }
-      return { data: Array.isArray(data) ? (data[0] as SocialContent) : (data as SocialContent), error: null };
+      return { data: data as SocialContent, error: null };
     } catch (e: unknown) {
       return { data: null, error: e instanceof Error ? e.message : 'Error adding social content' };
     }

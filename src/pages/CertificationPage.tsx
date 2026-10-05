@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { productsService } from '../services/productsService';
 import { mediaService } from '../services/mediaService';
+import { getProductPrice } from '../services/productHelpers';
 import { supabase, checkSupabaseConnection } from '../lib/supabase';
 import { ShieldCheck, CheckCircle2, Play, RefreshCw, Database, Terminal, ArrowRight, ExternalLink } from 'lucide-react';
 
@@ -83,7 +84,7 @@ export function CertificationPage({ onNavigate }: { onNavigate: (path: string) =
     const createRes = await productsService.createProduct({
       name: 'HOEOS Synchronized Test Drink',
       slug: testSlug,
-      base_price: 1350,
+      price: 1350,
       short_description: 'Automated synchronization verification specimen',
       status: 'published',
     });
@@ -109,20 +110,22 @@ export function CertificationPage({ onNavigate }: { onNavigate: (path: string) =
     const startB = Date.now();
     await productsService.updateProductPrice(testId, 1750, 1500, 'HOEOS Sync Test');
     const priceVerify = await productsService.getProductById(testId);
-    const passedB = priceVerify.data?.base_price === 1750 && priceVerify.data?.sale_price === 1500;
-    setSyncTests(prev => prev.map(t => t.id === 'B' ? { 
-      ...t, 
-      status: passedB ? 'pass' : 'fail', 
-      detail: `Verified price mutated to ₦1,750 (Sale: ₦1,500) and recorded in price_history in ${Date.now() - startB}ms` 
+    const pInfo = priceVerify.data ? getProductPrice(priceVerify.data) : { amount: 0, compare_at_amount: null };
+    const passedB = pInfo.amount === 1750 && pInfo.compare_at_amount === 1500;
+    setSyncTests(prev => prev.map(t => t.id === 'B' ? {
+      ...t,
+      status: passedB ? 'pass' : 'fail',
+      detail: `Verified price mutated to ₦1,750 (Sale: ₦1,500) and recorded in product_prices in ${Date.now() - startB}ms`
     } : t));
 
     // Test C: Media upload
     setSyncTests(prev => prev.map(t => t.id === 'C' ? { ...t, status: 'running' } : t));
     const startC = Date.now();
+    const testBlob = new Blob(['HOEOS_TEST_IMAGE_BYTES'], { type: 'image/jpeg' });
     const mediaRes = await mediaService.uploadMedia(
       testId,
-      'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=400&q=80',
-      'product_image',
+      testBlob,
+      'image',
       'HOEOS Verified Media Asset',
       true
     );

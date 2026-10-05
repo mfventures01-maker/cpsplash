@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import { Retailer, RetailerStatus } from '../types/database.types';
+import { supabase, TENANT_ID } from '../lib/supabase';
+import { Retailer, RetailerStatus, RetailerVerificationStatus } from '../types/database.types';
 
 const getErrMsg = (err: unknown, fallback: string): string => {
   if (err && typeof err === 'object' && 'message' in err) {
@@ -13,7 +13,9 @@ export const retailerService = {
     const { data } = await supabase
       .from('retailers')
       .select('*')
-      .eq('status', 'verified')
+      .eq('tenant_id', TENANT_ID)
+      .eq('verification_status', 'verified')
+      .eq('status', 'active')
       .order('city', { ascending: true });
     return (data as Retailer[]) || [];
   },
@@ -22,6 +24,7 @@ export const retailerService = {
     const { data } = await supabase
       .from('retailers')
       .select('*')
+      .eq('tenant_id', TENANT_ID)
       .order('created_at', { ascending: false });
     return (data as Retailer[]) || [];
   },
@@ -29,23 +32,25 @@ export const retailerService = {
   async addRetailer(retailer: Partial<Retailer>): Promise<{ data: Retailer | null; error: string | null }> {
     try {
       const record = {
+        tenant_id: TENANT_ID,
         name: retailer.name || '',
-        address: retailer.address || '',
+        address: retailer.address || null,
         city: retailer.city || 'Sapele',
         state: retailer.state || 'Delta State',
+        country: retailer.country || 'NG',
         phone: retailer.phone || null,
         whatsapp: retailer.whatsapp || null,
         latitude: retailer.latitude || null,
         longitude: retailer.longitude || null,
-        availability: retailer.availability || 'In Stock - Zobo Sweet & Luxury Juice Mix',
-        status: (retailer.status as RetailerStatus) || 'verified',
+        verification_status: (retailer.verification_status as RetailerVerificationStatus) || 'verified',
+        status: (retailer.status as RetailerStatus) || 'active',
       };
 
-      const { data, error } = await supabase.from('retailers').insert(record);
+      const { data, error } = await supabase.from('retailers').insert(record).select().single();
       if (error || !data) {
         return { data: null, error: error ? getErrMsg(error, 'Failed to add retailer') : 'Failed to add retailer' };
       }
-      return { data: Array.isArray(data) ? (data[0] as Retailer) : (data as Retailer), error: null };
+      return { data: data as Retailer, error: null };
     } catch (e: unknown) {
       return { data: null, error: e instanceof Error ? e.message : 'Error adding retailer' };
     }

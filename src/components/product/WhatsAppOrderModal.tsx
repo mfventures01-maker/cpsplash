@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { Product } from '../../types/database.types';
-import { X, MessageCircle, Plus, Minus, MapPin, CheckCircle, ShieldCheck } from 'lucide-react';
+import { X, MessageCircle, Plus, Minus, CheckCircle, ShieldCheck } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService';
 import { ordersService } from '../../services/ordersService';
+import {
+  getProductPrice,
+  getProductVolume,
+  getProductHeroMediaUrl,
+  getProductPrimaryVariant
+} from '../../services/productHelpers';
 
 interface WhatsAppOrderModalProps {
   product: Product | null;
@@ -20,13 +26,14 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
   const [note, setNote] = useState('');
   const [orderSent, setOrderSent] = useState(false);
 
-  // Authoritative price directly from the Supabase product record
-  const unitPrice = (product.sale_price !== null && product.sale_price !== undefined) 
-    ? product.sale_price 
-    : product.base_price;
+  const price = getProductPrice(product);
+  const volumeInfo = getProductVolume(product);
+  const imageUrl = getProductHeroMediaUrl(product);
+  const primaryVariant = getProductPrimaryVariant(product);
 
+  const unitPrice = price.amount;
   const subtotal = unitPrice * quantity;
-  const phoneNumber = product.whatsapp_order_number || '2348127700724';
+  const phoneNumber = '2348127700724';
 
   const handleSendOrder = () => {
     // 1. Generate Deterministic WhatsApp Order Message (Authoritative format)
@@ -36,7 +43,7 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
       `I would like to order:`,
       `Product: ${product.name}`,
       `Quantity: ${quantity}`,
-      `Volume: ${product.volume_ml}mL`,
+      `Volume: ${volumeInfo.volume}${volumeInfo.unit}`,
       `Unit Price: ₦${unitPrice.toLocaleString()}`,
       `Subtotal: ₦${subtotal.toLocaleString()}`,
       ``,
@@ -54,7 +61,7 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
-    // 2. Persist order record into Supabase customer_orders table
+    // 2. Persist order record into Supabase orders & order_items tables
     ordersService.createOrder({
       customer_name: customerName.trim() || 'Valued Customer',
       customer_phone: customerPhone.trim() || '08127700724',
@@ -68,10 +75,11 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
       items: [
         {
           product_id: product.id,
+          variant_id: primaryVariant?.id || null,
           product_name: product.name,
           quantity,
           unit_price: unitPrice,
-          volume_ml: product.volume_ml,
+          volume: volumeInfo.volume,
           subtotal,
         }
       ]
@@ -134,28 +142,22 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
             {/* Product Summary Box */}
             <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex items-center gap-4">
               <div className="w-16 h-16 rounded-xl bg-stone-200 overflow-hidden shrink-0">
-                {product.media && product.media[0] ? (
-                  <img
-                    src={product.media[0].url}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xs text-stone-400">
-                    No image
-                  </div>
-                )}
+                <img
+                  src={imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-stone-900 text-sm truncate">{product.name}</h4>
-                <p className="text-xs text-stone-500">{product.volume_ml}mL chilled bottle</p>
+                <p className="text-xs text-stone-500">{volumeInfo.volume}{volumeInfo.unit} chilled bottle</p>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-base font-extrabold text-stone-900">
                     ₦{unitPrice.toLocaleString()}
                   </span>
-                  {product.sale_price && (
+                  {price.compare_at_amount && (
                     <span className="text-xs text-stone-400 line-through">
-                      ₦{product.base_price.toLocaleString()}
+                      ₦{price.compare_at_amount.toLocaleString()}
                     </span>
                   )}
                 </div>
@@ -310,13 +312,13 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
             <div className="pt-2 flex gap-3">
               <button
                 onClick={handleSendOrder}
-                className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs"
+                className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs cursor-pointer"
               >
                 Re-open WhatsApp
               </button>
               <button
                 onClick={onClose}
-                className="px-6 py-3 rounded-xl border border-stone-300 text-stone-700 font-bold text-xs hover:bg-stone-50"
+                className="px-6 py-3 rounded-xl border border-stone-300 text-stone-700 font-bold text-xs hover:bg-stone-50 cursor-pointer"
               >
                 Done
               </button>

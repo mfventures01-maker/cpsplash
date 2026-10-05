@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase, TENANT_ID } from '../lib/supabase';
 import { BlogPost } from '../types/database.types';
 
 const getErrMsg = (err: unknown, fallback: string): string => {
@@ -12,7 +12,8 @@ export const blogService = {
   async getPublishedPosts(): Promise<BlogPost[]> {
     const { data } = await supabase
       .from('blog_posts')
-      .select('*')
+      .select('*, featured_media:media_assets(*)')
+      .eq('tenant_id', TENANT_ID)
       .eq('status', 'published')
       .order('published_at', { ascending: false });
     return (data as BlogPost[]) || [];
@@ -21,7 +22,8 @@ export const blogService = {
   async getAllPosts(): Promise<BlogPost[]> {
     const { data } = await supabase
       .from('blog_posts')
-      .select('*')
+      .select('*, featured_media:media_assets(*)')
+      .eq('tenant_id', TENANT_ID)
       .order('created_at', { ascending: false });
     return (data as BlogPost[]) || [];
   },
@@ -29,7 +31,8 @@ export const blogService = {
   async getPostBySlug(slug: string): Promise<BlogPost | null> {
     const { data } = await supabase
       .from('blog_posts')
-      .select('*')
+      .select('*, featured_media:media_assets(*)')
+      .eq('tenant_id', TENANT_ID)
       .eq('slug', slug)
       .single();
     return (data as BlogPost) || null;
@@ -43,24 +46,23 @@ export const blogService = {
         .replace(/(^-|-$)/g, '');
 
       const newPost = {
+        tenant_id: TENANT_ID,
         title: post.title || 'Untitled Post',
         slug,
-        excerpt: post.excerpt || '',
+        excerpt: post.excerpt || null,
         content: post.content || '',
-        featured_media: post.featured_media || null,
+        featured_media_id: post.featured_media_id || null,
         status: post.status || 'draft',
         published_at: post.status === 'published' ? new Date().toISOString() : null,
         seo_title: post.seo_title || post.title,
         seo_description: post.seo_description || post.excerpt,
-        related_product_id: post.related_product_id || null,
-        cta_text: post.cta_text || 'Order on WhatsApp',
       };
 
-      const { data, error } = await supabase.from('blog_posts').insert(newPost);
+      const { data, error } = await supabase.from('blog_posts').insert(newPost).select().single();
       if (error || !data) {
         return { data: null, error: error ? getErrMsg(error, 'Failed to create blog post') : 'Failed to create blog post' };
       }
-      return { data: Array.isArray(data) ? (data[0] as BlogPost) : (data as BlogPost), error: null };
+      return { data: data as BlogPost, error: null };
     } catch (e: unknown) {
       return { data: null, error: e instanceof Error ? e.message : 'Error creating blog post' };
     }

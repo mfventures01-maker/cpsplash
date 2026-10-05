@@ -40,10 +40,8 @@ export function AdminBlogManager() {
     setSlug(post.slug);
     setExcerpt(post.excerpt || '');
     setContent(post.content);
-    setFeaturedMedia(post.featured_media || '');
-    setRelatedProductId(post.related_product_id || '');
+    setFeaturedMedia(post.featured_media?.path || post.featured_media_id || '');
     setStatus(post.status === 'published' ? 'published' : 'draft');
-    setCtaText(post.cta_text || 'Order on WhatsApp');
   };
 
   const handleNew = () => {
@@ -53,8 +51,8 @@ export function AdminBlogManager() {
     setSlug('');
     setExcerpt('');
     setContent('');
-    setFeaturedMedia('https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1200&q=80');
-    setRelatedProductId(products[0]?.id || '');
+    setFeaturedMedia('');
+    setRelatedProductId('');
     setStatus('published');
     setCtaText('Order on WhatsApp');
   };
@@ -69,10 +67,7 @@ export function AdminBlogManager() {
         slug,
         excerpt,
         content,
-        featured_media: featuredMedia,
-        related_product_id: relatedProductId || null,
         status,
-        cta_text: ctaText,
       });
     } else {
       await blogService.createPost({
@@ -80,10 +75,7 @@ export function AdminBlogManager() {
         slug,
         excerpt,
         content,
-        featured_media: featuredMedia,
-        related_product_id: relatedProductId || null,
         status,
-        cta_text: ctaText,
       });
     }
 
@@ -251,13 +243,12 @@ export function AdminBlogManager() {
               <tr>
                 <th className="py-3 px-6 font-bold">Article</th>
                 <th className="py-3 px-4 font-bold">Status</th>
-                <th className="py-3 px-4 font-bold">Linked Product</th>
+                <th className="py-3 px-4 font-bold">Published</th>
                 <th className="py-3 px-6 font-bold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
               {posts.map(post => {
-                const prod = products.find(p => p.id === post.related_product_id);
                 return (
                   <tr key={post.id} className="hover:bg-stone-50">
                     <td className="py-4 px-6 font-semibold text-stone-900">
@@ -271,8 +262,8 @@ export function AdminBlogManager() {
                         {post.status}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-stone-600 font-medium">
-                      {prod?.name || 'None'}
+                    <td className="py-4 px-4 text-stone-500 font-mono text-[11px]">
+                      {post.published_at ? new Date(post.published_at).toLocaleDateString() : 'Draft'}
                     </td>
                     <td className="py-4 px-6 text-right space-x-2">
                       <button onClick={() => handleEdit(post)} className="text-stone-600 hover:text-stone-900 font-bold">

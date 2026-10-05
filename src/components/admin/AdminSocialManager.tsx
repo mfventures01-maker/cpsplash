@@ -32,15 +32,12 @@ export function AdminSocialManager() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!postUrl || !thumbnail) return;
+    if (!postUrl) return;
 
     await socialService.addSocialContent({
       platform,
-      post_url: postUrl,
-      thumbnail,
+      url: postUrl,
       caption,
-      creator,
-      product_id: productId || null,
       status: 'published',
     });
 
@@ -172,17 +169,17 @@ export function AdminSocialManager() {
         {socialItems.map(item => (
           <div key={item.id} className="p-4 rounded-2xl bg-white border border-stone-200 space-y-3">
             <div className="aspect-4/3 rounded-xl overflow-hidden bg-stone-100">
-              <img src={item.thumbnail} alt={item.creator || 'UGC'} className="w-full h-full object-cover" />
+              <img src={item.url} alt={item.caption || 'UGC'} className="w-full h-full object-cover" />
             </div>
             <div className="space-y-1 text-xs">
               <div className="flex justify-between items-center">
-                <span className="font-bold text-stone-900">{item.creator}</span>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-stone-100">{item.platform}</span>
+                <span className="font-bold text-stone-900 capitalize">{item.platform} Post</span>
+                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-stone-100">{item.status}</span>
               </div>
-              <p className="text-stone-600 text-[11px] line-clamp-2">"{item.caption}"</p>
+              <p className="text-stone-600 text-[11px] line-clamp-2">"{item.caption || item.url}"</p>
             </div>
             <div className="flex justify-between items-center pt-2 border-t border-stone-100 text-xs">
-              <a href={item.post_url} target="_blank" rel="noopener noreferrer" className="text-rose-600 font-bold flex items-center gap-1">
+              <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-rose-600 font-bold flex items-center gap-1">
                 <span>View</span>
                 <ExternalLink className="w-3 h-3" />
               </a>

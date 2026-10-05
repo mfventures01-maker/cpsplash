@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { productsService } from '../../services/productsService';
 import { Product, ProductStatus } from '../../types/database.types';
-import { Plus, Edit2, Trash2, Globe, Eye, EyeOff, DollarSign, ShieldCheck, RefreshCw, Sparkles } from 'lucide-react';
+import { Plus, Edit2, Trash2, Globe, Eye, EyeOff, DollarSign, ShieldCheck, RefreshCw } from 'lucide-react';
+import {
+  getProductPrice,
+  getProductVolume,
+  getProductHeroMediaUrl,
+  getProductClaims
+} from '../../services/productHelpers';
 
 interface AdminProductListProps {
   onNewProduct: () => void;
@@ -44,8 +50,9 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
 
   const handleOpenPriceModal = (p: Product) => {
     setQuickPriceModal(p);
-    setNewBasePrice(p.base_price);
-    setNewSalePrice(p.sale_price || '');
+    const price = getProductPrice(p);
+    setNewBasePrice(price.amount);
+    setNewSalePrice(price.compare_at_amount || '');
     setPriceReason('Standard retail adjustment');
   };
 
@@ -82,7 +89,7 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
         <div className="flex items-center gap-2">
           <button
             onClick={fetchProducts}
-            className="p-2.5 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-600 transition-colors"
+            className="p-2.5 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-600 transition-colors cursor-pointer"
             title="Refresh from Supabase"
           >
             <RefreshCw className="w-4 h-4" />
@@ -117,21 +124,17 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
               </thead>
               <tbody className="divide-y divide-stone-100">
                 {products.map((product) => {
-                  const verifiedClaims = product.claims?.filter(c => c.status === 'verified') || [];
-                  const heroMedia = product.media?.find(m => m.is_primary) || product.media?.[0];
+                  const verifiedClaims = getProductClaims(product, true);
+                  const heroUrl = getProductHeroMediaUrl(product);
+                  const price = getProductPrice(product);
+                  const volume = getProductVolume(product);
 
                   return (
                     <tr key={product.id} className="hover:bg-stone-50/70 transition-colors">
                       <td className="py-4 px-6 font-semibold text-stone-900">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-xl bg-stone-100 overflow-hidden shrink-0 border border-stone-200">
-                            {heroMedia?.url ? (
-                              <img src={heroMedia.url} alt={product.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-[10px] text-stone-400">
-                                No img
-                              </div>
-                            )}
+                            <img src={heroUrl} alt={product.name} className="w-full h-full object-cover" />
                           </div>
                           <div>
                             <span className="font-bold text-sm block leading-snug">{product.name}</span>
@@ -158,13 +161,13 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
                       </td>
 
                       <td className="py-4 px-4 font-mono font-bold text-stone-900 text-sm">
-                        ₦{Number(product.base_price).toLocaleString()}
+                        ₦{price.amount.toLocaleString()}
                       </td>
 
                       <td className="py-4 px-4 font-mono text-stone-700">
-                        {product.sale_price ? (
+                        {price.compare_at_amount ? (
                           <span className="font-bold text-rose-700">
-                            ₦{Number(product.sale_price).toLocaleString()}
+                            ₦{price.compare_at_amount.toLocaleString()}
                           </span>
                         ) : (
                           <span className="text-stone-400">—</span>
@@ -172,7 +175,7 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
                       </td>
 
                       <td className="py-4 px-4 font-mono text-stone-600">
-                        {product.volume_ml}mL
+                        {volume.volume}{volume.unit}
                       </td>
 
                       <td className="py-4 px-4">
@@ -185,7 +188,7 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
                       <td className="py-4 px-6 text-right space-x-1">
                         <button
                           onClick={() => handleOpenPriceModal(product)}
-                          className="p-2 rounded-lg hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-colors inline-block"
+                          className="p-2 rounded-lg hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-colors inline-block cursor-pointer"
                           title="Quick Price Engine adjustment"
                         >
                           <DollarSign className="w-4 h-4 text-emerald-600" />
@@ -193,7 +196,7 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
 
                         <button
                           onClick={() => onEditProduct(product.id)}
-                          className="p-2 rounded-lg hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-colors inline-block"
+                          className="p-2 rounded-lg hover:bg-stone-100 text-stone-600 hover:text-stone-900 transition-colors inline-block cursor-pointer"
                           title="Edit full product specifications"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -202,7 +205,7 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
                         {product.status === 'published' && (
                           <button
                             onClick={() => onViewLive(product.slug)}
-                            className="p-2 rounded-lg hover:bg-rose-50 text-rose-600 transition-colors inline-block"
+                            className="p-2 rounded-lg hover:bg-rose-50 text-rose-600 transition-colors inline-block cursor-pointer"
                             title="View public product page"
                           >
                             <Globe className="w-4 h-4" />
@@ -211,7 +214,7 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
 
                         <button
                           onClick={() => handleDelete(product.id, product.name)}
-                          className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors inline-block"
+                          className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors inline-block cursor-pointer"
                           title="Delete from Supabase"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -285,7 +288,7 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
               </button>
               <button
                 onClick={() => setQuickPriceModal(null)}
-                className="px-4 py-3 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs font-bold"
+                className="px-4 py-3 rounded-xl border border-stone-300 hover:bg-stone-50 text-stone-700 text-xs font-bold cursor-pointer"
               >
                 Cancel
               </button>

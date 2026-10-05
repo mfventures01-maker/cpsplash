@@ -1,33 +1,29 @@
 import React, { useState } from 'react';
 import { ProductClaim } from '../../types/database.types';
-import { ShieldCheck, Leaf, Heart, Sparkles, Zap, Info, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Leaf, Heart, Sparkles, Zap, CheckCircle2 } from 'lucide-react';
 
 interface VerifiedClaimsProps {
-  claims: ProductClaim[];
+  claims?: ProductClaim[];
 }
 
-export function VerifiedClaimsBadge({ claims }: VerifiedClaimsProps) {
+export function VerifiedClaimsBadge({ claims = [] }: VerifiedClaimsProps) {
   const [selectedClaim, setSelectedClaim] = useState<ProductClaim | null>(null);
 
   // Filter only verified claims for public presentation (HOEOS Rule)
-  const verifiedList = claims.filter(c => c.status === 'verified');
+  const verifiedList = claims.filter(c => c.verification_status === 'verified');
 
   if (verifiedList.length === 0) {
     return null;
   }
 
-  const getIcon = (badge: string) => {
-    switch (badge) {
-      case 'leaf':
-        return <Leaf className="w-4 h-4 text-emerald-600" />;
-      case 'shield':
-        return <ShieldCheck className="w-4 h-4 text-emerald-600" />;
-      case 'heart':
+  const getIcon = (claimType: string) => {
+    switch (claimType) {
+      case 'health':
         return <Heart className="w-4 h-4 text-rose-500" />;
-      case 'zap':
+      case 'benefit':
         return <Zap className="w-4 h-4 text-amber-500" />;
       default:
-        return <Sparkles className="w-4 h-4 text-emerald-600" />;
+        return <Leaf className="w-4 h-4 text-emerald-600" />;
     }
   };
 
@@ -57,15 +53,17 @@ export function VerifiedClaimsBadge({ claims }: VerifiedClaimsProps) {
             className="flex items-start gap-2.5 p-3 rounded-2xl bg-white border border-emerald-100 hover:border-emerald-300 shadow-xs cursor-pointer transition-all hover:shadow-sm"
           >
             <div className="mt-0.5 shrink-0">
-              {getIcon(claim.badge_icon)}
+              {getIcon(claim.claim_type)}
             </div>
             <div className="flex-1 min-w-0">
               <span className="text-xs font-bold text-stone-900 block leading-tight">
                 {claim.claim}
               </span>
-              <span className="text-[10px] text-emerald-700 block truncate mt-0.5">
-                Source: {claim.source}
-              </span>
+              {claim.evidence_source && (
+                <span className="text-[10px] text-emerald-700 block truncate mt-0.5">
+                  Source: {claim.evidence_source}
+                </span>
+              )}
             </div>
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
           </div>
@@ -77,14 +75,16 @@ export function VerifiedClaimsBadge({ claims }: VerifiedClaimsProps) {
         <div className="p-3.5 rounded-2xl bg-white border border-emerald-300 text-xs space-y-1.5 animate-in fade-in duration-200">
           <div className="flex justify-between items-center text-emerald-900 font-bold">
             <span>Certification Authority:</span>
-            <span className="text-emerald-700">{selectedClaim.approved_by || 'Quality Assurance Office'}</span>
+            <span className="text-emerald-700">CP Quality Assurance Lead</span>
           </div>
-          <p className="text-stone-600 text-[11px] leading-relaxed">
-            <strong>Substantiation:</strong> {selectedClaim.source}
-          </p>
-          {selectedClaim.approved_at && (
+          {selectedClaim.evidence_source && (
+            <p className="text-stone-600 text-[11px] leading-relaxed">
+              <strong>Substantiation:</strong> {selectedClaim.evidence_source}
+            </p>
+          )}
+          {selectedClaim.verified_at && (
             <p className="text-[10px] text-stone-400 font-mono">
-              Audit Date: {new Date(selectedClaim.approved_at).toLocaleDateString()}
+              Audit Date: {new Date(selectedClaim.verified_at).toLocaleDateString()}
             </p>
           )}
         </div>
