@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { checkSupabaseConnection, SupabaseConfigState, supabase } from '../../lib/supabase';
 import { BrandLogo } from '../common/BrandAssets';
+import { useAdminAuth } from '../../auth/AdminAuthContext';
 
 export type AdminTab = 
   | 'dashboard'
@@ -47,6 +48,7 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ currentTab, onSelectTab, onExitAdmin, children }: AdminLayoutProps) {
+  const { user, userRole, logout } = useAdminAuth();
   const [dbStatus, setDbStatus] = useState<SupabaseConfigState | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -143,11 +145,38 @@ export function AdminLayout({ currentTab, onSelectTab, onExitAdmin, children }: 
           </nav>
         </div>
 
-        {/* Bottom Actions */}
-        <div className="pt-4 border-t border-stone-800 space-y-2">
+        {/* Bottom Actions & Authenticated User Identity */}
+        <div className="pt-4 border-t border-stone-800 space-y-3">
+          {/* User Identity Pill */}
+          <div className="p-3 rounded-2xl bg-stone-950/80 border border-stone-800 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500">
+                Logged in as
+              </span>
+              <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-900/40">
+                {userRole || 'Staff'}
+              </span>
+            </div>
+            <div className="text-xs font-semibold text-stone-200 truncate" title={user?.email || ''}>
+              {user?.email || 'Authenticated User'}
+            </div>
+            <div className="text-[10px] font-mono text-stone-500 truncate">
+              UID: {user?.id ? `${user.id.slice(0, 8)}...${user.id.slice(-4)}` : 'Active'}
+            </div>
+          </div>
+
+          {/* Logout Action */}
+          <button
+            onClick={() => logout()}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-red-950/40 hover:bg-red-900/50 border border-red-900/40 text-red-300 hover:text-red-100 text-xs font-semibold transition-colors cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out from CMS</span>
+          </button>
+
           <button
             onClick={onExitAdmin}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-semibold transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Return to Public Store</span>

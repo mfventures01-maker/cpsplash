@@ -11,6 +11,8 @@ import { ClaimsPage } from './pages/ClaimsPage';
 import { StoryPage } from './pages/StoryPage';
 import { CertificationPage } from './pages/CertificationPage';
 import { AdminApp } from './pages/AdminApp';
+import { AdminAuthProvider } from './auth/AdminAuthContext';
+import { AdminAuthGate } from './components/auth/AdminAuthGate';
 import { WhatsAppOrderModal } from './components/product/WhatsAppOrderModal';
 import { Product } from './types/database.types';
 
@@ -41,10 +43,14 @@ export default function App() {
     // Admin CMS routes
     if (currentPath.startsWith('/admin')) {
       return (
-        <AdminApp
-          onExitAdmin={() => navigate('/')}
-          onNavigatePublic={(path) => navigate(path)}
-        />
+        <AdminAuthProvider>
+          <AdminAuthGate onExitAdmin={() => navigate('/')}>
+            <AdminApp
+              onExitAdmin={() => navigate('/')}
+              onNavigatePublic={(path) => navigate(path)}
+            />
+          </AdminAuthGate>
+        </AdminAuthProvider>
       );
     }
 
