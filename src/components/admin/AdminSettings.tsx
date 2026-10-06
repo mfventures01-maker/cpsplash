@@ -128,7 +128,7 @@ export function AdminSettings() {
         <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-[11px] leading-relaxed flex items-start gap-2">
           <Shield className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <span>
-            <strong>HOEOS Security Rule:</strong> Never expose <code>service_role</code> keys or private administrative secrets in client-facing code. Only public <code>anon</code> keys are permitted here.
+            <strong>HOEOS Security Rule:</strong> Never expose privileged administrative keys or backend secrets in client-facing code. Only public <code>anon</code> keys are permitted here.
           </span>
         </div>
 

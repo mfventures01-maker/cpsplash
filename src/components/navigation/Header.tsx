@@ -20,11 +20,11 @@ export function Header({ currentPath, onNavigate, cartCount = 0, onOpenCart }: H
   }, []);
 
   const navItems = [
-    { label: 'Products', path: '/products' },
+    { label: 'Shop', path: '/shop' },
+    { label: 'Commercial Supply', path: '/sports' },
     { label: 'Goodness & Benefits', path: '/claims' },
-    { label: 'Social & Campaigns', path: '/campaigns' },
-    { label: 'Find in Store', path: '/find-cp-splash' },
     { label: 'Fresh Blog', path: '/blog' },
+    { label: 'Find in Store', path: '/find-cp-splash' },
     { label: 'Story', path: '/story' },
   ];
 

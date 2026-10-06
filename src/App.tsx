@@ -4,6 +4,7 @@ import { Footer } from './components/navigation/Footer';
 import { HomePage } from './pages/HomePage';
 import { ProductsCatalogPage } from './pages/ProductsCatalogPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
+import { CommercialFunnelPage } from './pages/CommercialFunnelPage';
 import { CampaignLandingPage } from './pages/CampaignLandingPage';
 import { BlogIndexPage, BlogPostPage } from './pages/BlogPages';
 import { FindRetailersPage } from './pages/FindRetailersPage';
@@ -54,7 +55,38 @@ export default function App() {
       );
     }
 
-    // Dynamic Product Detail: /products/:slug
+    // Five Commercial Acquisition Funnels
+    if (currentPath === '/sports') {
+      return <CommercialFunnelPage territorySlug="sports" onNavigate={navigate} />;
+    }
+    if (currentPath === '/events' || currentPath === '/parties-events') {
+      return <CommercialFunnelPage territorySlug="parties-events" onNavigate={navigate} />;
+    }
+    if (currentPath === '/hotels' || currentPath === '/hotels-hospitality') {
+      return <CommercialFunnelPage territorySlug="hotels-hospitality" onNavigate={navigate} />;
+    }
+    if (currentPath === '/schools') {
+      return <CommercialFunnelPage territorySlug="schools" onNavigate={navigate} />;
+    }
+    if (currentPath === '/individuals') {
+      return <CommercialFunnelPage territorySlug="individuals" onNavigate={navigate} />;
+    }
+    if (currentPath.startsWith('/funnel/')) {
+      const slug = currentPath.replace('/funnel/', '').trim();
+      return <CommercialFunnelPage territorySlug={slug} onNavigate={navigate} />;
+    }
+
+    // Dynamic Product Detail: /shop/:slug or /products/:slug
+    if (currentPath.startsWith('/shop/')) {
+      const slug = currentPath.replace('/shop/', '').trim();
+      return (
+        <ProductDetailPage
+          slug={slug}
+          onNavigate={navigate}
+          onOpenOrderModal={setOrderModalProduct}
+        />
+      );
+    }
     if (currentPath.startsWith('/products/')) {
       const slug = currentPath.replace('/products/', '').trim();
       return (
@@ -66,8 +98,8 @@ export default function App() {
       );
     }
 
-    // Products catalog: /products
-    if (currentPath === '/products') {
+    // Products catalog: /shop or /products
+    if (currentPath === '/shop' || currentPath === '/products') {
       return (
         <ProductsCatalogPage
           onNavigate={navigate}

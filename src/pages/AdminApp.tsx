@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { AdminLayout, AdminTab } from '../components/admin/AdminLayout';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
+import { AdminCommercialBrain } from '../components/admin/AdminCommercialBrain';
+import { AdminLeadsManager } from '../components/admin/AdminLeadsManager';
 import { AdminOrdersManager } from '../components/admin/AdminOrdersManager';
 import { AdminProductList } from '../components/admin/AdminProductList';
 import { AdminProductEditor } from '../components/admin/AdminProductEditor';
@@ -47,6 +49,14 @@ export function AdminApp({ onExitAdmin, onNavigatePublic, initialTab = 'dashboar
     >
       {currentTab === 'dashboard' && (
         <AdminDashboard onSelectTab={setCurrentTab} />
+      )}
+
+      {currentTab === 'commercial_brain' && (
+        <AdminCommercialBrain />
+      )}
+
+      {currentTab === 'sales_leads' && (
+        <AdminLeadsManager />
       )}
 
       {currentTab === 'orders' && (

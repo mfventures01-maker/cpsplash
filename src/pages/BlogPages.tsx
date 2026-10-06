@@ -115,10 +115,13 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
     blogService.getPostBySlug(slug).then((p) => {
       setPost(p);
       if (p) {
-        analyticsService.trackEvent('blog_view', {
+        document.title = p.seo_title || `${p.title} | CP Fruit Splash Knowledge Hub`;
+        analyticsService.trackEvent('page_view', {
           landingPage: `/blog/${slug}`,
           content: p.title,
         });
+      } else {
+        document.title = 'Article Not Found | CP Fruit Splash';
       }
       setLoading(false);
     });
@@ -147,8 +150,33 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
     );
   }
 
+  // AEO/SEO Structured Article Data
+  const articleStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    'headline': post.seo_title || post.title,
+    'description': post.seo_description || post.excerpt,
+    'datePublished': post.published_at || post.created_at,
+    'dateModified': post.updated_at || post.created_at,
+    'author': {
+      '@type': 'Organization',
+      'name': 'CP Fruit Splash'
+    },
+    'publisher': {
+      '@type': 'Organization',
+      'name': 'CP Fruit Splash',
+      'url': 'https://cp-splash-nine.vercel.app'
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+      {/* Inject Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleStructuredData) }}
+      />
+
       <button
         onClick={() => onNavigate('/blog')}
         className="inline-flex items-center gap-2 text-stone-500 hover:text-stone-900 text-xs font-bold cursor-pointer"
@@ -184,9 +212,51 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
         ) : null;
       })()}
 
-      {/* Main Post Body */}
+      {/* Main Post Body (AEO Direct Answer Paragraphs) */}
       <div className="prose prose-stone max-w-none text-stone-800 text-sm sm:text-base leading-relaxed whitespace-pre-line py-4">
         {post.content}
+      </div>
+
+      {/* DETERMINISTIC COMMERCIAL DESTINATION BANNER (AEO Internal Linking) */}
+      <div className="p-8 rounded-3xl bg-gradient-to-r from-stone-900 via-stone-850 to-stone-900 text-white space-y-6 shadow-xl border border-stone-800">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-rose-400 block">
+            Commercial Supply & Bulk Distribution
+          </span>
+          <h3 className="text-2xl sm:text-3xl font-black text-white">
+            Planning Beverages for Your Team, Event, or School?
+          </h3>
+          <p className="text-stone-300 text-xs sm:text-sm max-w-xl leading-relaxed">
+            Get cold-chain delivery directly from our Sapele hub with tiered wholesale rates, official purchase invoicing, and dedicated WhatsApp dispatch.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+          <button
+            onClick={() => onNavigate('/sports')}
+            className="p-3 rounded-xl bg-white/10 hover:bg-rose-600 text-white text-xs font-bold text-left transition-colors cursor-pointer"
+          >
+            Sports & Gyms →
+          </button>
+          <button
+            onClick={() => onNavigate('/events')}
+            className="p-3 rounded-xl bg-white/10 hover:bg-amber-600 text-white text-xs font-bold text-left transition-colors cursor-pointer"
+          >
+            Parties & Events →
+          </button>
+          <button
+            onClick={() => onNavigate('/hotels')}
+            className="p-3 rounded-xl bg-white/10 hover:bg-purple-600 text-white text-xs font-bold text-left transition-colors cursor-pointer"
+          >
+            Hotels & Lounges →
+          </button>
+          <button
+            onClick={() => onNavigate('/schools')}
+            className="p-3 rounded-xl bg-white/10 hover:bg-emerald-600 text-white text-xs font-bold text-left transition-colors cursor-pointer"
+          >
+            Schools & Admin →
+          </button>
+        </div>
       </div>
 
       {/* BLOG -> PRODUCT -> WHATSAPP Conversion Box */}

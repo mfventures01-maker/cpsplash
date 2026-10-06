@@ -18,7 +18,9 @@ import {
   X,
   Sliders,
   Sparkles,
-  ShoppingBag
+  ShoppingBag,
+  Layers,
+  Compass
 } from 'lucide-react';
 import { checkSupabaseConnection, SupabaseConfigState, supabase } from '../../lib/supabase';
 import { BrandLogo } from '../common/BrandAssets';
@@ -26,6 +28,8 @@ import { useAdminAuth } from '../../auth/AdminAuthContext';
 
 export type AdminTab = 
   | 'dashboard'
+  | 'commercial_brain'
+  | 'sales_leads'
   | 'orders'
   | 'products'
   | 'product_new'
@@ -58,6 +62,8 @@ export function AdminLayout({ currentTab, onSelectTab, onExitAdmin, children }: 
 
   const navItems: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <Sliders className="w-4 h-4" /> },
+    { id: 'commercial_brain', label: 'Commercial Brain', icon: <Layers className="w-4 h-4" /> },
+    { id: 'sales_leads', label: 'Sales Leads', icon: <Users className="w-4 h-4" /> },
     { id: 'orders', label: 'Customer Orders', icon: <ShoppingBag className="w-4 h-4" /> },
     { id: 'products', label: 'Product Engine', icon: <Package className="w-4 h-4" /> },
     { id: 'pricing', label: 'Price Engine', icon: <DollarSign className="w-4 h-4" /> },

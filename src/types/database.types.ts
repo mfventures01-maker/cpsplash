@@ -323,6 +323,10 @@ export interface AnalyticsEvent {
   product_id?: string | null;
   campaign_id?: string | null;
   order_id?: string | null;
+  lead_id?: string | null;
+  territory_id?: string | null;
+  offer_id?: string | null;
+  journey_id?: string | null;
   page_path?: string | null;
   source?: string | null;
   medium?: string | null;
@@ -330,6 +334,129 @@ export interface AnalyticsEvent {
   content?: string | null;
   metadata?: Record<string, unknown>;
   created_at?: string;
+}
+
+// 17. COMMERCIAL SALES ENGINE TYPES
+export interface SalesTerritory {
+  id: string;
+  tenant_id: string;
+  slug: string;
+  name: string;
+  headline: string;
+  description: string | null;
+  buyer_summary: string | null;
+  cta_label: string;
+  landing_path: string | null;
+  active: boolean;
+  sort_order: number;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  // Relations
+  journeys?: SalesJourney[];
+  offers?: SalesOffer[];
+}
+
+export type SalesJourneyType = 'quote' | 'direct' | 'consultation' | 'distribution';
+export type SalesJourneyDestination = 'whatsapp' | 'checkout' | 'portal' | 'custom';
+
+export interface SalesJourney {
+  id: string;
+  tenant_id: string;
+  territory_id: string;
+  slug: string;
+  name: string;
+  journey_type: string;
+  destination: string;
+  cta_label: string;
+  whatsapp_number: string | null;
+  manychat_flow_key: string | null;
+  active: boolean;
+  config: Record<string, unknown>;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  // Relations
+  questions?: SalesQuestion[];
+  territory?: SalesTerritory;
+}
+
+export interface SalesOffer {
+  id: string;
+  tenant_id: string;
+  territory_id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  offer_type: string;
+  active: boolean;
+  metadata: Record<string, unknown>;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type QuestionType = 'text' | 'number' | 'date' | 'select' | 'tel' | 'email' | 'textarea';
+
+export interface SalesQuestion {
+  id: string;
+  tenant_id: string;
+  journey_id: string;
+  field_key: string;
+  label: string;
+  question_type: QuestionType | string;
+  required: boolean;
+  placeholder: string | null;
+  options: string[] | { label: string; value: string }[] | Record<string, unknown>[];
+  sort_order: number;
+  active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'quoted' | 'won' | 'lost' | 'closed';
+
+export interface SalesLead {
+  id: string;
+  tenant_id: string;
+  lead_number: string;
+  territory_id: string;
+  offer_id: string | null;
+  journey_id: string | null;
+  buyer_type: string | null;
+  contact_name: string | null;
+  email: string | null;
+  phone: string | null;
+  location: string | null;
+  quantity: number | null;
+  event_date: string | null;
+  product_interest: string | null;
+  status: LeadStatus;
+  source: string | null;
+  medium: string | null;
+  campaign: string | null;
+  content: string | null;
+  manychat_contact_id: string | null;
+  notes: string | null;
+  answers: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  // Joined relations
+  territory?: SalesTerritory;
+  journey?: SalesJourney;
+  offer?: SalesOffer;
+}
+
+export interface SalesFunnelSummary {
+  tenant_id: string;
+  territory_id: string;
+  status: string;
+  lead_count: number;
+  first_lead_at: string | null;
+  last_lead_at: string | null;
+  territory_name?: string;
 }
 
 // Convenience view / domain model for UI consumption

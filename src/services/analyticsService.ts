@@ -5,6 +5,26 @@ export const analyticsService = {
   /**
    * Track an event into the Supabase-backed event pipeline
    */
+  /**
+   * Get or generate a deterministic browser session ID
+   */
+  getSessionId(): string {
+    if (typeof window === 'undefined') return 'server-session';
+    try {
+      let sid = sessionStorage.getItem('cp_session_id');
+      if (!sid) {
+        sid = 'sess_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now().toString(36);
+        sessionStorage.setItem('cp_session_id', sid);
+      }
+      return sid;
+    } catch {
+      return 'anon-session';
+    }
+  },
+
+  /**
+   * Track an event into the Supabase-backed event pipeline
+   */
   async trackEvent(
     eventName: AnalyticsEvent['event_name'],
     options: {
@@ -14,6 +34,10 @@ export const analyticsService = {
       medium?: string | null;
       campaign?: string | null;
       content?: string | null;
+      leadId?: string | null;
+      territoryId?: string | null;
+      offerId?: string | null;
+      journeyId?: string | null;
       metadata?: Record<string, unknown>;
     } = {}
   ): Promise<void> {
@@ -27,6 +51,7 @@ export const analyticsService = {
 
       const record: AnalyticsEvent = {
         tenant_id: TENANT_ID,
+        session_id: this.getSessionId(),
         event_name: eventName,
         source: utmSource,
         medium: utmMedium,
@@ -34,6 +59,10 @@ export const analyticsService = {
         content: utmContent,
         page_path: options.landingPage || (typeof window !== 'undefined' ? window.location.pathname : '/'),
         product_id: options.productId || null,
+        lead_id: options.leadId || null,
+        territory_id: options.territoryId || null,
+        offer_id: options.offerId || null,
+        journey_id: options.journeyId || null,
         metadata: options.metadata || {},
         created_at: new Date().toISOString(),
       };

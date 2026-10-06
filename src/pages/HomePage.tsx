@@ -2,12 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { HeroSlider } from '../components/hero/HeroSlider';
 import { ProductCard } from '../components/product/ProductCard';
 import { SocialProofFeed } from '../components/product/SocialProofFeed';
-import { Product, SocialContent, BlogPost } from '../types/database.types';
+import { Product, SocialContent, BlogPost, SalesTerritory } from '../types/database.types';
 import { useProducts } from '../hooks/useProducts';
 import { socialService } from '../services/socialService';
 import { blogService } from '../services/blogService';
+import { salesService } from '../services/salesService';
 import { analyticsService } from '../services/analyticsService';
-import { ShieldCheck, Heart, Sparkles, MapPin, MessageCircle, ArrowRight, CheckCircle2, Truck, Droplets, Award } from 'lucide-react';
+import { CommercialSalesEngine } from '../components/sales/CommercialSalesEngine';
+import {
+  ShieldCheck,
+  Heart,
+  Sparkles,
+  MapPin,
+  MessageCircle,
+  ArrowRight,
+  CheckCircle2,
+  Truck,
+  Droplets,
+  Award,
+  Building2,
+  Trophy,
+  Users,
+  GraduationCap,
+  Layers
+} from 'lucide-react';
 
 interface HomePageProps {
   onNavigate: (path: string) => void;
@@ -18,12 +36,20 @@ export function HomePage({ onNavigate, onOpenOrderModal }: HomePageProps) {
   const { products, loading, error } = useProducts();
   const [socialItems, setSocialItems] = useState<SocialContent[]>([]);
   const [recentBlog, setRecentBlog] = useState<BlogPost[]>([]);
+  const [territories, setTerritories] = useState<SalesTerritory[]>([]);
+  const [territoriesLoading, setTerritoriesLoading] = useState(true);
+  const [activeEngineTerritory, setActiveEngineTerritory] = useState<SalesTerritory | null>(null);
 
   useEffect(() => {
     analyticsService.trackEvent('page_view', { landingPage: '/' });
     socialService.getPublishedContent().then(setSocialItems);
     blogService.getPublishedPosts().then(posts => setRecentBlog(posts.slice(0, 2)));
+    salesService.getActiveTerritories().then(data => {
+      setTerritories(data);
+      setTerritoriesLoading(false);
+    });
   }, []);
+
 
   return (
     <div className="space-y-20 pb-20">
@@ -34,7 +60,79 @@ export function HomePage({ onNavigate, onOpenOrderModal }: HomePageProps) {
         onOpenOrderModal={onOpenOrderModal}
       />
 
-      {/* 2. Core Pillars Bar */}
+      {/* 2. Primary Commercial Qualification Entry: "What are you buying for?" */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
+        <div className="bg-stone-900 text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-stone-800 space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-stone-800 pb-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-rose-400 font-mono text-xs font-bold uppercase tracking-wider">
+                <Sparkles className="w-4 h-4" />
+                <span>Commercial Acquisition Engine</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                What are you buying for?
+              </h2>
+              <p className="text-stone-400 text-sm max-w-xl">
+                Select your buyer territory below. Each path provides tailored pricing, institutional terms, or direct cold-chain order routing.
+              </p>
+            </div>
+            <div className="text-xs font-mono text-stone-400 bg-stone-950 px-3 py-1.5 rounded-xl border border-stone-800">
+              Deterministic RLS • Zero Hardcoded Logic
+            </div>
+          </div>
+
+          {territoriesLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-36 rounded-2xl bg-stone-800/60 animate-pulse border border-stone-700/50" />
+              ))}
+            </div>
+          ) : territories.length === 0 ? (
+            <div className="p-8 text-center rounded-2xl bg-stone-950 border border-stone-800 space-y-3">
+              <p className="text-sm font-semibold text-stone-300">
+                Commercial territories are governed by the live Supabase CMS.
+              </p>
+              <p className="text-xs text-stone-500 max-w-md mx-auto">
+                No active territory records currently exist in the database. Publish territories (Sports, Parties & Events, Hotels, Schools, Individuals) via the CMS Admin to activate the dynamic buyer funnels.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {territories.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => {
+                    if (t.landing_path) {
+                      onNavigate(t.landing_path);
+                    } else {
+                      setActiveEngineTerritory(t);
+                    }
+                  }}
+                  className="group text-left p-5 rounded-2xl bg-stone-950/70 hover:bg-stone-800/90 border border-stone-800 hover:border-rose-500/60 transition-all duration-300 flex flex-col justify-between cursor-pointer"
+                >
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-900/40 inline-block">
+                      {t.slug}
+                    </span>
+                    <h3 className="text-base font-black text-white group-hover:text-rose-400 transition-colors">
+                      {t.name}
+                    </h3>
+                    <p className="text-xs text-stone-400 line-clamp-2 leading-relaxed">
+                      {t.headline || t.buyer_summary || t.description || 'Exclusive terms & delivery.'}
+                    </p>
+                  </div>
+                  <div className="pt-4 mt-2 flex items-center justify-between text-xs font-bold text-rose-400 group-hover:translate-x-0.5 transition-transform">
+                    <span>{t.cta_label || 'Get Pricing'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 3. Core Pillars Bar */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 rounded-3xl bg-white border border-stone-200/90 shadow-xl shadow-stone-200/50">
           <div className="flex items-center gap-3.5 p-2">
@@ -320,6 +418,15 @@ export function HomePage({ onNavigate, onOpenOrderModal }: HomePageProps) {
             ))}
           </div>
         </section>
+      )}
+
+      {/* Reusable Commercial Sales Engine Modal */}
+      {activeEngineTerritory && (
+        <CommercialSalesEngine
+          territoryId={activeEngineTerritory.id}
+          onClose={() => setActiveEngineTerritory(null)}
+          onNavigate={onNavigate}
+        />
       )}
     </div>
   );
