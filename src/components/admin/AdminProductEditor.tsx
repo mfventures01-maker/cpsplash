@@ -43,6 +43,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [mediaAltText, setMediaAltText] = useState('');
   const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [mediaType, setMediaType] = useState<'image' | 'animation' | 'video'>('image');
 
   // New Claim state
   const [newClaimText, setNewClaimText] = useState('');
@@ -159,7 +160,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     const res = await mediaService.uploadMedia(
       productId,
       selectedFile,
-      'image',
+      mediaType,
       mediaAltText || name,
       isPrimary
     );
@@ -483,13 +484,18 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="font-bold text-stone-700 block mb-1">Select File (Image / WebP / JPEG / PNG)</label>
+                <label className="font-bold text-stone-700 block mb-1">Select Product Image or Animation</label>
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleFileUpload}
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => {
+                    handleFileUpload(e);
+                    const file = e.target.files?.[0];
+                    if (file) setMediaType(file.type === 'image/gif' ? 'animation' : 'image');
+                  }}
                   className="w-full px-3 py-2 rounded-xl border border-stone-300 text-xs bg-white cursor-pointer"
                 />
+                <p className="mt-1 text-[11px] text-stone-500">Supported here: JPEG, PNG, WebP and GIF. Storage must also allow the selected format.</p>
               </div>
 
               <div>
