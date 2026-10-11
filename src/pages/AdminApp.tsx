@@ -38,7 +38,9 @@ export function AdminApp({ onExitAdmin, onNavigatePublic, initialTab = 'dashboar
   };
 
   const handleProductSaved = (savedProduct: Product) => {
-    setCurrentTab('products');
+    // Keep the saved product open so the owner can upload media immediately.
+    setEditingProductId(savedProduct.id);
+    setCurrentTab('product_edit');
   };
 
   return (
