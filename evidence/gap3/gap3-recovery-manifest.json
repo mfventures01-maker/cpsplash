@@ -1,0 +1,58 @@
+﻿[
+    {
+        "file":  "20261015_000001_recovered_touch_sales_updated_at_fn.sql",
+        "sha256":  "A59D066CD8B7DEE73D4DCB44175BC7400F315DB11AF1DB01751372A50B451ED9",
+        "bytes":  1058,
+        "evidence_class":  "A_STATIC",
+        "source":  "LIVE_CATALOG_DUMP",
+        "applied_to_db":  false
+    },
+    {
+        "file":  "20261015_000002_recovered_normalize_sales_lead_fn.sql",
+        "sha256":  "7ADF1A0C72AB2C622EDB9F21DAAF9D6A6FB229AA028852801B9F85CF845B376C",
+        "bytes":  2086,
+        "evidence_class":  "A_STATIC",
+        "source":  "LIVE_CATALOG_DUMP",
+        "applied_to_db":  false
+    },
+    {
+        "file":  "20261015_000003_recovered_sales_lead_number_seq.sql",
+        "sha256":  "0CFDCE1714CBD60DA5185E4039295305A37E8826E235E42A629EBF09D8445613",
+        "bytes":  1041,
+        "evidence_class":  "A_STATIC",
+        "source":  "LIVE_CATALOG_DUMP",
+        "applied_to_db":  false
+    },
+    {
+        "file":  "20261015_000004_recovered_sales_territories.sql",
+        "sha256":  "0A06EB0831DCBAC7F9EB675C969EF01DD5F99EAE15F09E7FB2E7076C3264AE74",
+        "bytes":  3088,
+        "evidence_class":  "A_STATIC",
+        "source":  "LIVE_CATALOG_DUMP",
+        "applied_to_db":  false
+    },
+    {
+        "file":  "20261015_000005_recovered_sales_offers.sql",
+        "sha256":  "74AE343E0892AAC64698409EA84A523DDB6F6421B8AC84353C66831FAEBFD0AB",
+        "bytes":  3107,
+        "evidence_class":  "A_STATIC",
+        "source":  "LIVE_CATALOG_DUMP",
+        "applied_to_db":  false
+    },
+    {
+        "file":  "20261015_000006_recovered_sales_journeys.sql",
+        "sha256":  "69F04F6276CFAD83E1AAA32159E3AAAA19B8D9D2FE63718189157DE4CA2F5AB9",
+        "bytes":  3450,
+        "evidence_class":  "A_STATIC",
+        "source":  "LIVE_CATALOG_DUMP",
+        "applied_to_db":  false
+    },
+    {
+        "file":  "20261015_000007_recovered_sales_leads.sql",
+        "sha256":  "E1D3CB4631B740D32930802211789ACA54B25F4D05E89F083D658B2D842A89DE",
+        "bytes":  5128,
+        "evidence_class":  "A_STATIC",
+        "source":  "LIVE_CATALOG_DUMP",
+        "applied_to_db":  false
+    }
+]
