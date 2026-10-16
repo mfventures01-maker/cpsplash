@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { SalesTerritory } from '../types/database.types';
+import { SalesTerritory, MediaPlacement } from '../types/database.types';
 import { salesService } from '../services/salesService';
+import { placementService } from '../services/placementService';
+import { mediaService } from '../services/mediaService';
 import { analyticsService } from '../services/analyticsService';
 import { CommercialSalesEngine } from '../components/sales/CommercialSalesEngine';
 import { 
@@ -27,6 +29,8 @@ interface CommercialFunnelPageProps {
 
 export function CommercialFunnelPage({ territorySlug, onNavigate }: CommercialFunnelPageProps) {
   const [territory, setTerritory] = useState<SalesTerritory | null>(null);
+  const [heroPlacements, setHeroPlacements] = useState<MediaPlacement[]>([]);
+  const [cardPlacements, setCardPlacements] = useState<MediaPlacement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModalEngine, setShowModalEngine] = useState(false);
@@ -37,15 +41,21 @@ export function CommercialFunnelPage({ territorySlug, onNavigate }: CommercialFu
       setLoading(true);
       setError(null);
       try {
-        const data = await salesService.getTerritoryBySlug(territorySlug);
+        const [tData, heroData, cardData] = await Promise.all([
+          salesService.getTerritoryBySlug(territorySlug),
+          placementService.getPlacements('funnel_hero', territorySlug),
+          placementService.getPlacements('funnel_card', territorySlug),
+        ]);
         if (!mounted) return;
-        if (!data) {
+        if (!tData) {
           setError(`Commercial territory "${territorySlug}" is not currently published.`);
         } else {
-          setTerritory(data);
+          setTerritory(tData);
+          setHeroPlacements(heroData || []);
+          setCardPlacements(cardData || []);
           analyticsService.trackEvent('page_view', {
             landingPage: `/${territorySlug}`,
-            territoryId: data.id,
+            territoryId: tData.id,
             metadata: { territorySlug }
           });
         }
@@ -181,6 +191,87 @@ export function CommercialFunnelPage({ territorySlug, onNavigate }: CommercialFu
                 {territory.description || territory.buyer_summary || 'Access bespoke institutional pricing, cold-chain distribution, and direct WhatsApp sales support.'}
               </p>
 
+              {/* Persistent Funnel Hero Media Showcase (Video / Image) */}
+              {heroPlacements.length > 0 && (() => {
+                const placement = heroPlacements[0];
+                const asset = placement.media_assets || placement.asset;
+                const imgUrl = mediaService.getMediaAssetUrl(asset);
+                if (!imgUrl) return null;
+
+                return (
+                  <div className="rounded-2xl overflow-hidden bg-stone-900 border border-white/15 aspect-video w-full max-w-xl shadow-2xl relative mb-4">
+                    {asset?.mime_type?.startsWith('video/') || asset?.media_type === 'video' ? (
+                      <video
+                        src={imgUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        poster={asset?.poster_url || undefined}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <img
+                        src={imgUrl}
+                        alt={placement.alt_text_override || asset?.alt_text || `${territory.name} imagery`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Persistent Funnel Card Placement (GIF / WebP / Image) */}
+              {cardPlacements.length > 0 && (() => {
+                const placement = cardPlacements[0];
+                const asset = placement.media_assets || placement.asset;
+                const imgUrl = mediaService.getMediaAssetUrl(asset);
+                const isGif = asset?.mime_type === 'image/gif';
+                if (!imgUrl) return null;
+
+                return (
+                  <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex items-center gap-4 max-w-xl">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-stone-900 border border-white/15 shrink-0 relative">
+                      {asset?.mime_type?.startsWith('video/') || asset?.media_type === 'video' ? (
+                        <video
+                          src={imgUrl}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          poster={asset?.poster_url || undefined}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={imgUrl}
+                          alt={placement.alt_text_override || asset?.alt_text || `${territory.name} imagery`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      )}
+                      {isGif && (
+                        <div className="absolute top-1 left-1 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[8px] font-bold uppercase">
+                          GIF
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[10px] font-mono font-bold uppercase text-rose-300 tracking-wider block">
+                        Official {territory.name} Supply Asset
+                      </span>
+                      <p className="text-xs font-bold text-white truncate">
+                        {placement.alt_text_override || asset?.caption || asset?.alt_text || 'Verified Cold-Crafted Blend'}
+                      </p>
+                      <p className="text-[11px] text-stone-300 truncate">
+                        Sapele production hub • Temperature-controlled cold chain
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="pt-2 flex flex-wrap items-center gap-4">
                 <button
                   onClick={() => setShowModalEngine(true)}
@@ -241,7 +332,7 @@ export function CommercialFunnelPage({ territorySlug, onNavigate }: CommercialFu
             </div>
             <h3 className="text-lg font-bold text-stone-900">100% Pure Botanicals</h3>
             <p className="text-xs text-stone-600 leading-relaxed">
-              Zero preservatives, pure hibiscus (Zobo Sweet) and cold-blended superfruits (Luxury Juice Mix). Certified quality.
+              Zero synthetic preservatives, pure cold-crafted botanicals and nutrient-dense superfruit blends. Certified quality.
             </p>
           </div>
         </div>
