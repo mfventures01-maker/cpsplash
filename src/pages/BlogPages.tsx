@@ -4,7 +4,7 @@ import { mediaService } from '../services/mediaService';
 import { productsService } from '../services/productsService';
 import { BlogPost, Product } from '../types/database.types';
 import { analyticsService } from '../services/analyticsService';
-import { getProductPrice } from '../services/productHelpers';
+import { getProductPrice, getBlogFeaturedImageUrl } from '../services/productHelpers';
 import { ArrowLeft, ArrowRight, MessageCircle, Calendar, Sparkles } from 'lucide-react';
 
 interface BlogIndexProps {
@@ -120,12 +120,64 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
           landingPage: `/blog/${slug}`,
           content: p.title,
         });
+
+        // Resolve active published product from database
+        productsService.getPublishedProducts().then(({ data }) => {
+          if (data && data.length > 0) {
+            setRelatedProduct(data.find(prod => prod.featured) || data[0]);
+          }
+        });
       } else {
         document.title = 'Article Not Found | CP Fruit Splash';
       }
       setLoading(false);
     });
   }, [slug]);
+
+  // Dynamic OG & Canonical Meta Tag Injection
+  useEffect(() => {
+    if (!post) return;
+
+    const ogImage = getBlogFeaturedImageUrl(post);
+    const title = post.seo_title || post.title;
+    const description = post.seo_description || post.excerpt || '';
+
+    const setMeta = (attr: 'property' | 'name', key: string, value: string) => {
+      let el = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', value);
+    };
+
+    document.title = title;
+    setMeta('name', 'description', description);
+    setMeta('property', 'og:title', title);
+    setMeta('property', 'og:description', description);
+    if (ogImage) {
+      setMeta('property', 'og:image', ogImage);
+      setMeta('property', 'og:image:width', '1200');
+      setMeta('property', 'og:image:height', '630');
+    }
+    setMeta('property', 'og:type', 'article');
+    setMeta('property', 'og:url', window.location.href);
+
+    // Canonical
+    let link = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      document.head.appendChild(link);
+    }
+    link.setAttribute('href', window.location.href);
+
+    // Cleanup on unmount
+    return () => {
+      document.head.querySelectorAll('meta[property^="og:"], link[rel="canonical"]').forEach(el => el.remove());
+    };
+  }, [post]);
 
   if (loading) {
     return (
@@ -156,6 +208,7 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
     '@type': 'Article',
     'headline': post.seo_title || post.title,
     'description': post.seo_description || post.excerpt,
+    'image': getBlogFeaturedImageUrl(post) || undefined,
     'datePublished': post.published_at || post.created_at,
     'dateModified': post.updated_at || post.created_at,
     'author': {
@@ -200,11 +253,7 @@ export function BlogPostPage({ slug, onNavigate, onOpenOrderModal }: BlogPostPag
       </div>
 
       {(() => {
-        const mediaUrl = typeof post.featured_media === 'string'
-          ? post.featured_media
-          : post.featured_media?.path
-            ? mediaService.getPublicUrl(post.featured_media.path)
-            : null;
+        const mediaUrl = getBlogFeaturedImageUrl(post);
         return mediaUrl ? (
           <div className="rounded-3xl overflow-hidden aspect-16/9 bg-stone-100 shadow-md">
             <img src={mediaUrl} alt={post.title} className="w-full h-full object-cover" />

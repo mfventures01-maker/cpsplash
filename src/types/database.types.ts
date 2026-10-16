@@ -154,6 +154,33 @@ export interface MediaAsset {
   public_url?: string;
 }
 
+export type MediaSequenceRole =
+  | 'hero_bottle'
+  | 'premium_three_quarter'
+  | 'ingredient_explosion'
+  | 'lifestyle'
+  | 'serving'
+  | 'campaign_hero'
+  | 'video_poster'
+  | 'gallery';
+
+export interface ProductMediaSequenceItem {
+  position: number;
+  role: MediaSequenceRole;
+  media_id: string;
+  custom_label?: string;
+  poster_url?: string;
+  enabled: boolean;
+}
+
+export interface ProductAnimationConfig {
+  enabled: boolean;
+  duration_seconds: number;
+  loop: boolean;
+  autoplay: boolean;
+  aspect_ratio?: 'square' | 'portrait' | 'landscape';
+}
+
 // 8. PRODUCT MEDIA (Join table linking product to media_assets)
 export interface ProductMediaRelation {
   product_id: string;
@@ -161,6 +188,36 @@ export interface ProductMediaRelation {
   sort_order: number;
   is_primary: boolean;
   created_at: string;
+  // Joined asset:
+  media_assets?: MediaAsset;
+  asset?: MediaAsset;
+  // Sequence role (resolved from metadata or role mapping):
+  role?: MediaSequenceRole;
+}
+
+// 8b. MEDIA PLACEMENTS (Tenant-scoped persistent placement across homepage, menu, funnels)
+export type PlacementScopeType =
+  | 'homepage_hero'
+  | 'homepage_carousel'
+  | 'product_menu'
+  | 'product_gallery'
+  | 'funnel_hero'
+  | 'funnel_card'
+  | 'campaign'
+  | 'sales_journey';
+
+export interface MediaPlacement {
+  id: string;
+  tenant_id: string;
+  media_id: string;
+  placement_key: string;
+  scope_type: PlacementScopeType;
+  scope_id: string | null;
+  sort_order: number;
+  active: boolean;
+  alt_text_override: string | null;
+  created_at: string;
+  updated_at: string;
   // Joined asset:
   media_assets?: MediaAsset;
   asset?: MediaAsset;
@@ -199,6 +256,8 @@ export interface BlogPost {
   created_at: string;
   updated_at: string;
   featured_media?: MediaAsset | null;
+  featured_media_assets?: MediaAsset | null;
+  featured_image_url?: string | null;
 }
 
 // 11. INFLUENCERS
