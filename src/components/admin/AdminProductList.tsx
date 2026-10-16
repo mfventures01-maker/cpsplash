@@ -37,7 +37,10 @@ export function AdminProductList({ onNewProduct, onEditProduct, onViewLive }: Ad
 
   const handleStatusToggle = async (product: Product) => {
     const nextStatus: ProductStatus = product.status === 'published' ? 'draft' : 'published';
-    await productsService.setProductStatus(product.id, nextStatus);
+    const res = await productsService.setProductStatus(product.id, nextStatus);
+    if (res?.error) {
+      alert(`Publication gate: ${res.error}`);
+    }
     fetchProducts();
   };
 

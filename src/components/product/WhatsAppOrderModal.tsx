@@ -9,6 +9,7 @@ import {
   getProductHeroMediaUrl,
   getProductPrimaryVariant
 } from '../../services/productHelpers';
+import { BUSINESS_CONFIG } from '../../services/businessConfig';
 
 interface WhatsAppOrderModalProps {
   product: Product | null;
@@ -33,7 +34,7 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
 
   const unitPrice = price.amount;
   const subtotal = unitPrice * quantity;
-  const phoneNumber = '2348127700724';
+  const phoneNumber = BUSINESS_CONFIG.contact.whatsappNumber;
 
   const handleSendOrder = () => {
     // 1. Generate Deterministic WhatsApp Order Message (Authoritative format)
@@ -64,7 +65,7 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
     // 2. Persist order record into Supabase orders & order_items tables
     ordersService.createOrder({
       customer_name: customerName.trim() || 'Valued Customer',
-      customer_phone: customerPhone.trim() || '08127700724',
+      customer_phone: customerPhone.trim() || BUSINESS_CONFIG.contact.enquiryPhoneDisplay,
       customer_location: deliveryLocation,
       delivery_address: deliveryAddress.trim() || null,
       channel: 'whatsapp',
@@ -288,7 +289,7 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
               </button>
               <p className="text-[11px] text-center text-stone-500 mt-2 flex items-center justify-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Verified Direct Line: +234 812 770 0724 (Sapele Hub)</span>
+                <span>Verified Direct Line: {BUSINESS_CONFIG.contact.enquiryPhoneDisplay} ({BUSINESS_CONFIG.flagshipLocation.hubName})</span>
               </p>
             </div>
           </div>
@@ -307,7 +308,7 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
               <div>Product: {product.name}</div>
               <div>Total: ₦{subtotal.toLocaleString()}</div>
               <div>Destination: {deliveryLocation}</div>
-              <div>Target: 08127700724</div>
+              <div>Target: {BUSINESS_CONFIG.contact.enquiryPhoneDisplay}</div>
             </div>
             <div className="pt-2 flex gap-3">
               <button

@@ -136,7 +136,7 @@ export function AdminSocialManager() {
               required
               value={thumbnail}
               onChange={(e) => setThumbnail(e.target.value)}
-              placeholder="https://images.unsplash.com/..."
+              placeholder="https://...supabase.co/storage/v1/object/public/cp-ugc/..."
               className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300"
             />
           </div>

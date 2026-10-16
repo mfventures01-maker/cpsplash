@@ -11,7 +11,7 @@ export function AdminRetailerManager() {
   const [state, setState] = useState('Delta State');
   const [phone, setPhone] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
-  const [availability, setAvailability] = useState('In Stock - Zobo Sweet & Luxury Juice Mix');
+  const [availability, setAvailability] = useState('In Stock - Verified Fresh Batches');
 
   const fetchRetailers = async () => {
     const data = await retailerService.getAllRetailers();

@@ -9,6 +9,7 @@ import { blogService } from '../services/blogService';
 import { analyticsService } from '../services/analyticsService';
 import { getProductPrice, getProductVolume } from '../services/productHelpers';
 import { MessageCircle, ShieldCheck, ArrowLeft, Share2, MapPin, CheckCircle } from 'lucide-react';
+import { BUSINESS_CONFIG } from '../services/businessConfig';
 
 interface ProductDetailPageProps {
   slug: string;
@@ -118,6 +119,7 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
               media={product.media || []}
               productName={product.name}
               productId={product.id}
+              metadata={product.metadata}
             />
           </div>
 
@@ -131,7 +133,7 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
                 </span>
                 <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
                   <CheckCircle className="w-3.5 h-3.5" />
-                  In Stock
+                  Available to Order
                 </span>
               </div>
 
@@ -195,11 +197,11 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
                 className="w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-stone-950 font-black text-base flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-950/40 cursor-pointer"
               >
                 <MessageCircle className="w-5 h-5 fill-stone-950" />
-                <span>Order on WhatsApp (08127700724)</span>
+                <span>Order on WhatsApp ({BUSINESS_CONFIG.contact.enquiryPhoneDisplay})</span>
               </button>
 
               <p className="text-[11px] text-center text-stone-400">
-                Direct to Sapele Hub: Opposite Ajimele Junction, Ajogodo, Delta State.
+                Direct to Sapele Hub: {BUSINESS_CONFIG.flagshipLocation.address}, {BUSINESS_CONFIG.flagshipLocation.city}.
               </p>
             </div>
 

@@ -1,0 +1,191 @@
+{
+  "A4_funnel_placements": [
+    {
+      "active": true,
+      "bucket": "cp-public",
+      "filename": "test-animated.webp",
+      "mime_type": "image/webp",
+      "path": "media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792117400544_8n47c4_test-animated.webp",
+      "scope_id": "parties-events",
+      "scope_type": "funnel_card",
+      "sort_order": 2
+    },
+    {
+      "active": false,
+      "bucket": "cp-public",
+      "filename": "test-animated.webp",
+      "mime_type": "image/webp",
+      "path": "media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792117400544_8n47c4_test-animated.webp",
+      "scope_id": null,
+      "scope_type": "homepage_hero",
+      "sort_order": 1
+    }
+  ],
+  "A4_blog_posts": [],
+  "A5_storage_objects": [
+    {
+      "bucket_id": "cp-public",
+      "created_at": "2026-10-16 02:23:21.35035+00",
+      "name": "media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792117400544_8n47c4_test-animated.webp",
+      "size_bytes": 73
+    },
+    {
+      "bucket_id": "cp-public",
+      "created_at": "2026-10-16 02:23:13.280626+00",
+      "name": "media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792117392397_upy06o_test-video.mp4",
+      "size_bytes": 160
+    },
+    {
+      "bucket_id": "cp-public",
+      "created_at": "2026-10-16 02:23:05.127259+00",
+      "name": "media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792117384262_g1pqy9_test-animation.gif",
+      "size_bytes": 115
+    },
+    {
+      "bucket_id": "cp-public",
+      "created_at": "2026-10-16 02:22:57.066576+00",
+      "name": "media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792117376108_xw0cnh_test-hero.png",
+      "size_bytes": 308
+    },
+    {
+      "bucket_id": "cp-public",
+      "created_at": "2026-10-16 01:56:41.190308+00",
+      "name": "products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png",
+      "size_bytes": 308
+    },
+    {
+      "bucket_id": "cp-public",
+      "created_at": "2026-10-15 20:12:48.508162+00",
+      "name": "media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792095138375_fwwfcv_beetroot_mix_cpsplash.png",
+      "size_bytes": 2679847
+    }
+  ],
+  "A6_storage_policies": [
+    {
+      "cmd": "DELETE",
+      "policyname": "cp_public_cms_delete",
+      "qual": "((bucket_id = 'cp-public'::text) AND (EXISTS ( SELECT 1\n   FROM media_assets ma\n  WHERE ((ma.bucket = 'cp-public'::text) AND (ma.path = objects.name) AND has_tenant_role(ma.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+      "roles": "{authenticated}"
+    },
+    {
+      "cmd": "DELETE",
+      "policyname": "cp_public_media_delete",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'media'::text) AND ((storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'::text) AND has_tenant_role(((storage.foldername(name))[2])::uuid, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))",
+      "roles": "{authenticated}"
+    },
+    {
+      "cmd": "INSERT",
+      "policyname": "cp_public_media_insert",
+      "qual": null,
+      "roles": "{authenticated}"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "cp_public_media_select",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'media'::text) AND ((storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'::text) AND has_tenant_role(((storage.foldername(name))[2])::uuid, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))",
+      "roles": "{authenticated}"
+    },
+    {
+      "cmd": "UPDATE",
+      "policyname": "cp_public_media_update",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'media'::text) AND ((storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'::text) AND has_tenant_role(((storage.foldername(name))[2])::uuid, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))",
+      "roles": "{authenticated}"
+    },
+    {
+      "cmd": "DELETE",
+      "policyname": "cp_public_staff_delete",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS ( SELECT 1\n   FROM products p\n  WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+      "roles": "{authenticated}"
+    },
+    {
+      "cmd": "INSERT",
+      "policyname": "cp_public_staff_insert",
+      "qual": null,
+      "roles": "{authenticated}"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "cp_public_staff_select",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS ( SELECT 1\n   FROM products p\n  WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+      "roles": "{authenticated}"
+    },
+    {
+      "cmd": "UPDATE",
+      "policyname": "cp_public_staff_update",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS ( SELECT 1\n   FROM products p\n  WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+      "roles": "{authenticated}"
+    }
+  ],
+  "A7_table_policies": [
+    {
+      "cmd": "SELECT",
+      "policyname": "blog_public_select",
+      "qual": "((status = 'published'::text) AND ((published_at IS NULL) OR (published_at <= now())))",
+      "roles": "{public}",
+      "tablename": "blog_posts"
+    },
+    {
+      "cmd": "ALL",
+      "policyname": "blog_staff_manage",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "tablename": "blog_posts"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "media_public_select",
+      "qual": "((status = 'active'::text) AND (bucket = 'cp-public'::text))",
+      "roles": "{anon,authenticated}",
+      "tablename": "media_assets"
+    },
+    {
+      "cmd": "ALL",
+      "policyname": "media_staff_manage",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "tablename": "media_assets"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "Public read access for active media placements",
+      "qual": "((active = true) AND (EXISTS ( SELECT 1\n   FROM media_assets ma\n  WHERE ((ma.id = media_placements.media_id) AND (ma.status = 'active'::text) AND (ma.bucket = 'cp-public'::text)))))",
+      "roles": "{public}",
+      "tablename": "media_placements"
+    },
+    {
+      "cmd": "ALL",
+      "policyname": "Tenant admin manage media placements",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "tablename": "media_placements"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "product_media_public_select",
+      "qual": "(EXISTS ( SELECT 1\n   FROM products p\n  WHERE ((p.id = product_media.product_id) AND (p.status = 'published'::text))))",
+      "roles": "{public}",
+      "tablename": "product_media"
+    },
+    {
+      "cmd": "ALL",
+      "policyname": "product_media_staff_manage",
+      "qual": "(EXISTS ( SELECT 1\n   FROM products p\n  WHERE ((p.id = product_media.product_id) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))))",
+      "roles": "{authenticated}",
+      "tablename": "product_media"
+    },
+    {
+      "cmd": "SELECT",
+      "policyname": "products_public_select",
+      "qual": "(status = 'published'::text)",
+      "roles": "{public}",
+      "tablename": "products"
+    },
+    {
+      "cmd": "ALL",
+      "policyname": "products_staff_manage",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "tablename": "products"
+    }
+  ]
+}

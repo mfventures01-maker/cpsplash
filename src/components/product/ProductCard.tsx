@@ -92,9 +92,11 @@ export function ProductCard({ product, onNavigate, onOpenOrderModal }: ProductCa
             {product.name}
           </h3>
 
-          <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
-            {product.short_description || 'Cold-crafted natural Nigerian beverage. Pure fruit vitality.'}
-          </p>
+          {product.short_description && (
+            <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
+              {product.short_description}
+            </p>
+          )}
         </div>
 
         {/* Price Engine Display & CTA */}

@@ -1,14 +1,30 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { CP_SPLASH_TENANT_ID } from '../types/database.types';
 
-// Supabase environment configuration — strictly authoritative from environment
-const ENV_SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').trim();
-const ENV_SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+// Supabase environment configuration â€” strictly authoritative from environment
+const getEnvVar = (key: string): string => {
+  if (typeof import.meta !== 'undefined' && import.meta?.env?.[key]) {
+    return String(import.meta.env[key]);
+  }
+  if (typeof process !== 'undefined' && process?.env?.[key]) {
+    return String(process.env[key]);
+  }
+  return '';
+};
 
-export const TENANT_ID = (import.meta.env.VITE_CP_SPLASH_TENANT_ID || CP_SPLASH_TENANT_ID).trim();
+const ENV_SUPABASE_URL = getEnvVar('VITE_SUPABASE_URL').trim();
+const ENV_SUPABASE_ANON_KEY = getEnvVar('VITE_SUPABASE_ANON_KEY').trim();
+
+export const TENANT_ID = (getEnvVar('VITE_CP_SPLASH_TENANT_ID') || CP_SPLASH_TENANT_ID).trim();
 
 if (!ENV_SUPABASE_URL || !ENV_SUPABASE_ANON_KEY) {
   console.warn('[HOEOS CONFIG] Supabase environment variables missing or incomplete. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in environment.');
+}
+
+declare global {
+  interface Window {
+    supabase?: SupabaseClient;
+  }
 }
 
 export interface SupabaseConfigState {
@@ -122,4 +138,9 @@ export async function checkSupabaseConnection(): Promise<SupabaseConfigState> {
       error: err instanceof Error ? err.message : 'Unknown connection error',
     };
   }
+}
+
+// TEMPORARY for Task 8 verification - remove after certification
+if (typeof window !== 'undefined') {
+  window.supabase = supabase;
 }

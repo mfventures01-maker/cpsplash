@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrandLogo } from '../common/BrandAssets';
-import { MessageCircle, ShoppingBag, Menu, X, ShieldCheck, Database, Sliders, MapPin, Phone } from 'lucide-react';
+import { MessageCircle, ShoppingBag, Menu, X, ShieldCheck, Database, Sliders, MapPin, ChevronDown } from 'lucide-react';
 import { checkSupabaseConnection, SupabaseConfigState } from '../../lib/supabase';
+import { ProductMenu } from './ProductMenu';
+import { BUSINESS_CONFIG, buildWhatsAppUrl } from '../../services/businessConfig';
 
 interface HeaderProps {
   currentPath: string;
@@ -12,15 +14,31 @@ interface HeaderProps {
 
 export function Header({ currentPath, onNavigate, cartCount = 0, onOpenCart }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [productMenuOpen, setProductMenuOpen] = useState(false);
   const [dbStatus, setDbStatus] = useState<SupabaseConfigState | null>(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const menuContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     checkSupabaseConnection().then(setDbStatus);
   }, []);
 
+  // Close product menu dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuContainerRef.current && !menuContainerRef.current.contains(event.target as Node)) {
+        setProductMenuOpen(false);
+      }
+    }
+    if (productMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [productMenuOpen]);
+
   const navItems = [
-    { label: 'Shop', path: '/shop' },
     { label: 'Commercial Supply', path: '/sports' },
     { label: 'Goodness & Benefits', path: '/claims' },
     { label: 'Fresh Blog', path: '/blog' },
@@ -37,18 +55,20 @@ export function Header({ currentPath, onNavigate, cartCount = 0, onOpenCart }: H
             <span className="inline-flex items-center gap-1 bg-rose-800/80 text-rose-200 px-2 py-0.5 rounded text-[11px] font-semibold">
               <MapPin className="w-3 h-3 text-rose-400" /> Sapele Flagship
             </span>
-            <span className="hidden sm:inline text-rose-300">Opposite Ajimele Junction, Ajogodo, Sapele, Delta State</span>
+            <span className="hidden sm:inline text-rose-300">
+              {BUSINESS_CONFIG.flagshipLocation.address}, {BUSINESS_CONFIG.flagshipLocation.city}, {BUSINESS_CONFIG.flagshipLocation.state}
+            </span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
             <a 
-              href="https://wa.me/2348127700724" 
+              href={buildWhatsAppUrl('Hello CP Splash, I have an enquiry about your products!')}
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-emerald-300 hover:text-emerald-200 font-semibold transition-colors"
             >
               <MessageCircle className="w-3 h-3" />
-              <span>WhatsApp: 08127700724</span>
+              <span>WhatsApp: {BUSINESS_CONFIG.contact.enquiryPhoneDisplay}</span>
             </a>
             <span className="text-stone-600 hidden md:inline">|</span>
             <button
@@ -78,6 +98,36 @@ export function Header({ currentPath, onNavigate, cartCount = 0, onOpenCart }: H
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-7">
+            {/* Dynamic Products Dropdown */}
+            <div className="relative" ref={menuContainerRef}>
+              <button
+                type="button"
+                onClick={() => setProductMenuOpen(!productMenuOpen)}
+                className={`text-sm font-semibold transition-colors cursor-pointer py-1 flex items-center gap-1.5 ${
+                  currentPath.startsWith('/products') || currentPath.startsWith('/shop') || productMenuOpen
+                    ? 'text-rose-700'
+                    : 'text-stone-700 hover:text-rose-600'
+                }`}
+                aria-expanded={productMenuOpen}
+                aria-haspopup="true"
+              >
+                <span>Products & Blends</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${productMenuOpen ? 'rotate-180 text-rose-600' : 'text-stone-400'}`} />
+              </button>
+
+              {productMenuOpen && (
+                <div className="absolute top-full left-0 mt-3 z-50">
+                  <ProductMenu
+                    onNavigate={(path) => {
+                      onNavigate(path);
+                      setProductMenuOpen(false);
+                    }}
+                    onClose={() => setProductMenuOpen(false)}
+                  />
+                </div>
+              )}
+            </div>
+
             {navItems.map((item) => {
               const isActive = currentPath === item.path;
               return (
@@ -101,7 +151,7 @@ export function Header({ currentPath, onNavigate, cartCount = 0, onOpenCart }: H
           <div className="flex items-center gap-3">
             {/* Direct WhatsApp Quick Order */}
             <a
-              href="https://wa.me/2348127700724?text=Hello%20CP%20Splash,%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!"
+              href={buildWhatsAppUrl('Hello CP Splash, I would like to order CP Fruit Splash drinks!')}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md shadow-emerald-700/20 transition-all hover:shadow-lg active:scale-95"
@@ -138,8 +188,19 @@ export function Header({ currentPath, onNavigate, cartCount = 0, onOpenCart }: H
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-stone-200 px-4 pt-3 pb-6 space-y-3 animate-in slide-in-from-top duration-200">
+        <div className="lg:hidden bg-white border-b border-stone-200 px-4 pt-3 pb-6 space-y-4 animate-in slide-in-from-top duration-200">
           <div className="grid grid-cols-2 gap-2 pb-2 border-b border-stone-100">
+            <button
+              onClick={() => {
+                onNavigate('/products');
+                setMobileMenuOpen(false);
+              }}
+              className={`text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                currentPath === '/products' || currentPath === '/shop' ? 'bg-rose-50 text-rose-700 font-bold' : 'text-stone-700 hover:bg-stone-50'
+              }`}
+            >
+              All Products
+            </button>
             {navItems.map((item) => (
               <button
                 key={item.path}
@@ -156,15 +217,22 @@ export function Header({ currentPath, onNavigate, cartCount = 0, onOpenCart }: H
             ))}
           </div>
 
+          {/* Dynamic Database-Driven Mobile Product List */}
+          <ProductMenu
+            isMobile={true}
+            onNavigate={onNavigate}
+            onClose={() => setMobileMenuOpen(false)}
+          />
+
           <div className="pt-2 flex flex-col gap-2">
             <a
-              href="https://wa.me/2348127700724?text=Hello%20CP%20Splash,%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!"
+              href={buildWhatsAppUrl('Hello CP Splash, I would like to order CP Fruit Splash drinks!')}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-md"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Order on WhatsApp (08127700724)</span>
+              <span>Order on WhatsApp ({BUSINESS_CONFIG.contact.enquiryPhoneDisplay})</span>
             </a>
 
             <button

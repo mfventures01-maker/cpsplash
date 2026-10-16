@@ -3,6 +3,7 @@ import { retailerService } from '../services/retailerService';
 import { Retailer } from '../types/database.types';
 import { MapPin, Phone, MessageCircle, ShieldCheck, Search, Navigation } from 'lucide-react';
 import { analyticsService } from '../../src/services/analyticsService';
+import { BUSINESS_CONFIG, buildWhatsAppUrl } from '../services/businessConfig';
 
 export function FindRetailersPage() {
   const [retailers, setRetailers] = useState<Retailer[]>([]);
@@ -55,22 +56,22 @@ export function FindRetailersPage() {
             </h2>
             <p className="text-sm text-rose-100 flex items-center gap-2">
               <MapPin className="w-4 h-4 text-rose-400 shrink-0" />
-              <span>Opposite Ajimele Junction, Ajogodo, Sapele, Delta State</span>
+              <span>{BUSINESS_CONFIG.flagshipLocation.address}, {BUSINESS_CONFIG.flagshipLocation.city}, {BUSINESS_CONFIG.flagshipLocation.state}</span>
             </p>
             <p className="text-xs text-stone-300">
-              Full inventory in stock daily: CP Zobo Sweet (500mL), Luxury Juice Mix (500mL), and Hibiscus Ginger Glow. Walk-in and bulk wholesale welcome.
+              Fresh cold-crafted inventory available daily across all active authorized blends. Walk-in and bulk wholesale welcome.
             </p>
           </div>
 
           <div className="md:col-span-4 flex flex-col gap-2">
             <a
-              href="https://wa.me/2348127700724?text=Hello%20CP%20Splash%20Sapele%20Hub,%20I%20am%20coming%20for%20pickup!"
+              href={buildWhatsAppUrl('Hello CP Splash Sapele Hub, I am coming for pickup!')}
               target="_blank"
               rel="noopener noreferrer"
               className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold text-center flex items-center justify-center gap-2 transition-colors"
             >
               <MessageCircle className="w-4 h-4" />
-              <span>Message Sapele Hub (08127700724)</span>
+              <span>Message Sapele Hub ({BUSINESS_CONFIG.contact.enquiryPhoneDisplay})</span>
             </a>
           </div>
         </div>

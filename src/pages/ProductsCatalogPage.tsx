@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { ProductCard } from '../components/product/ProductCard';
-import { Product } from '../types/database.types';
-import { Filter, Sparkles, RefreshCw } from 'lucide-react';
+import { Product, ProductCategory } from '../types/database.types';
+import { productsService } from '../services/productsService';
+import { Sparkles, RefreshCw } from 'lucide-react';
 
 interface ProductsCatalogPageProps {
   onNavigate: (path: string) => void;
@@ -11,12 +12,16 @@ interface ProductsCatalogPageProps {
 
 export function ProductsCatalogPage({ onNavigate, onOpenOrderModal }: ProductsCatalogPageProps) {
   const { products, loading, error, refetch } = useProducts();
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'hibiscus' | 'luxury'>('all');
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  useEffect(() => {
+    productsService.getCategories().then(setCategories);
+  }, []);
 
   const filteredProducts = products.filter(p => {
-    if (selectedFilter === 'hibiscus') return p.slug.includes('zobo') || p.slug.includes('hibiscus');
-    if (selectedFilter === 'luxury') return p.slug.includes('luxury') || p.slug.includes('juice');
-    return true;
+    if (selectedCategory === 'all') return true;
+    return p.category_id === selectedCategory || p.category?.id === selectedCategory || p.category?.slug === selectedCategory;
   });
 
   return (
@@ -37,37 +42,30 @@ export function ProductsCatalogPage({ onNavigate, onOpenOrderModal }: ProductsCa
 
       {/* Filter Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-stone-200">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => setSelectedFilter('all')}
+            onClick={() => setSelectedCategory('all')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              selectedFilter === 'all'
+              selectedCategory === 'all'
                 ? 'bg-rose-700 text-white shadow-sm'
                 : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
             }`}
           >
             All Products ({products.length})
           </button>
-          <button
-            onClick={() => setSelectedFilter('hibiscus')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              selectedFilter === 'hibiscus'
-                ? 'bg-rose-700 text-white shadow-sm'
-                : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
-            }`}
-          >
-            Zobo & Hibiscus
-          </button>
-          <button
-            onClick={() => setSelectedFilter('luxury')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              selectedFilter === 'luxury'
-                ? 'bg-rose-700 text-white shadow-sm'
-                : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
-            }`}
-          >
-            Luxury Whole Fruit Mix
-          </button>
+          {categories.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                selectedCategory === cat.id
+                  ? 'bg-rose-700 text-white shadow-sm'
+                  : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
         </div>
 
         <button

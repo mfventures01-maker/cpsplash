@@ -5,6 +5,7 @@ import { Campaign, Product } from '../types/database.types';
 import { analyticsService } from '../services/analyticsService';
 import { getProductPrice, getProductVolume, getProductHeroMediaUrl } from '../services/productHelpers';
 import { Sparkles, MessageCircle, ArrowRight, Tag, ShieldCheck, Play } from 'lucide-react';
+import { buildWhatsAppUrl } from '../services/businessConfig';
 
 interface CampaignLandingPageProps {
   slug: string;
@@ -84,7 +85,7 @@ export function CampaignLandingPage({ slug, onNavigate, onOpenOrderModal }: Camp
       </div>
 
       {/* Main Campaign Product Connection */}
-      {product && (
+      {product ? (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="p-8 sm:p-12 rounded-3xl bg-white border border-stone-200 shadow-xl grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
             <div className="md:col-span-5 aspect-square rounded-2xl overflow-hidden bg-stone-100">
@@ -139,6 +140,32 @@ export function CampaignLandingPage({ slug, onNavigate, onOpenOrderModal }: Camp
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <div className="p-10 rounded-3xl bg-white border border-stone-200 shadow-sm space-y-4">
+            <h3 className="text-xl font-bold text-stone-900">Special Promotion Active</h3>
+            <p className="text-stone-600 text-sm max-w-lg mx-auto">
+              This campaign is connected to our cold-crafted botanical production hub. Inquire directly on WhatsApp to claim campaign offers or explore our full product range.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <a
+                href={buildWhatsAppUrl(`Hello, I would like to inquire about the campaign: ${campaign.name}`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-3 px-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-md"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Claim on WhatsApp</span>
+              </a>
+              <button
+                onClick={() => onNavigate('/products')}
+                className="py-3 px-6 rounded-full border border-stone-300 hover:bg-stone-50 text-stone-700 font-bold text-xs cursor-pointer"
+              >
+                Browse All Products
+              </button>
             </div>
           </div>
         </div>

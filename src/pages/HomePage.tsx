@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { HeroSlider } from '../components/hero/HeroSlider';
 import { ProductCard } from '../components/product/ProductCard';
+import { ProductCarousel } from '../components/product/ProductCarousel';
 import { SocialProofFeed } from '../components/product/SocialProofFeed';
 import { Product, SocialContent, BlogPost, SalesTerritory } from '../types/database.types';
 import { useProducts } from '../hooks/useProducts';
@@ -9,6 +10,7 @@ import { blogService } from '../services/blogService';
 import { salesService } from '../services/salesService';
 import { analyticsService } from '../services/analyticsService';
 import { CommercialSalesEngine } from '../components/sales/CommercialSalesEngine';
+import { BUSINESS_CONFIG, buildWhatsAppUrl } from '../services/businessConfig';
 import {
   ShieldCheck,
   Heart,
@@ -177,134 +179,141 @@ export function HomePage({ onNavigate, onOpenOrderModal }: HomePageProps) {
         </div>
       </section>
 
-      {/* 3. Authoritative Product Engine Catalog */}
+      {/* 3. Authoritative Product Engine Catalog & Interactive Carousel */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-rose-600 font-bold text-xs uppercase tracking-wider">
-              <span>Authoritative Supabase Product Engine</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight mt-1">
-              Explore Our Signature Blends
-            </h2>
-            <p className="text-stone-600 text-sm max-w-xl mt-2">
-              Every bottle is cold-crafted, sealed fresh, and priced deterministically through our live Supabase database.
-            </p>
-          </div>
-
-          <button
-            onClick={() => onNavigate('/products')}
-            className="inline-flex items-center gap-2 text-rose-700 hover:text-rose-900 font-bold text-sm group"
-          >
-            <span>Browse Full Range</span>
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </button>
-        </div>
-
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-96 rounded-3xl bg-stone-100 animate-pulse border border-stone-200" />
-            ))}
+          <div className="space-y-4">
+            <div className="h-8 bg-stone-100 rounded-lg w-1/4 animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-96 rounded-3xl bg-stone-100 animate-pulse border border-stone-200" />
+              ))}
+            </div>
           </div>
         ) : error ? (
           <div className="p-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
             {error}
           </div>
+        ) : products.length === 0 ? (
+          <div className="p-10 rounded-3xl bg-white border border-stone-200 text-center space-y-3 shadow-xs">
+            <div className="flex items-center justify-center gap-2 text-rose-600 font-bold text-xs uppercase tracking-wider">
+              <span>Authoritative Supabase Product Engine</span>
+            </div>
+            <h3 className="text-xl font-black text-stone-900">
+              Live Catalog Synchronized (Zero Hardcoded Products)
+            </h3>
+            <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
+              Our storefront strictly conforms to HOEOS Single Source of Truth architecture. Currently, no published products exist in the database. Published items will appear here immediately across all carousels, cards, and menus.
+            </p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map(product => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onNavigate={onNavigate}
-                onOpenOrderModal={onOpenOrderModal}
-              />
-            ))}
+          <div className="space-y-12">
+            <ProductCarousel
+              products={products}
+              onNavigate={onNavigate}
+              onOpenOrderModal={onOpenOrderModal}
+            />
+
+            {/* Catalog Grid View */}
+            <div className="space-y-6 pt-6 border-t border-stone-200/80">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight">
+                    Full Catalog Grid
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Explore all cold-crafted varieties in the active database.
+                  </p>
+                </div>
+                <button
+                  onClick={() => onNavigate('/products')}
+                  className="inline-flex items-center gap-2 text-rose-700 hover:text-rose-900 font-bold text-xs group cursor-pointer"
+                >
+                  <span>Open Full Products View ({products.length})</span>
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {products.map(product => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onNavigate={onNavigate}
+                    onOpenOrderModal={onOpenOrderModal}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </section>
 
-      {/* 4. The Two Flagship Stories Showcase */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Card 1: Zobo Sweet */}
-          <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-rose-900 to-red-950 text-white relative overflow-hidden flex flex-col justify-between min-h-[420px]">
-            <div className="relative z-10 space-y-4">
-              <span className="px-3 py-1 rounded-full bg-rose-800/80 text-rose-200 text-xs font-bold uppercase tracking-wider inline-block">
-                Flagship Hibiscus Drink
-              </span>
-              <h3 className="text-3xl sm:text-4xl font-black leading-tight">
-                CP Fruit Splash <br /><span className="text-rose-300 font-serif italic">Zobo Sweet</span>
-              </h3>
-              <p className="text-rose-100/90 text-sm leading-relaxed max-w-md">
-                "Taste Nature. Feel Refreshed." A refreshing blend of natural zobo (hibiscus) packed with antioxidants, essential nutrients and a touch of natural sweetness for your well-being.
-              </p>
-              <ul className="space-y-1.5 text-xs text-rose-200">
-                <li className="flex items-center gap-2">✓ 100% Fresh & Natural</li>
-                <li className="flex items-center gap-2">✓ No Artificial Colours or Preservatives</li>
-                <li className="flex items-center gap-2">✓ Zobo Goodness for a Healthier You</li>
-              </ul>
-            </div>
+      {/* 4. Signature Blends Dynamic Showcase */}
+      {products.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {products.slice(0, 2).map((product, idx) => {
+              const claims = (product.claims || [])
+                .filter(c => c.verification_status === 'verified')
+                .slice(0, 3);
+              const bgGradient = idx % 2 === 0
+                ? 'from-rose-900 to-red-950'
+                : 'from-amber-950 via-rose-950 to-stone-950';
+              const badgeBg = idx % 2 === 0
+                ? 'bg-rose-800/80 text-rose-200'
+                : 'bg-amber-800/80 text-amber-200';
 
-            <div className="pt-6 relative z-10 flex items-center gap-3">
-              <button
-                onClick={() => onNavigate('/products/zobo-sweet')}
-                className="px-5 py-2.5 rounded-full bg-white text-rose-950 hover:bg-rose-50 font-bold text-xs transition-colors cursor-pointer"
-              >
-                Discover Zobo Sweet
-              </button>
-              <a
-                href="https://wa.me/2348127700724?text=Hello%20CP%20Splash,%20I%20would%20like%20to%20order%20Zobo%20Sweet!"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>Order on WhatsApp</span>
-              </a>
-            </div>
+              return (
+                <div
+                  key={product.id}
+                  className={`p-8 sm:p-10 rounded-3xl bg-gradient-to-br ${bgGradient} text-white relative overflow-hidden flex flex-col justify-between min-h-[420px]`}
+                >
+                  <div className="relative z-10 space-y-4">
+                    <span className={`px-3 py-1 rounded-full ${badgeBg} text-xs font-bold uppercase tracking-wider inline-block`}>
+                      {product.category?.name || 'Cold-Crafted Signature'}
+                    </span>
+                    <h3 className="text-3xl sm:text-4xl font-black leading-tight">
+                      {product.brand || 'CP Fruit Splash'} <br />
+                      <span className={idx % 2 === 0 ? "text-rose-300 font-serif italic" : "text-amber-300 font-serif italic"}>
+                        {product.name.replace(/^(CP Fruit Splash|CP Splash)\s*/i, '')}
+                      </span>
+                    </h3>
+                    {product.short_description && (
+                      <p className="text-rose-100/90 text-sm leading-relaxed max-w-md">
+                        {product.short_description}
+                      </p>
+                    )}
+                    {claims.length > 0 && (
+                      <ul className="space-y-1.5 text-xs text-rose-200">
+                        {claims.map(c => (
+                          <li key={c.id} className="flex items-center gap-2">✓ {c.claim}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="pt-6 relative z-10 flex items-center gap-3">
+                    <button
+                      onClick={() => onNavigate(`/products/${product.slug}`)}
+                      className="px-5 py-2.5 rounded-full bg-white text-stone-950 hover:bg-rose-50 font-bold text-xs transition-colors cursor-pointer"
+                    >
+                      Discover {product.name}
+                    </button>
+                    <button
+                      onClick={() => onOpenOrderModal(product)}
+                      className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span>Order on WhatsApp</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
-          {/* Card 2: Luxury Juice Mix */}
-          <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-amber-950 via-rose-950 to-stone-950 text-white relative overflow-hidden flex flex-col justify-between min-h-[420px]">
-            <div className="relative z-10 space-y-4">
-              <span className="px-3 py-1 rounded-full bg-amber-800/80 text-amber-200 text-xs font-bold uppercase tracking-wider inline-block">
-                Royal Fruit Harmony
-              </span>
-              <h3 className="text-3xl sm:text-4xl font-black leading-tight">
-                CP Fruit Splash <br /><span className="text-amber-300 font-serif italic">Luxury Juice Mix</span>
-              </h3>
-              <p className="text-amber-100/90 text-sm leading-relaxed max-w-md">
-                "Goodness in Every Sip!" The ultimate cold fruit symphony: Pomegranate • Apple • Strawberry • Blueberry + Extra Vitamin C.
-              </p>
-              <ul className="space-y-1.5 text-xs text-amber-200">
-                <li className="flex items-center gap-2">✓ Cold-blended whole superfruits</li>
-                <li className="flex items-center gap-2">✓ Rich in protective polyphenols</li>
-                <li className="flex items-center gap-2">✓ Blend your way to a healthier you</li>
-              </ul>
-            </div>
-
-            <div className="pt-6 relative z-10 flex items-center gap-3">
-              <button
-                onClick={() => onNavigate('/products/luxury-juice-mix')}
-                className="px-5 py-2.5 rounded-full bg-white text-stone-950 hover:bg-stone-50 font-bold text-xs transition-colors cursor-pointer"
-              >
-                Discover Luxury Juice Mix
-              </button>
-              <a
-                href="https://wa.me/2348127700724?text=Hello%20CP%20Splash,%20I%20would%20like%20to%20order%20Luxury%20Juice%20Mix!"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>Order on WhatsApp</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 5. Community & Social Proof Feed */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -335,11 +344,11 @@ export function HomePage({ onNavigate, onOpenOrderModal }: HomePageProps) {
               <div className="flex flex-wrap items-center gap-6 pt-2 text-xs font-mono text-stone-300">
                 <div>
                   <strong className="text-white block">Location:</strong>
-                  Opposite Ajimele Junction, Ajogodo, Sapele
+                  {BUSINESS_CONFIG.flagshipLocation.address}, {BUSINESS_CONFIG.flagshipLocation.city}
                 </div>
                 <div>
                   <strong className="text-white block">Enquiry Hotline:</strong>
-                  08127700724
+                  {BUSINESS_CONFIG.contact.enquiryPhoneDisplay}
                 </div>
                 <div>
                   <strong className="text-white block">Availability:</strong>
@@ -356,13 +365,13 @@ export function HomePage({ onNavigate, onOpenOrderModal }: HomePageProps) {
                 View Retailer Directory
               </button>
               <a
-                href="https://wa.me/2348127700724"
+                href={buildWhatsAppUrl('Hello Sapele Hub, I would like to enquire about your products!')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs text-center flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span>Message Sapele Hub</span>
+                <span>Message Sapele Hub ({BUSINESS_CONFIG.contact.enquiryPhoneDisplay})</span>
               </a>
             </div>
           </div>

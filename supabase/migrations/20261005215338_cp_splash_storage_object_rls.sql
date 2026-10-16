@@ -5,7 +5,7 @@
 -- DO NOT APPLY as a new migration.
 -- Source: ledger JSON export supplied to this recovery script.
 
-create policy \"cp_public_staff_insert\"
+create policy "cp_public_staff_insert"
 on storage.objects
 for insert
 to authenticated
@@ -24,7 +24,7 @@ with check (
   )
 );
 
-create policy \"cp_public_staff_select\"
+create policy "cp_public_staff_select"
 on storage.objects
 for select
 to authenticated
@@ -43,7 +43,7 @@ using (
   )
 );
 
-create policy \"cp_public_staff_update\"
+create policy "cp_public_staff_update"
 on storage.objects
 for update
 to authenticated
@@ -76,7 +76,7 @@ with check (
   )
 );
 
-create policy \"cp_public_staff_delete\"
+create policy "cp_public_staff_delete"
 on storage.objects
 for delete
 to authenticated

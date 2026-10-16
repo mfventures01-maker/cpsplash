@@ -1,12 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrandLogo } from '../common/BrandAssets';
 import { MapPin, Phone, MessageCircle, ShieldCheck, Heart, ArrowRight } from 'lucide-react';
+import { productsService } from '../../services/productsService';
+import { Product } from '../../types/database.types';
+import { BUSINESS_CONFIG, buildWhatsAppUrl } from '../../services/businessConfig';
 
 interface FooterProps {
   onNavigate: (path: string) => void;
 }
 
 export function Footer({ onNavigate }: FooterProps) {
+  const [footerProducts, setFooterProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    productsService.getPublishedProducts().then(({ data }) => {
+      if (data) setFooterProducts(data.slice(0, 4));
+    });
+  }, []);
+
   return (
     <footer className="bg-stone-950 text-stone-300 pt-16 pb-12 border-t border-stone-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,27 +38,31 @@ export function Footer({ onNavigate }: FooterProps) {
             </div>
           </div>
 
-          {/* Quick Discovery */}
+          {/* Dynamic Discovery */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-stone-100">Products & Blends</h4>
             <ul className="space-y-2 text-sm text-stone-400">
+              {footerProducts.length > 0 ? (
+                footerProducts.map(p => (
+                  <li key={p.id}>
+                    <button
+                      onClick={() => onNavigate(`/products/${p.slug}`)}
+                      className="hover:text-rose-400 transition-colors text-left"
+                    >
+                      {p.name}
+                    </button>
+                  </li>
+                ))
+              ) : (
+                <li className="text-xs text-stone-500 italic">
+                  Live catalog synchronized via Supabase.
+                </li>
+              )}
               <li>
-                <button onClick={() => onNavigate('/products/zobo-sweet')} className="hover:text-rose-400 transition-colors">
-                  CP Zobo Sweet (500ml)
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('/products/luxury-juice-mix')} className="hover:text-rose-400 transition-colors">
-                  Luxury Juice Mix (500ml)
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('/products/hibiscus-ginger-glow')} className="hover:text-rose-400 transition-colors">
-                  Hibiscus & Ginger Glow
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('/products')} className="hover:text-rose-400 transition-colors font-medium text-rose-500 flex items-center gap-1">
+                <button
+                  onClick={() => onNavigate('/products')}
+                  className="hover:text-rose-400 transition-colors font-medium text-rose-500 flex items-center gap-1 cursor-pointer"
+                >
                   View Full Catalog <ArrowRight className="w-3 h-3" />
                 </button>
               </li>
@@ -93,25 +108,25 @@ export function Footer({ onNavigate }: FooterProps) {
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-stone-200 block">Cp Fruit Splash Flagship:</strong>
-                  Opposite Ajimele Junction, Ajogodo, Sapele, Delta State.
+                  <strong className="text-stone-200 block">{BUSINESS_CONFIG.brandName} Flagship:</strong>
+                  {BUSINESS_CONFIG.flagshipLocation.address}, {BUSINESS_CONFIG.flagshipLocation.city}, {BUSINESS_CONFIG.flagshipLocation.state}.
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span>
-                  Enquiry: <strong className="text-stone-200">08127700724</strong>
+                  Enquiry: <strong className="text-stone-200">{BUSINESS_CONFIG.contact.enquiryPhoneDisplay}</strong>
                 </span>
               </div>
               <div className="pt-2">
                 <a
-                  href="https://wa.me/2348127700724"
+                  href={buildWhatsAppUrl('Hello CP Splash, I have an enquiry about your products!')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-700/40 hover:bg-emerald-700/60 border border-emerald-500/30 text-emerald-300 font-semibold transition-colors"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
-                  <span>WhatsApp 08127700724</span>
+                  <span>WhatsApp {BUSINESS_CONFIG.contact.enquiryPhoneDisplay}</span>
                 </a>
               </div>
             </div>

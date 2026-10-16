@@ -1,5 +1,7 @@
 import React from 'react';
 import { MapPin, Phone, MessageCircle, Heart, ShieldCheck, Droplets, Sparkles } from 'lucide-react';
+import { BRAND_PLACEHOLDER_IMAGE } from '../services/productHelpers';
+import { BUSINESS_CONFIG, buildWhatsAppUrl } from '../services/businessConfig';
 
 export function StoryPage() {
   return (
@@ -7,21 +9,21 @@ export function StoryPage() {
       {/* Header */}
       <div className="text-center space-y-4 max-w-3xl mx-auto">
         <span className="text-xs font-bold uppercase tracking-wider text-rose-600 block">
-          Born in Sapele, Delta State
+          Born in {BUSINESS_CONFIG.flagshipLocation.city}, {BUSINESS_CONFIG.flagshipLocation.state}
         </span>
         <h1 className="text-4xl sm:text-6xl font-black text-stone-900 tracking-tight">
-          The Story of CP Fruit Splash
+          The Story of {BUSINESS_CONFIG.brandName}
         </h1>
         <p className="text-stone-600 text-base leading-relaxed font-serif italic">
-          "Goodness in Every Sip. Real nature, authentic botanical craftsmanship, zero artificial compromises."
+          "{BUSINESS_CONFIG.tagline}"
         </p>
       </div>
 
       {/* Hero Visual Block */}
       <div className="rounded-3xl overflow-hidden aspect-16/9 bg-stone-900 shadow-xl relative">
         <img
-          src="https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1200&q=80"
-          alt="CP Splash Harvest"
+          src={BRAND_PLACEHOLDER_IMAGE}
+          alt="CP Splash Botanical Craftsmanship"
           className="w-full h-full object-cover opacity-85"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent flex items-end p-8 sm:p-12">
@@ -30,7 +32,7 @@ export function StoryPage() {
               Flagship Facility
             </span>
             <h3 className="text-2xl sm:text-3xl font-bold">
-              Opposite Ajimele Junction, Ajogodo, Sapele
+              {BUSINESS_CONFIG.flagshipLocation.address}, {BUSINESS_CONFIG.flagshipLocation.city}
             </h3>
           </div>
         </div>
@@ -63,7 +65,7 @@ export function StoryPage() {
             </div>
             <h4 className="font-bold text-stone-900 text-sm">Superfruit Luxury</h4>
             <p className="text-xs text-stone-600 leading-relaxed">
-              Our Luxury Juice Mix unites pressed pomegranate, orchard apple, strawberries, and wild blueberries + Extra Vitamin C.
+              Our artisanal blends unite cold-pressed pomegranate, orchard apples, and wild berries with extra Vitamin C.
             </p>
           </div>
 
@@ -79,7 +81,7 @@ export function StoryPage() {
         </div>
 
         <p>
-          Today, CP Fruit Splash is expanding rapidly across Delta State, Benin City, Port Harcourt, and nationwide. Every bottle carries the phone number of our bottling plant: <strong>08127700724</strong>, welcoming feedback, community connections, and direct customer delivery.
+          Today, CP Fruit Splash is expanding rapidly across Delta State, Benin City, Port Harcourt, and nationwide. Every bottle carries the phone number of our bottling plant: <strong>{BUSINESS_CONFIG.contact.enquiryPhoneDisplay}</strong>, welcoming feedback, community connections, and direct customer delivery.
         </p>
       </div>
 
@@ -88,12 +90,12 @@ export function StoryPage() {
         <div className="space-y-2">
           <h3 className="text-2xl font-black">Experience the Goodness in Sapele</h3>
           <p className="text-xs text-rose-200">
-            Opposite Ajimele Junction, Ajogodo, Sapele, Delta State • Enquiry: 08127700724
+            {BUSINESS_CONFIG.flagshipLocation.address}, {BUSINESS_CONFIG.flagshipLocation.city}, {BUSINESS_CONFIG.flagshipLocation.state} • Enquiry: {BUSINESS_CONFIG.contact.enquiryPhoneDisplay}
           </p>
         </div>
 
         <a
-          href="https://wa.me/2348127700724"
+          href={buildWhatsAppUrl('Hello CP Splash Flagship, I would like to enquire about your products!')}
           target="_blank"
           rel="noopener noreferrer"
           className="px-6 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shrink-0 transition-colors shadow-lg"

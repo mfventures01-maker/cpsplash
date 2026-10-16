@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Product } from '../../types/database.types';
+import { Product, MediaPlacement } from '../../types/database.types';
 import { MessageCircle, ArrowRight, ShieldCheck, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService';
-import { getProductPrice, getProductVolume, getProductHeroMediaUrl } from '../../services/productHelpers';
+import {
+  getProductPrice,
+  getProductVolume,
+  getProductHeroMediaUrl,
+  BRAND_PLACEHOLDER_IMAGE
+} from '../../services/productHelpers';
+import { mediaService } from '../../services/mediaService';
+import { placementService } from '../../services/placementService';
+import { BUSINESS_CONFIG, buildWhatsAppUrl } from '../../services/businessConfig';
+import { Pause, Play } from 'lucide-react';
 
 interface HeroSliderProps {
   products: Product[];
@@ -12,56 +21,144 @@ interface HeroSliderProps {
 
 export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const zoboProduct = products.find(p => p.slug === 'zobo-sweet') || products[0];
-  const luxuryProduct = products.find(p => p.slug === 'luxury-juice-mix') || products[1] || products[0];
-
-  const slides = [
-    {
-      id: 'slide-1',
-      title: 'CP Fruit Splash Zobo Sweet',
-      headline: 'Taste Nature. Feel Refreshed.',
-      subheadline: 'Fresh. Natural. Refreshing.',
-      description: 'Artisanal Nigerian hibiscus beverage steeped from premium sun-ripened calyces. Packed with natural antioxidants, vital polyphenols, and gentle sweetness. Zero artificial colours or preservatives.',
-      cta: 'Discover Zobo Sweet',
-      secondaryCta: 'Order on WhatsApp',
-      product: zoboProduct,
-      bgGradient: 'from-rose-950 via-red-950 to-stone-950',
-      badge: 'Hibiscus Drink • 100% Fresh & Natural',
-      badgeColor: 'bg-rose-900/60 border-rose-500/40 text-rose-200',
-      highlights: ['Rich in Antioxidants', 'Extra Vitamin C', 'No Artificial Preservatives'],
-      imageSrc: getProductHeroMediaUrl(zoboProduct),
-      lifestyleSrc: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=800&q=80',
-    },
-    {
-      id: 'slide-2',
-      title: 'CP Fruit Splash Luxury Juice Mix',
-      headline: 'Goodness in Every Sip.',
-      subheadline: 'Pomegranate • Apple • Strawberry • Blueberry',
-      description: 'The ultimate royal antioxidant elixir. Four whole superfruits cold-blended into crisp refreshing perfection, naturally fortified with Extra Vitamin C to elevate your vitality.',
-      cta: 'Discover Luxury Juice Mix',
-      secondaryCta: 'Order on WhatsApp',
-      product: luxuryProduct,
-      bgGradient: 'from-purple-950 via-rose-950 to-stone-950',
-      badge: 'Luxury Cold Blend • 500mL',
-      badgeColor: 'bg-amber-900/60 border-amber-500/40 text-amber-200',
-      highlights: ['Pomegranate Arils', 'Whole Orchard Apples', 'Mountain Strawberries', 'Wild Blueberries'],
-      imageSrc: getProductHeroMediaUrl(luxuryProduct),
-      lifestyleSrc: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80',
-    }
-  ];
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [heroPlacements, setHeroPlacements] = useState<MediaPlacement[]>([]);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev === 0 ? 1 : 0));
-    }, 7500);
-    return () => clearInterval(timer);
+    let mounted = true;
+    async function loadPlacements() {
+      const data = await placementService.getPlacements('homepage_hero');
+      if (mounted) setHeroPlacements(data);
+    }
+    loadPlacements();
+    return () => { mounted = false; };
   }, []);
 
-  const slide = slides[currentSlide];
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    if (mediaQuery.matches) setIsPlaying(false);
+
+    const listener = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+      if (e.matches) setIsPlaying(false);
+    };
+    mediaQuery.addEventListener('change', listener);
+    return () => mediaQuery.removeEventListener('change', listener);
+  }, []);
+
+  // Derive dynamic slides strictly from published database records and persistent media placements
+  const featured = products.filter(p => p.featured);
+  const candidates = featured.length > 0 ? featured : products.slice(0, 3);
+
+  const dynamicSlides = candidates.map((p, idx) => {
+    // Check if a persistent hero placement exists for this slot
+    const placement = heroPlacements[idx];
+    const placementAsset = placement?.media_assets || placement?.asset;
+    const placementUrl = placementAsset ? mediaService.getMediaAssetUrl(placementAsset) : null;
+    const isAnimation = placementAsset?.mime_type === 'image/gif';
+
+    // Check if product has an approved lifestyle asset (role='lifestyle' or sort_order=4)
+    const rawSeq = p.metadata?.media_sequence as Array<{ role: string; media_id: string }> | undefined;
+    const lifestyleSeq = rawSeq?.find(s => s.role === 'lifestyle');
+    let lifestyleUrl: string | null = null;
+    if (lifestyleSeq) {
+      const matched = p.media?.find(m => m.media_id === lifestyleSeq.media_id);
+      if (matched) {
+        lifestyleUrl = mediaService.getMediaAssetUrl(matched.media_assets || matched.asset);
+      }
+    }
+    if (!lifestyleUrl && p.media && p.media.length > 3) {
+      lifestyleUrl = mediaService.getMediaAssetUrl(p.media[3].media_assets || p.media[3].asset);
+    }
+
+    return {
+      id: `slide-${p.id}`,
+      title: p.brand || 'CP Fruit Splash',
+      headline: p.name,
+      subheadline: p.short_description || p.seo_title || 'Cold-Crafted Natural Beverage',
+      description: p.description || p.short_description || 'Cold-crafted in Sapele, Delta State with pure natural ingredients and verified health claims.',
+      cta: `Discover ${p.name}`,
+      secondaryCta: 'Order on WhatsApp',
+      product: p,
+      bgGradient: idx % 2 === 0 ? 'from-rose-950 via-red-950 to-stone-950' : 'from-stone-950 via-purple-950 to-rose-950',
+      badge: isAnimation
+        ? `${p.category?.name || 'Signature Blend'} • Animated`
+        : `${p.category?.name || 'Signature Blend'} • Cold Bottle`,
+      badgeColor: idx % 2 === 0 ? 'bg-rose-900/60 border-rose-500/40 text-rose-200' : 'bg-amber-900/60 border-amber-500/40 text-amber-200',
+      highlights: (p.claims || [])
+        .filter(c => c.verification_status === 'verified')
+        .slice(0, 3)
+        .map(c => c.claim),
+      imageSrc: placementUrl || getProductHeroMediaUrl(p),
+      altText: placement?.alt_text_override || placementAsset?.alt_text || p.name,
+      lifestyleSrc: lifestyleUrl,
+    };
+  });
+
+  // Standalone persistent hero placements if any exist beyond product candidates
+  const standalonePlacementSlides = heroPlacements
+    .filter((_, idx) => idx >= candidates.length)
+    .map((placement, pIdx) => {
+      const asset = placement.media_assets || placement.asset;
+      const imgUrl = mediaService.getMediaAssetUrl(asset);
+      const isGif = asset?.mime_type === 'image/gif';
+      return {
+        id: `placement-slide-${placement.id}`,
+        title: 'CP Fruit Splash',
+        headline: placement.alt_text_override || asset?.caption || 'Artisanal Cold-Crafted Refreshment',
+        subheadline: 'Cold-Crafted Botanicals & Superfruits',
+        description: 'Fresh Nigerian fruit drinks handcrafted daily in Sapele, Delta State with zero synthetic preservatives.',
+        cta: 'Explore Full Range',
+        secondaryCta: 'Order on WhatsApp',
+        product: null as Product | null,
+        bgGradient: pIdx % 2 === 0 ? 'from-rose-950 via-red-950 to-stone-950' : 'from-stone-950 via-purple-950 to-rose-950',
+        badge: isGif ? '100% Fresh • Animated Showcase' : '100% Fresh & Natural • Sapele Flagship',
+        badgeColor: 'bg-rose-900/60 border-rose-500/40 text-rose-200',
+        highlights: ['Zero Artificial Preservatives', 'Cold-Chain Sealed', 'Sapele Flagship Hub'],
+        imageSrc: imgUrl || BRAND_PLACEHOLDER_IMAGE,
+        altText: placement.alt_text_override || asset?.alt_text || 'CP Splash Spotlight',
+        lifestyleSrc: null,
+      };
+    });
+
+  // Fallback presentation when catalog has no live published products yet
+  const defaultPlacementAsset = heroPlacements[0]?.media_assets || heroPlacements[0]?.asset;
+  const defaultPlacementUrl = defaultPlacementAsset ? mediaService.getMediaAssetUrl(defaultPlacementAsset) : null;
+  const defaultSlide = {
+    id: 'slide-default',
+    title: 'CP Fruit Splash',
+    headline: 'Taste Nature. Feel Refreshed.',
+    subheadline: 'Cold-Crafted Botanicals & Superfruits',
+    description: 'Artisanal Nigerian beverages handcrafted in Sapele, Delta State. Zero synthetic preservatives, live synchronized via our database-backed product engine.',
+    cta: 'Explore Full Range',
+    secondaryCta: 'Connect on WhatsApp',
+    product: null as Product | null,
+    bgGradient: 'from-rose-950 via-red-950 to-stone-950',
+    badge: '100% Fresh & Natural • Sapele Flagship',
+    badgeColor: 'bg-rose-900/60 border-rose-500/40 text-rose-200',
+    highlights: ['Zero Artificial Preservatives', 'Cold-Chain Sealed', 'Sapele Flagship Hub'],
+    imageSrc: defaultPlacementUrl || BRAND_PLACEHOLDER_IMAGE,
+    altText: heroPlacements[0]?.alt_text_override || defaultPlacementAsset?.alt_text || 'CP Fruit Splash Natural Beverage',
+    lifestyleSrc: null,
+  };
+
+  const combinedSlides = [...dynamicSlides, ...standalonePlacementSlides];
+  const slides = combinedSlides.length > 0 ? combinedSlides : [defaultSlide];
+
+  useEffect(() => {
+    if (slides.length <= 1 || !isPlaying || prefersReducedMotion) return;
+    const timer = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1 >= slides.length ? 0 : prev + 1));
+    }, 7500);
+    return () => clearInterval(timer);
+  }, [slides.length, isPlaying, prefersReducedMotion]);
+
+  const slide = slides[currentSlide] || slides[0];
   const activeProduct = slide.product;
-  const activePrice = getProductPrice(activeProduct);
-  const activeVolume = getProductVolume(activeProduct);
+  const activePrice = activeProduct ? getProductPrice(activeProduct) : { amount: 0, compare_at_amount: null, currency: 'NGN' };
+  const activeVolume = activeProduct ? getProductVolume(activeProduct) : { volume: 500, unit: 'ml' };
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -71,6 +168,8 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
         content: `hero_slide_${currentSlide + 1}`,
       });
       onOpenOrderModal(activeProduct);
+    } else {
+      window.open(buildWhatsAppUrl('Hello CP Splash, I would like to inquire about your products!'), '_blank');
     }
   };
 
@@ -81,6 +180,8 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
         content: `hero_slide_${currentSlide + 1}_cta`,
       });
       onNavigate(`/products/${activeProduct.slug}`);
+    } else {
+      onNavigate('/products');
     }
   };
 
@@ -153,14 +254,16 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
               </div>
             )}
 
-            {/* Highlight Badges */}
-            <div className="flex flex-wrap gap-2 pt-1">
-              {slide.highlights.map((item, idx) => (
-                <span key={idx} className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-stone-300 font-medium">
-                  ✓ {item}
-                </span>
-              ))}
-            </div>
+            {/* Highlight Badges from verified claims */}
+            {slide.highlights.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {slide.highlights.map((item, idx) => (
+                  <span key={idx} className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-stone-300 font-medium">
+                    ✓ {item}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -187,22 +290,24 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
             <div className="relative w-full max-w-md aspect-square rounded-3xl p-6 bg-gradient-to-b from-white/10 to-white/5 border border-white/15 backdrop-blur-md shadow-2xl flex items-center justify-center group overflow-hidden">
               <img
                 src={slide.imageSrc}
-                alt={slide.title}
+                alt={slide.altText || slide.title}
                 className="w-full h-full object-cover rounded-2xl shadow-inner transition-transform duration-700 group-hover:scale-105"
                 loading="eager"
               />
 
-              {/* Inset lifestyle photo badge */}
-              <div className="absolute -bottom-2 -right-2 p-2 bg-stone-900/90 rounded-2xl border border-white/20 shadow-xl backdrop-blur-md max-w-[150px] hidden sm:block">
-                <img
-                  src={slide.lifestyleSrc}
-                  alt="Lifestyle Model"
-                  className="w-full h-20 object-cover rounded-xl mb-1.5"
-                />
-                <p className="text-[10px] font-semibold text-rose-300 text-center leading-tight">
-                  Goodness in Every Sip!
-                </p>
-              </div>
+              {/* Inset lifestyle photo badge (only if approved asset exists) */}
+              {slide.lifestyleSrc && (
+                <div className="absolute -bottom-2 -right-2 p-2 bg-stone-900/90 rounded-2xl border border-white/20 shadow-xl backdrop-blur-md max-w-[150px] hidden sm:block">
+                  <img
+                    src={slide.lifestyleSrc}
+                    alt="Lifestyle Presentation"
+                    className="w-full h-20 object-cover rounded-xl mb-1.5"
+                  />
+                  <p className="text-[10px] font-semibold text-rose-300 text-center leading-tight">
+                    Approved Campaign
+                  </p>
+                </div>
+              )}
 
               {/* Verified Badge */}
               <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-emerald-900/80 border border-emerald-400/40 text-emerald-200 text-[11px] font-bold backdrop-blur-md flex items-center gap-1">
@@ -213,37 +318,50 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
         </div>
 
         {/* Slide navigation controls */}
-        <div className="flex items-center justify-between pt-10 border-t border-white/10 mt-12">
-          <div className="flex items-center gap-3">
-            {slides.map((s, idx) => (
-              <button
-                key={s.id}
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-2.5 rounded-full transition-all cursor-pointer ${
-                  currentSlide === idx ? 'w-10 bg-rose-500' : 'w-2.5 bg-white/30 hover:bg-white/50'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
-          </div>
+        {slides.length > 1 && (
+          <div className="flex items-center justify-between pt-10 border-t border-white/10 mt-12">
+            <div className="flex items-center gap-3">
+              {slides.map((s, idx) => (
+                <button
+                  key={s.id}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                    currentSlide === idx ? 'w-10 bg-rose-500' : 'w-2.5 bg-white/30 hover:bg-white/50'
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentSlide(prev => (prev === 0 ? 1 : 0))}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setCurrentSlide(prev => (prev === 0 ? 1 : 0))}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
-              aria-label="Next slide"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                aria-label={isPlaying ? "Pause automatic slide advancement" : "Resume automatic slide advancement"}
+                title={isPlaying ? "Pause slider" : "Play slider"}
+              >
+                {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-white" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentSlide(prev => (prev === 0 ? slides.length - 1 : prev - 1))}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentSlide(prev => (prev + 1 >= slides.length ? 0 : prev + 1))}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

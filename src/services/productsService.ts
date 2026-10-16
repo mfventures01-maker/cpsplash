@@ -3,8 +3,14 @@ import {
   Product,
   ProductStatus,
   ProductCategory,
-  PriceList
+  PriceList,
+  MediaAsset,
 } from '../types/database.types';
+import {
+  BUCKET_NAME,
+  isValidUuid,
+  ACCEPTED_IMAGE_MIME_TYPES,
+} from './mediaService';
 
 const getErrMsg = (err: unknown, fallback: string): string => {
   if (err && typeof err === 'object' && 'message' in err) {
@@ -29,6 +35,7 @@ export interface ProductInput {
   volume_unit?: string;
   seo_title?: string | null;
   seo_description?: string | null;
+  metadata?: Record<string, unknown>;
 }
 
 const PRODUCT_SELECT_QUERY = `
@@ -39,7 +46,191 @@ const PRODUCT_SELECT_QUERY = `
   claims:product_claims(*)
 `;
 
+export interface ProductPublicationValidationResult {
+  isValid: boolean;
+  error: string | null;
+}
+
+/**
+ * Shared Publication Validator satisfying HOEOS G1/G2 Publication Gate:
+ * Enforces all 8 prerequisite rules against persisted Supabase records:
+ * 1. Target product exists and tenant matches expected tenant (TENANT_ID).
+ * 2. product_media association exists for exact product with is_primary = true.
+ * 3. Associated media_assets record exists and has same tenant as product (TENANT_ID).
+ * 4. Media asset bucket is exactly 'cp-public'.
+ * 5. Media asset status is exactly 'active'.
+ * 6. Media asset media_type is exactly 'image'.
+ * 7. MIME type is an accepted image MIME type (image/jpeg, image/png, image/webp, image/gif).
+ * 8. Storage path matches expected prefix: products/{productId}/...
+ */
+export async function validateProductPublication(
+  productId: string
+): Promise<ProductPublicationValidationResult> {
+  if (!productId || typeof productId !== 'string' || !isValidUuid(productId.trim())) {
+    return {
+      isValid: false,
+      error: `Invalid product ID "${productId}": must be a valid UUID`,
+    };
+  }
+
+  const cleanProductId = productId.trim();
+
+  try {
+    // 1. Establish product existence and tenant match
+    const { data: product, error: prodErr } = await supabase
+      .from('products')
+      .select('id, tenant_id, status')
+      .eq('id', cleanProductId)
+      .single();
+
+    if (prodErr || !product) {
+      const isNotFound = prodErr && typeof prodErr === 'object' && (
+        ('code' in prodErr && (prodErr as { code?: unknown }).code === 'PGRST116') ||
+        ('details' in prodErr && String((prodErr as { details?: unknown }).details).includes('0 rows'))
+      );
+
+      return {
+        isValid: false,
+        error: isNotFound
+          ? `Product ${cleanProductId} not found in database`
+          : `Database verification error checking product existence: ${prodErr ? getErrMsg(prodErr, 'Query failed') : 'Product not found'}`,
+      };
+    }
+
+    if (product.tenant_id !== TENANT_ID) {
+      return {
+        isValid: false,
+        error: `Product tenant mismatch: product belongs to tenant "${product.tenant_id}", expected current tenant "${TENANT_ID}"`,
+      };
+    }
+
+    // 2. Query product_media for primary media association
+    const { data: mediaLinks, error: mediaErr } = await supabase
+      .from('product_media')
+      .select('product_id, media_id, is_primary, media_assets(*)')
+      .eq('product_id', cleanProductId)
+      .eq('is_primary', true);
+
+    if (mediaErr) {
+      return {
+        isValid: false,
+        error: `Database verification error checking primary media association: ${getErrMsg(mediaErr, 'Query failed')}`,
+      };
+    }
+
+    if (!mediaLinks || mediaLinks.length === 0) {
+      return {
+        isValid: false,
+        error: `Publication prerequisite failed: Product ${cleanProductId} has no primary media attached in product_media (is_primary = true)`,
+      };
+    }
+
+    // 3 - 8. Validate primary media candidates
+    let candidateFailureReason = '';
+
+    for (const rawLink of (mediaLinks as unknown as any[])) {
+      const link = rawLink as {
+        product_id: string;
+        media_id: string;
+        is_primary: boolean;
+        media_assets?: MediaAsset | MediaAsset[] | null;
+      };
+
+      if (link.product_id !== cleanProductId) {
+        candidateFailureReason = `Media link product ID mismatch: expected ${cleanProductId}, found ${link.product_id}`;
+        continue;
+      }
+
+      if (!link.is_primary) {
+        candidateFailureReason = `Media link is not marked as primary (is_primary = false)`;
+        continue;
+      }
+
+      let asset: MediaAsset | null = Array.isArray(link.media_assets)
+        ? (link.media_assets[0] || null)
+        : (link.media_assets || null);
+
+      // Fallback: If media_assets was not embedded via relation query, fetch directly
+      if (!asset && link.media_id) {
+        const { data: directAsset, error: assetErr } = await supabase
+          .from('media_assets')
+          .select('*')
+          .eq('id', link.media_id)
+          .single();
+
+        if (assetErr) {
+          return {
+            isValid: false,
+            error: `Database verification error fetching media asset ${link.media_id}: ${getErrMsg(assetErr, 'Query failed')}`,
+          };
+        }
+        asset = directAsset as MediaAsset | null;
+      }
+
+      if (!asset) {
+        candidateFailureReason = `Associated media asset record "${link.media_id}" does not exist in media_assets`;
+        continue;
+      }
+
+      // 3. Asset tenant must match expected tenant & product tenant
+      if (asset.tenant_id !== TENANT_ID || asset.tenant_id !== product.tenant_id) {
+        candidateFailureReason = `Media asset tenant mismatch: asset tenant "${asset.tenant_id}" does not match tenant "${TENANT_ID}"`;
+        continue;
+      }
+
+      // 4. Bucket must be exactly cp-public
+      if (asset.bucket !== BUCKET_NAME) {
+        candidateFailureReason = `Media asset bucket mismatch: asset bucket is "${asset.bucket}", expected "${BUCKET_NAME}"`;
+        continue;
+      }
+
+      // 5. Persisted status must be exactly active
+      if (asset.status !== 'active') {
+        candidateFailureReason = `Media asset status is "${asset.status}"; publication requires an "active" primary media asset`;
+        continue;
+      }
+
+      // 6. Persisted media_type must be image
+      if (asset.media_type !== 'image') {
+        candidateFailureReason = `Primary media asset must have media_type "image", but found "${asset.media_type}"`;
+        continue;
+      }
+
+      // 7. MIME type must be an accepted image MIME type (JPEG, PNG, WebP, GIF)
+      const mime = (asset.mime_type || '').toLowerCase().trim();
+      if (!mime || !ACCEPTED_IMAGE_MIME_TYPES.has(mime)) {
+        candidateFailureReason = `Invalid primary image MIME type "${asset.mime_type}". Accepted image MIME types: ${Array.from(ACCEPTED_IMAGE_MIME_TYPES).join(', ')}`;
+        continue;
+      }
+
+      // 8. Storage path must belong to expected product path: products/{productId}/...
+      const expectedPrefix = `products/${cleanProductId}/`;
+      if (!asset.path || !asset.path.startsWith(expectedPrefix) || asset.path.length <= expectedPrefix.length) {
+        candidateFailureReason = `Media asset storage path "${asset.path}" does not belong to expected product storage path "${expectedPrefix}*"`;
+        continue;
+      }
+
+      // All 8 checks passed!
+      return {
+        isValid: true,
+        error: null,
+      };
+    }
+
+    return {
+      isValid: false,
+      error: `Publication prerequisite failed: ${candidateFailureReason || 'No qualifying primary image found meeting publication requirements'}`,
+    };
+  } catch (err: unknown) {
+    return {
+      isValid: false,
+      error: `Unexpected error during publication validation: ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
+}
+
 export const productsService = {
+  validateProductPublication,
   /**
    * Helper to ensure an authoritative default price list exists for the tenant
    */
@@ -194,6 +385,13 @@ export const productsService = {
         return { data: null, error: 'Product name and slug are required' };
       }
 
+      if (productData.status === 'published') {
+        return {
+          data: null,
+          error: 'Publication prerequisite failed: products cannot be created directly with status "published". Products must be created as draft, have an active primary image in cp-public uploaded and linked, and then published.',
+        };
+      }
+
       const cleanSlug = productData.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
       // 1. Insert into products table
@@ -211,7 +409,7 @@ export const productsService = {
         featured: !!productData.featured,
         seo_title: productData.seo_title || productData.name,
         seo_description: productData.seo_description || productData.short_description || null,
-        metadata: {},
+        metadata: productData.metadata || {},
       };
 
       const { data: createdProduct, error: prodErr } = await supabase
@@ -288,6 +486,16 @@ export const productsService = {
    */
   async updateProduct(id: string, updates: Partial<ProductInput>): Promise<{ data: Product | null; error: string | null }> {
     try {
+      if (updates.status === 'published') {
+        const validation = await validateProductPublication(id);
+        if (!validation.isValid) {
+          return {
+            data: null,
+            error: validation.error || 'Product publication prerequisite failed: primary media image is required',
+          };
+        }
+      }
+
       const sanitized: Record<string, unknown> = {
         updated_at: new Date().toISOString(),
       };
@@ -303,6 +511,7 @@ export const productsService = {
       if (updates.featured !== undefined) sanitized.featured = updates.featured;
       if (updates.seo_title !== undefined) sanitized.seo_title = updates.seo_title;
       if (updates.seo_description !== undefined) sanitized.seo_description = updates.seo_description;
+      if (updates.metadata !== undefined) sanitized.metadata = updates.metadata;
 
       const { error: updateErr } = await supabase
         .from('products')
@@ -446,6 +655,16 @@ export const productsService = {
    */
   async setProductStatus(id: string, status: ProductStatus): Promise<{ success: boolean; error: string | null }> {
     try {
+      if (status === 'published') {
+        const validation = await validateProductPublication(id);
+        if (!validation.isValid) {
+          return {
+            success: false,
+            error: validation.error || 'Product publication prerequisite failed: primary media image is required',
+          };
+        }
+      }
+
       const { error } = await supabase
         .from('products')
         .update({ status, updated_at: new Date().toISOString() })

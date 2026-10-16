@@ -1,0 +1,280 @@
+{
+  "timestamp": "2026-10-16T19-19-36-568Z",
+  "base": "http://localhost:3000",
+  "tests": {
+    "B1": {
+      "totalImages": 3,
+      "heroArea": [],
+      "allImages": [
+        {
+          "src": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png",
+          "alt": "HOEOS Artisanal Hibiscus 0580",
+          "naturalWidth": 0,
+          "parentTag": "DIV"
+        },
+        {
+          "src": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png",
+          "alt": "HOEOS Artisanal Hibiscus 0580",
+          "naturalWidth": 0,
+          "parentTag": "DIV"
+        },
+        {
+          "src": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png",
+          "alt": "HOEOS Artisanal Hibiscus 0580",
+          "naturalWidth": 0,
+          "parentTag": "DIV"
+        }
+      ],
+      "anyCpPublic": true,
+      "anyTestProduct": true,
+      "anyPlaceholder": false,
+      "heroHtml": "<section class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20\"><div class=\"bg-stone-900 text-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-stone-800 space-y-8\"><div class=\"flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-stone-800 pb-6\"><div class=\"space-y-2\"><div class=\"flex items-center gap-2 text-rose-400 font-mono text-xs font-bold uppercase tracking-wider\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-sparkles w-4 h-4\" aria-hidden=\"true\"><path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\"></path><path d=\"M20 2v4\"></path><path d=\"M22 4h-4\"></path><circle cx=\"4\" cy=\"20\" r=\"2\"></circle></svg><span>Commercial Acquisition Engine</span></div><h2 class=\"text-3xl sm:text-4xl font-black text-white tracking-tight\">What are you buying for?</h2><p class=\"text-stone-400 text-sm max-w-xl\">Select your buyer territory below. Each path provides tailored pricing, institutional terms, or direct cold-chain order routing.</p></div><div class=\"text-xs font-mono text-stone-400 bg-stone-950 px-3 py-1.5 rounded-xl border border-stone-800\">Deterministic RLS • Zero Hardcoded Logic</div></div><div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4\"><button class=\"group text-left p-5 rounded-2xl bg-stone-950/70 hover:bg-stone-800/90 border border-stone-800 hover:border-rose-500/60 transition-all duration-300 flex flex-col justify-between cursor-pointer\"><div class=\"space-y-2\"><span class=\"text-[10px] font-mono font-bold uppercase tracking-wider text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-900/40 inline-block\">sports</span><h3 class=\"text-base font-black text-white group-hover:text-rose-400 transition-colors\">Sports &amp; Athletics</h3><p class=\"text-xs text-stone-400 line-clamp-2 leading-relaxed\">Fueling Teams, Athletes &amp; Fitness Communities</p></div><div class=\"pt-4 mt-2 flex items-center justify-between text-xs font-bold text-rose-400 group-hover:translate-x-0.5 transition-transform\"><span>Get Sports Bulk Price</span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-arrow-right w-3.5 h-3.5\" aria-hidden=\"true\"><path d=\"M5 12h14\"></path><path d=\"m12 5 7 7-7 7\"></path></svg></div></button><button class=\"group text-left p-5 rounded-2xl bg-stone-950/70 hover:bg-stone-800/90 border border-stone-800 hover:border-rose-500/60 transition-all duration-300 flex flex-col justify-between cursor-pointer\"><div class=\"space-y-2\"><span class=\"text-[10px] font-mono font-bold uppercase tracking-wider text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-900/40 inline-block\">parties-events</span><h3 class=\"text-base font-black text-white group-hover:text-rose-400 transition-colors\">Parties &amp; Events</h3><p class=\"text-xs text-stone-400 line-clamp-2 leading-relaxed\">Chilled Artisanal Drinks for Unforgettable Gatherings</p></div><div class=\"pt-4 mt-2 flex items-center justify-between text-xs font-bold text-rose-400 group-hover:translate-x-0.5 transition-transform\"><span>Get My Event Quote</span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-arrow-right w-3.5 h-3.5\" aria-hidden=\"true\"><path d=\"M5 12h14\"></path><path d=\"m12 5 7 7-7 7\"></path></svg></div></button><button class=\"group text-left p-5 rounded-2xl bg-stone-950/70 hover:bg-stone-800/90 border border-stone-800 hover:border-rose-500/60 transition-all duration-300 flex flex-col justify-between cursor-pointer\"><div class=\"space-y-2\"><span class=\"text-[10px] font-mono font-bold uppercase tracking-wider text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-900/40 inline-block\">hotels-hospitality</span><h3 class=\"text-base font-black text-white group-hover:text-rose-400 transition-colors\">Hotels &amp; Hospitality</h3><p class=\"text-xs text-stone-400 line-clamp-2 leading-relaxed\">Turnkey Beverage Supply for Hotels, Lounges &amp; Restaurants</p></div><div class=\"pt-4 mt-2 flex items-center justify-between text-xs font-bold text-rose-400 group-hover:translate-x-0.5 transition-transform\"><span>Request Hotel Supply</span><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-arrow-right w-3.5 h-3.5\" aria-hidden=\"true\"><path d=\"M5 12h14\"></path><path d=\"m12 5 7 7-7 7\""
+    },
+    "B2": [
+      {
+        "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=*%2Ccategory%3Aproduct_categories%28*%29%2Cvariants%3Aproduct_variants%28*%2Cprices%3Aproduct_prices%28*%29%29%2Cmedia%3Aproduct_media%28*%2Cmedia_assets%28*%29%29%2Cclaims%3Aproduct_claims%28*%29&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&status=eq.published&order=created_at.desc",
+        "status": 200,
+        "hasMediaKey": true,
+        "hasTestProduct": true,
+        "hasCpPublic": true,
+        "bodySnippet": "[{\"id\":\"84ff8050-8c5c-4e5f-ad4d-25449f978b56\",\"tenant_id\":\"42d36cee-4cd6-43d1-af5d-334e5a07e37c\",\"category_id\":null,\"name\":\"HOEOS Artisanal Hibiscus 0580\",\"slug\":\"hoeos-hibiscus-0580\",\"sku\":\"CP-FS-0580\",\"brand\":\"CP Fruit Splash\",\"product_type\":\"physical\",\"short_description\":null,\"description\":null,\"status\":\"published\",\"featured\":true,\"seo_title\":\"HOEOS Artisanal Hibiscus 0580\",\"seo_description\":null,\"seo_keywords\":null,\"metadata\":{\"media_sequence\": [], \"animation_config\": {\"loop\": true, \"enabled\": true, \"autoplay\": true, \"aspect_ratio\": \"square\", \"duration_seconds\": 4.5}},\"created_by\":null,\"created_at\":\"2026-10-16T01:56:31.591338+00:00\",\"updated_at\":\"2026-10-16T01:56:48.508+00:00\",\"category\":null,\"variants\":[{\"id\": \"36f2f44e-d582-423a-b7d2-c850da4a5e62\", \"sku\": \"CP-FS-0580-STD\", \"name\": \"Standard 500ml\", \"prices\": [{\"id\": \"e906a3fd-8f17-4fcd-8f68-a26497cff72c\", \"amount\": 1200.00, \"status\": \"active\", \"valid_to\": null, \"tenant_id\": \"42d36cee-4cd6-43d1-af5d-334e5a07e37c\", \"created_at\": \"2026-10-16T01:56:32.848888+00:00\", \"created_by\": null, \"valid_from\": null, \"variant_id\": \"36f2f44e-d582-423a-b7d2-c850da4a5e62\", \"change_reason\": \"Initial creation via CMS\", \"price_list_id\": \"1569b208-a9de-4f67-9c70-be9af47f75a1\", \"compare_at_amount\": null}], \"status\": \"active\", \"volume\": 500, \"weight\": null, \"barcode\": null, \"metadata\": {}, \"tenant_id\": \"42d36cee-4cd6-43d1-af5d-334e5a07e37c\", \"created_at\": \"2026-10-16T01:56:32.040932+00:00\", \"product_id\": \"84ff8050-8c5c-4e5f-ad4d-25449f978b56\", \"updated_at\": \"2026-10-16T01:56:32.040932+00:00\", \"volume_unit\": \"ml\", \"weight_unit\": null}],\"media\":[{\"media_id\": \"5c820322-ae78-4c6a-a0b6-2164b2fe42bd\", \"created_at\": \"2026-10-16T01:56:42.724304+00:00\", \"is_primary\": true, \"product_id\": \"84ff8050-8c5c-4e5f-ad4d-25449f978b56\", \"sort_order\": 1, \"media_assets\": {\"id\": \"5c820322-ae78-4c6a-a0b6-2164b2fe42bd\", \"path\": \"products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png\", \"width\": null, \"bucket\": \"cp-public\", \"height\": null, \"status\": \"active\", \"caption\": null, \"alt_text\": \"HOEOS Artisanal Hibiscus 0580\", \"filename\": \"test-product.png\", \"mime_type\": \"image/png\", \"tenant_id\": \"42d36cee-4cd6-43d1-af5d-334e5a07e37c\", \"created_at\": \"2026-10-16T01:56:41.605236+00:00\", \"media_type\": \"image\", \"size_bytes\": 308, \"uploaded_by\": null, \"duration_seconds\": null}}],\"claims\":[]}]"
+      },
+      {
+        "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=id&limit=1",
+        "status": 200,
+        "hasMediaKey": false,
+        "hasTestProduct": false,
+        "hasCpPublic": false,
+        "bodySnippet": "[{\"id\":\"84ff8050-8c5c-4e5f-ad4d-25449f978b56\"}]"
+      },
+      {
+        "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=*%2Ccategory%3Aproduct_categories%28*%29%2Cvariants%3Aproduct_variants%28*%2Cprices%3Aproduct_prices%28*%29%29%2Cmedia%3Aproduct_media%28*%2Cmedia_assets%28*%29%29%2Cclaims%3Aproduct_claims%28*%29&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&status=eq.published&order=created_at.desc",
+        "status": 200,
+        "hasMediaKey": true,
+        "hasTestProduct": true,
+        "hasCpPublic": true,
+        "bodySnippet": "[{\"id\":\"84ff8050-8c5c-4e5f-ad4d-25449f978b56\",\"tenant_id\":\"42d36cee-4cd6-43d1-af5d-334e5a07e37c\",\"category_id\":null,\"name\":\"HOEOS Artisanal Hibiscus 0580\",\"slug\":\"hoeos-hibiscus-0580\",\"sku\":\"CP-FS-0580\",\"brand\":\"CP Fruit Splash\",\"product_type\":\"physical\",\"short_description\":null,\"description\":null,\"status\":\"published\",\"featured\":true,\"seo_title\":\"HOEOS Artisanal Hibiscus 0580\",\"seo_description\":null,\"seo_keywords\":null,\"metadata\":{\"media_sequence\": [], \"animation_config\": {\"loop\": true, \"enabled\": true, \"autoplay\": true, \"aspect_ratio\": \"square\", \"duration_seconds\": 4.5}},\"created_by\":null,\"created_at\":\"2026-10-16T01:56:31.591338+00:00\",\"updated_at\":\"2026-10-16T01:56:48.508+00:00\",\"category\":null,\"variants\":[{\"id\": \"36f2f44e-d582-423a-b7d2-c850da4a5e62\", \"sku\": \"CP-FS-0580-STD\", \"name\": \"Standard 500ml\", \"prices\": [{\"id\": \"e906a3fd-8f17-4fcd-8f68-a26497cff72c\", \"amount\": 1200.00, \"status\": \"active\", \"valid_to\": null, \"tenant_id\": \"42d36cee-4cd6-43d1-af5d-334e5a07e37c\", \"created_at\": \"2026-10-16T01:56:32.848888+00:00\", \"created_by\": null, \"valid_from\": null, \"variant_id\": \"36f2f44e-d582-423a-b7d2-c850da4a5e62\", \"change_reason\": \"Initial creation via CMS\", \"price_list_id\": \"1569b208-a9de-4f67-9c70-be9af47f75a1\", \"compare_at_amount\": null}], \"status\": \"active\", \"volume\": 500, \"weight\": null, \"barcode\": null, \"metadata\": {}, \"tenant_id\": \"42d36cee-4cd6-43d1-af5d-334e5a07e37c\", \"created_at\": \"2026-10-16T01:56:32.040932+00:00\", \"product_id\": \"84ff8050-8c5c-4e5f-ad4d-25449f978b56\", \"updated_at\": \"2026-10-16T01:56:32.040932+00:00\", \"volume_unit\": \"ml\", \"weight_unit\": null}],\"media\":[{\"media_id\": \"5c820322-ae78-4c6a-a0b6-2164b2fe42bd\", \"created_at\": \"2026-10-16T01:56:42.724304+00:00\", \"is_primary\": true, \"product_id\": \"84ff8050-8c5c-4e5f-ad4d-25449f978b56\", \"sort_order\": 1, \"media_assets\": {\"id\": \"5c820322-ae78-4c6a-a0b6-2164b2fe42bd\", \"path\": \"products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png\", \"width\": null, \"bucket\": \"cp-public\", \"height\": null, \"status\": \"active\", \"caption\": null, \"alt_text\": \"HOEOS Artisanal Hibiscus 0580\", \"filename\": \"test-product.png\", \"mime_type\": \"image/png\", \"tenant_id\": \"42d36cee-4cd6-43d1-af5d-334e5a07e37c\", \"created_at\": \"2026-10-16T01:56:41.605236+00:00\", \"media_type\": \"image\", \"size_bytes\": 308, \"uploaded_by\": null, \"duration_seconds\": null}}],\"claims\":[]}]"
+      }
+    ],
+    "B3": {
+      "found": true,
+      "outerHTML": "<img alt=\"HOEOS Artisanal Hibiscus 0580\" class=\"w-full h-full object-cover rounded-2xl shadow-inner transition-transform duration-700 group-hover:scale-105\" loading=\"eager\" src=\"https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png\">",
+      "computedStyle": {
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "width": "398px",
+        "height": "398px"
+      }
+    },
+    "B4": {
+      "catalogImages": 2,
+      "images": [
+        {
+          "src": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png",
+          "alt": "HOEOS Artisanal Hibiscus 0580",
+          "naturalWidth": 0
+        },
+        {
+          "src": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.png",
+          "alt": "HOEOS Artisanal Hibiscus 0580",
+          "naturalWidth": 0
+        }
+      ],
+      "anyCpPublic": true
+    },
+    "B5": {
+      "totalImgs": 0,
+      "totalVideos": 0,
+      "videos": [],
+      "imgs": [],
+      "anyCpPublicMedia": false
+    },
+    "B6": {
+      "head": {
+        "ogImage": null,
+        "ogTitle": "CP Splash Social Commerce Engine",
+        "ogDescription": "Supabase-backed social commerce and product engine for CP Fruit Splash luxury natural beverages.",
+        "canonical": null,
+        "metaDescription": "Supabase-backed social commerce and product engine for CP Fruit Splash luxury natural beverages.",
+        "jsonLd": null
+      },
+      "imgs": []
+    },
+    "B7": {
+      "productPublic": {
+        "status": 200,
+        "ok": true,
+        "ct": "image/png"
+      },
+      "mediaPublic": {
+        "status": 200,
+        "ok": true,
+        "ct": "image/webp"
+      },
+      "productObject": {
+        "status": 200,
+        "ok": true,
+        "ct": "image/png"
+      }
+    },
+    "B8": {
+      "hasTestProduct": false,
+      "hasCpPublic": false,
+      "imgTagCount": 0,
+      "htmlSize": 127983,
+      "firstImgs": []
+    }
+  },
+  "consoleLogs": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 401 ()"
+    }
+  ],
+  "pageErrors": [],
+  "networkSummary": [
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/social_content?select=*&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&status=eq.published&order=p",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/blog_posts?select=*%2Cfeatured_media%3Amedia_assets%28*%29&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=*%2Ccategory%3Aproduct_categories%28*%29%2Cvariants%3Aproduct_variants%28*%2Cprices%3",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/media_placements?select=*%2Cmedia_assets%28*%29&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&sco",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/analytics_events",
+      "status": 401,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=id&limit=1",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/sales_territories?select=*&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&active=eq.true&order=sor",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=*%2Ccategory%3Aproduct_categories%28*%29%2Cvariants%3Aproduct_variants%28*%2Cprices%3",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-pr",
+      "status": 200,
+      "ct": "image/png"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=*%2Ccategory%3Aproduct_categories%28*%29%2Cvariants%3Aproduct_variants%28*%2Cprices%3",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=id&limit=1",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/sales_territories?select=*&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&slug=eq.sports&active=eq",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/media_placements?select=*%2Cmedia_assets%28*%29&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&sco",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/analytics_events",
+      "status": 401,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/sales_territories?select=*&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&active=eq.true&order=sor",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/sales_journeys?select=*&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&territory_id=eq.5a16e0c5-f5",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/sales_offers?select=*&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&territory_id=eq.5a16e0c5-f5b4",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/sales_questions?select=*&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5a07e37c&journey_id=eq.82e2f846-a8f",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/analytics_events",
+      "status": 401,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/analytics_events",
+      "status": 401,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=id&limit=1",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/products?select=*%2Ccategory%3Aproduct_categories%28*%29%2Cvariants%3Aproduct_variants%28*%2Cprices%3",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/rest/v1/blog_posts?select=*%2Cfeatured_media%3Amedia_assets%28*%29&tenant_id=eq.42d36cee-4cd6-43d1-af5d-334e5",
+      "status": 200,
+      "ct": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-pr",
+      "status": 200,
+      "ct": "image/png"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792117400544_8n47c4_test-anima",
+      "status": 200,
+      "ct": "image/webp"
+    },
+    {
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/cp-public/products/84ff8050-8c5c-4e5f-ad4d-25449f978b56/1792115800215_gpa7pi_test-product.p",
+      "status": 200,
+      "ct": "image/png"
+    }
+  ]
+}

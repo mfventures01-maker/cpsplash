@@ -773,13 +773,13 @@ using (tenant_id is null or has_tenant_role(tenant_id, array['owner','admin']));
 
 insert into public.roles (tenant_id,name,permissions,is_system)
 values
-  (null,'owner','{\"all\":true}',true),
-  (null,'admin','{\"all\":true}',true),
-  (null,'manager','{\"catalog\":true,\"orders\":true,\"inventory\":true}',true),
-  (null,'editor','{\"catalog\":true,\"content\":true}',true),
-  (null,'sales','{\"orders\":true,\"customers\":true}',true),
-  (null,'inventory','{\"inventory\":true}',true),
-  (null,'marketing','{\"content\":true,\"campaigns\":true,\"analytics\":true}',true)
+  (null,'owner','{"all":true}',true),
+  (null,'admin','{"all":true}',true),
+  (null,'manager','{"catalog":true,"orders":true,"inventory":true}',true),
+  (null,'editor','{"catalog":true,"content":true}',true),
+  (null,'sales','{"orders":true,"customers":true}',true),
+  (null,'inventory','{"inventory":true}',true),
+  (null,'marketing','{"content":true,"campaigns":true,"analytics":true}',true)
 on conflict do nothing;
 
 insert into public.tenants (name,slug,legal_name,default_currency,default_country,timezone,status)
