@@ -1,0 +1,70 @@
+{
+  "audit_timestamp": "2026-10-15T00:30:00Z",
+  "project_ref": "efvvczmopacoroudzfnl",
+  "queries": {
+    "schema_migrations": [
+      { "version": "20261001093826", "name": "create_multi_tenant_ecommerce_engine" },
+      { "version": "20261001093846", "name": "harden_multi_tenant_integrity_and_function_privileges" },
+      { "version": "20261001184542", "name": "restore_authenticated_tenant_function_execution" },
+      { "version": "20261001191133", "name": "create_cp_splash_storage_buckets" },
+      { "version": "20261005215338", "name": "cp_splash_storage_object_rls" },
+      { "version": "20261005215347", "name": "cp_splash_storage_object_rls_path_fix" },
+      { "version": "20261011005429", "name": "cp_splash_harden_public_grants_and_tenant_helpers" },
+      { "version": "20261011005448", "name": "cp_splash_revoke_anonymous_private_reads" },
+      { "version": "20261011010205", "name": "cp_splash_scope_public_media_metadata_to_public_bucket" },
+      { "version": "20261011011157", "name": "cp_splash_allow_gif_product_media_uploads" }
+    ],
+    "media_placements_class_check": [],
+    "storage_policies": [
+      {
+        "policyname": "cp_public_staff_delete",
+        "cmd": "DELETE",
+        "roles": ["authenticated"],
+        "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS (SELECT 1 FROM products p WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+        "with_check": null
+      },
+      {
+        "policyname": "cp_public_staff_insert",
+        "cmd": "INSERT",
+        "roles": ["authenticated"],
+        "qual": null,
+        "with_check": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS (SELECT 1 FROM products p WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))"
+      },
+      {
+        "policyname": "cp_public_staff_select",
+        "cmd": "SELECT",
+        "roles": ["authenticated"],
+        "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS (SELECT 1 FROM products p WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+        "with_check": null
+      },
+      {
+        "policyname": "cp_public_staff_update",
+        "cmd": "UPDATE",
+        "roles": ["authenticated"],
+        "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS (SELECT 1 FROM products p WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+        "with_check": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS (SELECT 1 FROM products p WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))"
+      }
+    ],
+    "tenants": [
+      {
+        "id": "42d36cee-4cd6-43d1-af5d-334e5a07e37c",
+        "slug": "cp-splash",
+        "name": "CP Fruit Splash",
+        "status": "active"
+      },
+      {
+        "id": "b765e32e-188f-470e-9054-43ec9abf0b77",
+        "slug": "linos-e-security",
+        "name": "Linos E Security",
+        "status": "active"
+      }
+    ],
+    "has_tenant_role": [
+      {
+        "proname": "has_tenant_role",
+        "args": "_tenant_id uuid, _role_names text[]",
+        "prosecdef": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+﻿ M .gitignore
+ D evidence/gap3/recovered-sql/20261015_000001_recovered_touch_sales_updated_at_fn.sql
+ D evidence/gap3/recovered-sql/20261015_000002_recovered_normalize_sales_lead_fn.sql
+ D evidence/gap3/recovered-sql/20261015_000003_recovered_sales_lead_number_seq.sql
+ D evidence/gap3/recovered-sql/20261015_000004_recovered_sales_territories.sql
+ D evidence/gap3/recovered-sql/20261015_000005_recovered_sales_offers.sql
+ D evidence/gap3/recovered-sql/20261015_000006_recovered_sales_journeys.sql
+ D evidence/gap3/recovered-sql/20261015_000007_recovered_sales_leads.sql
+ M package-lock.json
+ M package.json
+ M src/components/admin/AdminMediaManager.tsx
+ M src/components/admin/AdminProductEditor.tsx
+ M src/components/admin/AdminProductList.tsx
+ M src/components/admin/AdminRetailerManager.tsx
+ M src/components/admin/AdminSocialManager.tsx
+ M src/components/hero/HeroSlider.tsx
+ M src/components/navigation/Footer.tsx
+ M src/components/navigation/Header.tsx
+ M src/components/product/ProductCard.tsx
+ M src/components/product/ProductGallery.tsx
+ M src/components/product/WhatsAppOrderModal.tsx
+ M src/lib/supabase.ts
+ M src/pages/BlogPages.tsx
+ M src/pages/CampaignLandingPage.tsx
+ M src/pages/CertificationPage.tsx
+ M src/pages/CommercialFunnelPage.tsx
+ M src/pages/FindRetailersPage.tsx
+ M src/pages/HomePage.tsx
+ M src/pages/ProductDetailPage.tsx
+ M src/pages/ProductsCatalogPage.tsx
+ M src/pages/StoryPage.tsx
+ M src/services/mediaService.ts
+ M src/services/productHelpers.ts
+ M src/services/productsService.ts
+ M src/types/database.types.ts
+ D supabase/migrations/20260929000000_cp_splash_schema.sql
+ M supabase/migrations/20261001093826_create_multi_tenant_ecommerce_engine.sql
+ M supabase/migrations/20261005215338_cp_splash_storage_object_rls.sql
+ M supabase/migrations/20261005215347_cp_splash_storage_object_rls_path_fix.sql
+ M tsconfig.json
+?? docs/
+?? evidence/G6-20261015-114143/
+?? evidence/ledger-export.json
+?? evidence/legacy/
+?? evidence/media-review-20261014-165338.zip
+?? evidence/media-review-20261014-165338/
+?? evidence/migration-recovery/escape-fix-note.txt
+?? evidence/phase0-20261016-002550/
+?? evidence/phase0-20261016-021818/
+?? evidence/phase1-20261016-005354/
+?? evidence/phase2-20261016-012315/
+?? evidence/schema-audit/
+?? production-identity.mjs
+?? sales-certification.mjs
+?? sales-runtime-test.mjs
+?? scripts/Recover-ProductionMigrations.ps1
+?? scripts/audit-forms.cjs
+?? scripts/build-cms-form-inventory.cjs
+?? scripts/discover-columns.mjs
+?? scripts/generate-manifest.cjs
+?? scripts/hash-migrations.cjs
+?? scripts/test-five-funnels.cjs
+?? scripts/test-postgrest.mjs
+?? scripts/trace-phase2.mjs
+?? scripts/transcode-flow-assets.mjs
+?? scripts/verify-frontend-ssot.mjs
+?? src/components/navigation/ProductMenu.tsx
+?? src/components/product/ProductCarousel.tsx
+?? src/services/businessConfig.ts
+?? src/services/placementService.ts
+?? supabase/.gitignore
+?? supabase/config.toml
+?? supabase/migrations/20261011000001_recovered_touch_sales_updated_at_fn.sql
+?? supabase/migrations/20261011000002_recovered_normalize_sales_lead_fn.sql
+?? supabase/migrations/20261011000003_recovered_sales_lead_number_seq.sql
+?? supabase/migrations/20261011000004_recovered_sales_territories.sql
+?? supabase/migrations/20261011000005_recovered_sales_offers.sql
+?? supabase/migrations/20261011000006_recovered_sales_journeys.sql
+?? supabase/migrations/20261011000007_recovered_sales_leads.sql
+?? supabase/migrations/20261011000008_recovered_sales_questions.sql
+?? supabase/migrations/20261014000000_media_placements.sql
+?? supabase/migrations/20261014000001_media_placements_table.sql
+?? supabase/migrations/20261014000002_media_placements_modtime.sql
+?? supabase/migrations/20261014000003_media_placements_integrity.sql
+?? supabase/migrations/20261014000004_media_placements_rls.sql
+?? supabase/migrations/20261014000005_cp_public_storage_scope.sql
+?? supabase/migrations/20261016000001_cp_public_media_policies.sql
+?? tests/e2e_cms_storage_storefront.cjs
+?? tests/e2e_five_funnels_certification.cjs
+?? tests/media_pipeline_placements.test.ts
+?? tests/media_service_contract.test.ts
+?? tests/probe_media_animation.cjs
+?? tests/product_publication_gate.test.ts
+?? tests/run_test.mjs

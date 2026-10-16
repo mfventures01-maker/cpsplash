@@ -1,0 +1,10 @@
+﻿The three recovered migrations whose hashes changed between the original
+recovery (commit b3f9cc4) and the current working tree were corrected to
+remove JSON-serialization escape artifacts:
+
+  20261001093826  escaped JSON in seed roles INSERT:  {\"all\":true} -> {"all":true}
+  20261005215338  escaped quotes in CREATE POLICY:    \"name\"      -> "name"
+  20261005215347  escaped quotes in DROP/CREATE:      \"name\"      -> "name"
+
+These are correctness fixes; the previous form would not have been valid SQL.
+The current files are the authoritative versions. See git diff for exact lines.

@@ -1,0 +1,24 @@
+G6 — PRODUCTION APPLY COMPLETE
+================================
+
+Timestamp (UTC): 2026-10-15T13:42:38Z
+
+Migrations applied (6):
+  20261014000000_media_placements.sql
+  20261014000001_media_placements_table.sql
+  20261014000002_media_placements_modtime.sql
+  20261014000003_media_placements_integrity.sql
+  20261014000004_media_placements_rls.sql
+  20261014000005_cp_public_storage_scope.sql
+
+Result: Finished supabase db push.
+
+Verification (post-apply):
+  [x] Ledger = 24 rows
+  [x] media_placements table exists
+  [x] 4 cp_public_staff_* policies unchanged vs pre-state (byte-identical)
+  [x] cp_public_cms_delete unchanged vs pre-state (byte-identical)
+  [x] cp_public_media_insert policy exists (INSERT)
+  [x] Total storage policies = 6 (5 preserved + 1 new)
+
+Status: COMPLETE

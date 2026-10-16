@@ -1,0 +1,45 @@
+AUTHORIZATION TO APPLY MIGRATIONS TO PRODUCTION
+================================================
+
+Timestamp (UTC): 2026-10-15T13:31:35Z
+Authorized by:   Faith O.
+Project ref:     efvvczmopacoroudzfnl (ECOMMERCE)
+Region:          Central EU (Frankfurt)
+
+I authorize the following operation:
+
+  supabase db push
+
+against the production Supabase project, applying exactly these 6 migrations:
+
+  - 20261014000000_media_placements.sql           (no-op placeholder)
+  - 20261014000001_media_placements_table.sql     (media_placements table + 3 indexes)
+  - 20261014000002_media_placements_modtime.sql   (updated_at trigger + fn)
+  - 20261014000003_media_placements_integrity.sql (tenant-consistency trigger + fn)
+  - 20261014000004_media_placements_rls.sql       (RLS + 2 placement policies)
+  - 20261014000005_cp_public_storage_scope.sql    (1 storage policy: cp_public_media_insert)
+
+Verified preconditions:
+
+  [x] Local build applies all 24 migrations cleanly to an empty database.
+  [x] Local storage policies are 5 (4 preserved + 1 new). No redundant delete policy.
+  [x] Production ledger = 18 entries (10 certified + 8 Gap-3 repaired).
+  [x] Dry-run shows exactly 6 pending migrations.
+  [x] Production pre-state captured (ledger, tables, storage policies).
+  [x] The 5 pre-existing storage policies are recorded for byte-comparison post-apply.
+  [x] Rollback plan documented (docs/schema/target-end-to-end.md section 9.2).
+
+Expected post-conditions:
+
+  - media_placements table exists with 3 indexes, 2 triggers, RLS, 2 policies.
+  - cp_public_media_insert exists on storage.objects.
+  - The 4 cp_public_staff_* policies are UNCHANGED (byte-identical to pre-state).
+  - cp_public_cms_delete is UNCHANGED (byte-identical to pre-state).
+  - Production ledger = 24 entries.
+
+Rollback trigger:
+
+  If any cp_public_staff_* or cp_public_cms_delete policy differs from pre-state,
+  immediately execute the rollback block in section 9.2.
+
+Signature: Faith O.

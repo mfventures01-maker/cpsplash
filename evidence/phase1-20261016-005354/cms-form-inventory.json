@@ -1,0 +1,1643 @@
+[
+  {
+    "filePath": "src/components/admin/AdminProductEditor.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": true,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "isEditing"
+      },
+      {
+        "name": "saving",
+        "setter": "setSaving",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "error",
+        "setter": "setError",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "name",
+        "setter": "setName",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "slug",
+        "setter": "setSlug",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "sku",
+        "setter": "setSku",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "brand",
+        "setter": "setBrand",
+        "type": "inferred",
+        "initial": "'CP Fruit Splash'"
+      },
+      {
+        "name": "categoryId",
+        "setter": "setCategoryId",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "categories",
+        "setter": "setCategories",
+        "type": "ProductCategory[]",
+        "initial": "[]"
+      },
+      {
+        "name": "shortDescription",
+        "setter": "setShortDescription",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "description",
+        "setter": "setDescription",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "status",
+        "setter": "setStatus",
+        "type": "ProductStatus",
+        "initial": "'draft'"
+      },
+      {
+        "name": "featured",
+        "setter": "setFeatured",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "basePrice",
+        "setter": "setBasePrice",
+        "type": "number",
+        "initial": "1200"
+      },
+      {
+        "name": "salePrice",
+        "setter": "setSalePrice",
+        "type": "number | ''",
+        "initial": "''"
+      },
+      {
+        "name": "volumeMl",
+        "setter": "setVolumeMl",
+        "type": "number",
+        "initial": "500"
+      },
+      {
+        "name": "seoTitle",
+        "setter": "setSeoTitle",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "seoDescription",
+        "setter": "setSeoDescription",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "mediaSequence",
+        "setter": "setMediaSequence",
+        "type": "ProductMediaSequenceItem[]",
+        "initial": "[]"
+      },
+      {
+        "name": "animationConfig",
+        "setter": "setAnimationConfig",
+        "type": "ProductAnimationConfig",
+        "initial": "DEFAULT_ANIMATION_CONFIG"
+      },
+      {
+        "name": "mediaList",
+        "setter": "setMediaList",
+        "type": "ProductMediaRelation[]",
+        "initial": "[]"
+      },
+      {
+        "name": "claimsList",
+        "setter": "setClaimsList",
+        "type": "ProductClaim[]",
+        "initial": "[]"
+      },
+      {
+        "name": "stagedFiles",
+        "setter": "setStagedFiles",
+        "type": "StagedMediaFile[]",
+        "initial": "[]"
+      },
+      {
+        "name": "mediaAltText",
+        "setter": "setMediaAltText",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "uploadingMedia",
+        "setter": "setUploadingMedia",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "uploadProgressText",
+        "setter": "setUploadProgressText",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "newClaimText",
+        "setter": "setNewClaimText",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "newClaimSource",
+        "setter": "setNewClaimSource",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "newClaimType",
+        "setter": "setNewClaimType",
+        "type": "ClaimType",
+        "initial": "'health'"
+      },
+      {
+        "name": "addingClaim",
+        "setter": "setAddingClaim",
+        "type": "inferred",
+        "initial": "false"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminBlogManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": true,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "posts",
+        "setter": "setPosts",
+        "type": "BlogPost[]",
+        "initial": "[]"
+      },
+      {
+        "name": "products",
+        "setter": "setProducts",
+        "type": "Product[]",
+        "initial": "[]"
+      },
+      {
+        "name": "isEditing",
+        "setter": "setIsEditing",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "editingPostId",
+        "setter": "setEditingPostId",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "title",
+        "setter": "setTitle",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "slug",
+        "setter": "setSlug",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "excerpt",
+        "setter": "setExcerpt",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "content",
+        "setter": "setContent",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "featuredMedia",
+        "setter": "setFeaturedMedia",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "relatedProductId",
+        "setter": "setRelatedProductId",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "status",
+        "setter": "setStatus",
+        "type": "'draft' | 'published'",
+        "initial": "'published'"
+      },
+      {
+        "name": "ctaText",
+        "setter": "setCtaText",
+        "type": "inferred",
+        "initial": "'Order on WhatsApp'"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminCampaignManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "campaigns",
+        "setter": "setCampaigns",
+        "type": "Campaign[]",
+        "initial": "[]"
+      },
+      {
+        "name": "influencers",
+        "setter": "setInfluencers",
+        "type": "Influencer[]",
+        "initial": "[]"
+      },
+      {
+        "name": "products",
+        "setter": "setProducts",
+        "type": "Product[]",
+        "initial": "[]"
+      },
+      {
+        "name": "name",
+        "setter": "setName",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "slug",
+        "setter": "setSlug",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "headline",
+        "setter": "setHeadline",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "subheadline",
+        "setter": "setSubheadline",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "influencerId",
+        "setter": "setInfluencerId",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "productId",
+        "setter": "setProductId",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "promoCode",
+        "setter": "setPromoCode",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "discountPercent",
+        "setter": "setDiscountPercent",
+        "type": "number",
+        "initial": "10"
+      },
+      {
+        "name": "utmSource",
+        "setter": "setUtmSource",
+        "type": "inferred",
+        "initial": "'instagram'"
+      },
+      {
+        "name": "utmCampaign",
+        "setter": "setUtmCampaign",
+        "type": "inferred",
+        "initial": "''"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminClaimsManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "claims",
+        "setter": "setClaims",
+        "type": "ProductClaim[]",
+        "initial": "[]"
+      },
+      {
+        "name": "products",
+        "setter": "setProducts",
+        "type": "Product[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "selectedProductId",
+        "setter": "setSelectedProductId",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "claimText",
+        "setter": "setClaimText",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "claimSource",
+        "setter": "setClaimSource",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "claimType",
+        "setter": "setClaimType",
+        "type": "ClaimType",
+        "initial": "'health'"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminCommercialBrain.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": true,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "subTab",
+        "setter": "setSubTab",
+        "type": "BrainSubTab",
+        "initial": "'territories'"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "error",
+        "setter": "setError",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "successMsg",
+        "setter": "setSuccessMsg",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "territories",
+        "setter": "setTerritories",
+        "type": "SalesTerritory[]",
+        "initial": "[]"
+      },
+      {
+        "name": "journeys",
+        "setter": "setJourneys",
+        "type": "SalesJourney[]",
+        "initial": "[]"
+      },
+      {
+        "name": "offers",
+        "setter": "setOffers",
+        "type": "SalesOffer[]",
+        "initial": "[]"
+      },
+      {
+        "name": "questions",
+        "setter": "setQuestions",
+        "type": "SalesQuestion[]",
+        "initial": "[]"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminLeadsManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "leads",
+        "setter": "setLeads",
+        "type": "SalesLead[]",
+        "initial": "[]"
+      },
+      {
+        "name": "funnelSummaries",
+        "setter": "setFunnelSummaries",
+        "type": "SalesFunnelSummary[]",
+        "initial": "[]"
+      },
+      {
+        "name": "territories",
+        "setter": "setTerritories",
+        "type": "SalesTerritory[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "updatingId",
+        "setter": "setUpdatingId",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "error",
+        "setter": "setError",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "selectedTerritoryId",
+        "setter": "setSelectedTerritoryId",
+        "type": "string",
+        "initial": "'all'"
+      },
+      {
+        "name": "selectedStatus",
+        "setter": "setSelectedStatus",
+        "type": "string",
+        "initial": "'all'"
+      },
+      {
+        "name": "expandedLeadId",
+        "setter": "setExpandedLeadId",
+        "type": "string | null",
+        "initial": "null"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminMediaManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "activeTab",
+        "setter": "setActiveTab",
+        "type": "'library' | 'placements' | 'products'",
+        "initial": "'library'"
+      },
+      {
+        "name": "assets",
+        "setter": "setAssets",
+        "type": "MediaAsset[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loadingAssets",
+        "setter": "setLoadingAssets",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "assetFilter",
+        "setter": "setAssetFilter",
+        "type": "'all' | 'image' | 'animation' | 'video'",
+        "initial": "'all'"
+      },
+      {
+        "name": "placements",
+        "setter": "setPlacements",
+        "type": "MediaPlacement[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loadingPlacements",
+        "setter": "setLoadingPlacements",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "scopeFilter",
+        "setter": "setScopeFilter",
+        "type": "string",
+        "initial": "'all'"
+      },
+      {
+        "name": "products",
+        "setter": "setProducts",
+        "type": "Product[]",
+        "initial": "[]"
+      },
+      {
+        "name": "productMediaList",
+        "setter": "setProductMediaList",
+        "type": "ProductMediaRelation[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loadingProductMedia",
+        "setter": "setLoadingProductMedia",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "selectedFile",
+        "setter": "setSelectedFile",
+        "type": "File | null",
+        "initial": "null"
+      },
+      {
+        "name": "filePreview",
+        "setter": "setFilePreview",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "uploadAltText",
+        "setter": "setUploadAltText",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "uploadCaption",
+        "setter": "setUploadCaption",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "allowOversized",
+        "setter": "setAllowOversized",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "isUploading",
+        "setter": "setIsUploading",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "uploadProgress",
+        "setter": "setUploadProgress",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "uploadError",
+        "setter": "setUploadError",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "uploadSuccess",
+        "setter": "setUploadSuccess",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "showPlacementModal",
+        "setter": "setShowPlacementModal",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "modalMediaId",
+        "setter": "setModalMediaId",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "modalScopeType",
+        "setter": "setModalScopeType",
+        "type": "PlacementScopeType",
+        "initial": "'homepage_hero'"
+      },
+      {
+        "name": "modalScopeId",
+        "setter": "setModalScopeId",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "modalPlacementKey",
+        "setter": "setModalPlacementKey",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "modalSortOrder",
+        "setter": "setModalSortOrder",
+        "type": "number",
+        "initial": "0"
+      },
+      {
+        "name": "modalAltOverride",
+        "setter": "setModalAltOverride",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "placementError",
+        "setter": "setPlacementError",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "showProductLinkModal",
+        "setter": "setShowProductLinkModal",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "linkMediaId",
+        "setter": "setLinkMediaId",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "linkProductId",
+        "setter": "setLinkProductId",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "linkIsPrimary",
+        "setter": "setLinkIsPrimary",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "linkError",
+        "setter": "setLinkError",
+        "type": "string | null",
+        "initial": "null"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminOrdersManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "orders",
+        "setter": "setOrders",
+        "type": "Order[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "searchQuery",
+        "setter": "setSearchQuery",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "statusFilter",
+        "setter": "setStatusFilter",
+        "type": "string",
+        "initial": "'all'"
+      },
+      {
+        "name": "selectedOrder",
+        "setter": "setSelectedOrder",
+        "type": "Order | null",
+        "initial": "null"
+      },
+      {
+        "name": "updatingId",
+        "setter": "setUpdatingId",
+        "type": "string | null",
+        "initial": "null"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminPriceManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "products",
+        "setter": "setProducts",
+        "type": "Product[]",
+        "initial": "[]"
+      },
+      {
+        "name": "priceHistory",
+        "setter": "setPriceHistory",
+        "type": "PriceHistoryRow[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "selectedProduct",
+        "setter": "setSelectedProduct",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "newBasePrice",
+        "setter": "setNewBasePrice",
+        "type": "number",
+        "initial": "1000"
+      },
+      {
+        "name": "newSalePrice",
+        "setter": "setNewSalePrice",
+        "type": "number | ''",
+        "initial": "''"
+      },
+      {
+        "name": "reason",
+        "setter": "setReason",
+        "type": "string",
+        "initial": "'Standard periodic price update'"
+      },
+      {
+        "name": "updating",
+        "setter": "setUpdating",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "successMsg",
+        "setter": "setSuccessMsg",
+        "type": "string | null",
+        "initial": "null"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminProductList.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "products",
+        "setter": "setProducts",
+        "type": "Product[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "quickPriceModal",
+        "setter": "setQuickPriceModal",
+        "type": "Product | null",
+        "initial": "null"
+      },
+      {
+        "name": "newBasePrice",
+        "setter": "setNewBasePrice",
+        "type": "number",
+        "initial": "0"
+      },
+      {
+        "name": "newSalePrice",
+        "setter": "setNewSalePrice",
+        "type": "number | ''",
+        "initial": "''"
+      },
+      {
+        "name": "priceReason",
+        "setter": "setPriceReason",
+        "type": "string",
+        "initial": "''"
+      },
+      {
+        "name": "isUpdatingPrice",
+        "setter": "setIsUpdatingPrice",
+        "type": "inferred",
+        "initial": "false"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminRetailerManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "retailers",
+        "setter": "setRetailers",
+        "type": "Retailer[]",
+        "initial": "[]"
+      },
+      {
+        "name": "name",
+        "setter": "setName",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "address",
+        "setter": "setAddress",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "city",
+        "setter": "setCity",
+        "type": "inferred",
+        "initial": "'Sapele'"
+      },
+      {
+        "name": "state",
+        "setter": "setState",
+        "type": "inferred",
+        "initial": "'Delta State'"
+      },
+      {
+        "name": "phone",
+        "setter": "setPhone",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "whatsapp",
+        "setter": "setWhatsapp",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "availability",
+        "setter": "setAvailability",
+        "type": "inferred",
+        "initial": "'In Stock - Verified Fresh Batches'"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminSettings.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "url",
+        "setter": "setUrl",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "anonKey",
+        "setter": "setAnonKey",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "statusState",
+        "setter": "setStatusState",
+        "type": "SupabaseConfigState | null",
+        "initial": "null"
+      },
+      {
+        "name": "isTesting",
+        "setter": "setIsTesting",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "saveMessage",
+        "setter": "setSaveMessage",
+        "type": "string | null",
+        "initial": "null"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminSocialManager.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": true
+    },
+    "formFieldStates": [
+      {
+        "name": "socialItems",
+        "setter": "setSocialItems",
+        "type": "SocialContent[]",
+        "initial": "[]"
+      },
+      {
+        "name": "products",
+        "setter": "setProducts",
+        "type": "Product[]",
+        "initial": "[]"
+      },
+      {
+        "name": "platform",
+        "setter": "setPlatform",
+        "type": "SocialPlatform",
+        "initial": "'instagram'"
+      },
+      {
+        "name": "postUrl",
+        "setter": "setPostUrl",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "thumbnail",
+        "setter": "setThumbnail",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "caption",
+        "setter": "setCaption",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "creator",
+        "setter": "setCreator",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "productId",
+        "setter": "setProductId",
+        "type": "inferred",
+        "initial": "''"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminAnalyticsViewer.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "events",
+        "setter": "setEvents",
+        "type": "AnalyticsEvent[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminDashboard.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "products",
+        "setter": "setProducts",
+        "type": "Product[]",
+        "initial": "[]"
+      },
+      {
+        "name": "claims",
+        "setter": "setClaims",
+        "type": "ProductClaim[]",
+        "initial": "[]"
+      },
+      {
+        "name": "retailers",
+        "setter": "setRetailers",
+        "type": "Retailer[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/components/admin/AdminLayout.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "dbStatus",
+        "setter": "setDbStatus",
+        "type": "SupabaseConfigState | null",
+        "initial": "null"
+      },
+      {
+        "name": "mobileMenuOpen",
+        "setter": "setMobileMenuOpen",
+        "type": "inferred",
+        "initial": "false"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/AdminApp.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "currentTab",
+        "setter": "setCurrentTab",
+        "type": "AdminTab",
+        "initial": "initialTab"
+      },
+      {
+        "name": "editingProductId",
+        "setter": "setEditingProductId",
+        "type": "string | null",
+        "initial": "null"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/AdminLoginPage.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": true,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "email",
+        "setter": "setEmail",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "password",
+        "setter": "setPassword",
+        "type": "inferred",
+        "initial": "''"
+      },
+      {
+        "name": "submitting",
+        "setter": "setSubmitting",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "localError",
+        "setter": "setLocalError",
+        "type": "string | null",
+        "initial": "null"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/BlogPages.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "posts",
+        "setter": "setPosts",
+        "type": "BlogPost[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "post",
+        "setter": "setPost",
+        "type": "BlogPost | null",
+        "initial": "null"
+      },
+      {
+        "name": "relatedProduct",
+        "setter": "setRelatedProduct",
+        "type": "Product | null",
+        "initial": "null"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/CampaignLandingPage.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "campaign",
+        "setter": "setCampaign",
+        "type": "Campaign | null",
+        "initial": "null"
+      },
+      {
+        "name": "product",
+        "setter": "setProduct",
+        "type": "Product | null",
+        "initial": "null"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/CertificationPage.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "isRunningAll",
+        "setter": "setIsRunningAll",
+        "type": "inferred",
+        "initial": "false"
+      },
+      {
+        "name": "testResults",
+        "setter": "setTestResults",
+        "type": "TestResult[]",
+        "initial": "[\r\n    {\r\n      name: 'G0: Discovery & Forensic Audit',\r\n      code: 'G0_DISCOVERY',\r\n      status: 'pass',\r\n      evidence: 'Audited workspace & environment. Verified lack of legacy hardcoded product catalogues. Verified PostgREST and storage architecture requirements.',\r\n    },\r\n    {\r\n      name: 'G1: Master Database Schema',\r\n      code: 'G1_SCHEMA',\r\n      status: 'pass',\r\n      evidence: 'Verified PostgreSQL schema in /supabase/migrations/20260929000000_cp_splash_schema.sql. All 11 tables (products, product_media, product_claims, product_prices, blog_posts, social_content, influencers, campaigns, retailers, analytics_events"
+      },
+      {
+        "name": "syncTests",
+        "setter": "setSyncTests",
+        "type": "{ id: string; name: string; status: 'idle' | 'running' | 'pass' | 'fail'; detail: string }[]",
+        "initial": "[\r\n    { id: 'A', name: 'Test A: Product Creation', status: 'idle', detail: 'Admin creates product -> Supabase INSERT -> DB record verified -> Public route resolves' },\r\n    { id: 'B', name: 'Test B: Price Engine Update', status: 'idle', detail: 'Admin changes price -> Supabase UPDATE -> DB value verified -> Public page displays new price' },\r\n    { id: 'C', name: 'Test C: Media Engine Upload', status: 'idle', detail: 'Admin uploads image -> Storage upload succeeds -> product_media record linked' },\r\n    { id: 'D', name: 'Test D: Description Update', status: 'idle', detail: 'Admin edits description -> Supabase UPDATE -> Public page updates' },\r\n    { id: 'E', name: 'Test E: Publish State Toggle', status: 'idle', detail: 'Admin sets unpublished -> Database status changes -> Public catalog excludes product' },\r\n  ]"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/ClaimsPage.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "claims",
+        "setter": "setClaims",
+        "type": "ProductClaim[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/CommercialFunnelPage.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "territory",
+        "setter": "setTerritory",
+        "type": "SalesTerritory | null",
+        "initial": "null"
+      },
+      {
+        "name": "funnelPlacements",
+        "setter": "setFunnelPlacements",
+        "type": "MediaPlacement[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "error",
+        "setter": "setError",
+        "type": "string | null",
+        "initial": "null"
+      },
+      {
+        "name": "showModalEngine",
+        "setter": "setShowModalEngine",
+        "type": "inferred",
+        "initial": "false"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/FindRetailersPage.tsx",
+    "isForm": true,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": true,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "retailers",
+        "setter": "setRetailers",
+        "type": "Retailer[]",
+        "initial": "[]"
+      },
+      {
+        "name": "loading",
+        "setter": "setLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "searchCity",
+        "setter": "setSearchCity",
+        "type": "inferred",
+        "initial": "''"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/HomePage.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "socialItems",
+        "setter": "setSocialItems",
+        "type": "SocialContent[]",
+        "initial": "[]"
+      },
+      {
+        "name": "recentBlog",
+        "setter": "setRecentBlog",
+        "type": "BlogPost[]",
+        "initial": "[]"
+      },
+      {
+        "name": "territories",
+        "setter": "setTerritories",
+        "type": "SalesTerritory[]",
+        "initial": "[]"
+      },
+      {
+        "name": "territoriesLoading",
+        "setter": "setTerritoriesLoading",
+        "type": "inferred",
+        "initial": "true"
+      },
+      {
+        "name": "activeEngineTerritory",
+        "setter": "setActiveEngineTerritory",
+        "type": "SalesTerritory | null",
+        "initial": "null"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/ProductDetailPage.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "socialItems",
+        "setter": "setSocialItems",
+        "type": "SocialContent[]",
+        "initial": "[]"
+      },
+      {
+        "name": "relatedBlog",
+        "setter": "setRelatedBlog",
+        "type": "BlogPost[]",
+        "initial": "[]"
+      },
+      {
+        "name": "copiedLink",
+        "setter": "setCopiedLink",
+        "type": "inferred",
+        "initial": "false"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/ProductsCatalogPage.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [
+      {
+        "name": "categories",
+        "setter": "setCategories",
+        "type": "ProductCategory[]",
+        "initial": "[]"
+      },
+      {
+        "name": "selectedCategory",
+        "setter": "setSelectedCategory",
+        "type": "string",
+        "initial": "'all'"
+      }
+    ],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "React state tab switching (AdminApp / AdminLayout)",
+    "evidenceClass": "STATIC"
+  },
+  {
+    "filePath": "src/pages/StoryPage.tsx",
+    "isForm": false,
+    "formElements": {
+      "hasFormTag": false,
+      "hasInput": false,
+      "hasTextarea": false,
+      "hasSelect": false
+    },
+    "formFieldStates": [],
+    "persistenceMechanism": "none",
+    "isPersistent": false,
+    "surroundingNavigation": "Standard <a href>",
+    "evidenceClass": "STATIC"
+  }
+]

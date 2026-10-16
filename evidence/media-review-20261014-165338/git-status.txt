@@ -1,0 +1,50 @@
+﻿ M package-lock.json
+ M package.json
+ M src/components/admin/AdminMediaManager.tsx
+ M src/components/admin/AdminProductEditor.tsx
+ M src/components/admin/AdminProductList.tsx
+ M src/components/admin/AdminRetailerManager.tsx
+ M src/components/admin/AdminSocialManager.tsx
+ M src/components/hero/HeroSlider.tsx
+ M src/components/navigation/Footer.tsx
+ M src/components/navigation/Header.tsx
+ M src/components/product/ProductCard.tsx
+ M src/components/product/ProductGallery.tsx
+ M src/components/product/WhatsAppOrderModal.tsx
+ M src/lib/supabase.ts
+ M src/pages/BlogPages.tsx
+ M src/pages/CampaignLandingPage.tsx
+ M src/pages/CertificationPage.tsx
+ M src/pages/CommercialFunnelPage.tsx
+ M src/pages/FindRetailersPage.tsx
+ M src/pages/HomePage.tsx
+ M src/pages/ProductDetailPage.tsx
+ M src/pages/ProductsCatalogPage.tsx
+ M src/pages/StoryPage.tsx
+ M src/services/mediaService.ts
+ M src/services/productHelpers.ts
+ M src/services/productsService.ts
+ M src/types/database.types.ts
+?? evidence/
+?? production-identity.mjs
+?? reports/
+?? sales-certification.mjs
+?? sales-engine-production.png
+?? sales-runtime-test.mjs
+?? scripts/
+?? src/components/navigation/ProductMenu.tsx
+?? src/components/product/ProductCarousel.tsx
+?? src/lib/supabase.ts.before-env-repair-20261013.bak
+?? src/services/businessConfig.ts
+?? src/services/mediaService.ts.before-cleanup-repair-20261013-085423.bak
+?? src/services/placementService.ts
+?? supabase/migrations/20261014000000_media_placements.sql
+?? tests/e2e_cms_storage_storefront.cjs
+?? tests/e2e_five_funnels_certification.cjs
+?? tests/media_pipeline_placements.test.ts
+?? tests/media_service_contract.test.ts
+?? tests/media_service_contract.test.ts.before-cleanup-tests-20261013-091312.bak
+?? tests/media_service_contract.test.ts.before-cleanup-tests-20261013-091649.bak
+?? tests/probe_media_animation.cjs
+?? tests/product_publication_gate.test.ts
+?? tests/run_test.mjs
