@@ -86,16 +86,16 @@ export function CertificationPage({ onNavigate }: { onNavigate: (path: string) =
       slug: testSlug,
       price: 1350,
       short_description: 'Automated synchronization verification specimen',
-      status: 'published',
+      status: 'draft',
     });
     
-    // Verify public resolution
-    const pubVerify = await productsService.getProductBySlug(testSlug, true);
-    const passedA = !!(createRes.data && pubVerify.data && pubVerify.data.slug === testSlug);
-    setSyncTests(prev => prev.map(t => t.id === 'A' ? { 
-      ...t, 
-      status: passedA ? 'pass' : 'fail', 
-      detail: `Verified created ID ${createRes.data?.id} resolved via slug "${testSlug}" in ${Date.now() - startA}ms` 
+    // Verify database record creation
+    const dbVerify = await productsService.getProductBySlug(testSlug, false);
+    const passedA = !!(createRes.data && dbVerify.data && dbVerify.data.slug === testSlug);
+    setSyncTests(prev => prev.map(t => t.id === 'A' ? {
+      ...t,
+      status: passedA ? 'pass' : 'fail',
+      detail: `Verified created ID ${createRes.data?.id} (draft) resolved via slug "${testSlug}" in ${Date.now() - startA}ms`
     } : t));
 
     if (!createRes.data) {
@@ -118,7 +118,7 @@ export function CertificationPage({ onNavigate }: { onNavigate: (path: string) =
       detail: `Verified price mutated to ₦1,750 (Sale: ₦1,500) and recorded in product_prices in ${Date.now() - startB}ms`
     } : t));
 
-    // Test C: Media upload
+    // Test C: Media upload & Guarded Publication
     setSyncTests(prev => prev.map(t => t.id === 'C' ? { ...t, status: 'running' } : t));
     const startC = Date.now();
     const testBlob = new Blob(['HOEOS_TEST_IMAGE_BYTES'], { type: 'image/jpeg' });
@@ -129,11 +129,14 @@ export function CertificationPage({ onNavigate }: { onNavigate: (path: string) =
       'HOEOS Verified Media Asset',
       true
     );
-    const passedC = !!(mediaRes.data && mediaRes.data.product_id === testId);
-    setSyncTests(prev => prev.map(t => t.id === 'C' ? { 
-      ...t, 
-      status: passedC ? 'pass' : 'fail', 
-      detail: `Verified media attached to product in product_media with is_primary=true in ${Date.now() - startC}ms` 
+    // With active primary image attached, guarded publication transition succeeds:
+    const pubStatusRes = await productsService.setProductStatus(testId, 'published');
+    const pubVerify = await productsService.getProductBySlug(testSlug, true);
+    const passedC = !!(mediaRes.data && mediaRes.data.product_id === testId && pubStatusRes.success && pubVerify.data?.slug === testSlug);
+    setSyncTests(prev => prev.map(t => t.id === 'C' ? {
+      ...t,
+      status: passedC ? 'pass' : 'fail',
+      detail: `Verified media attached, publication gate passed, and public route resolved in ${Date.now() - startC}ms`
     } : t));
 
     // Test D: Description update
