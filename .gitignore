@@ -10,3 +10,65 @@ coverage/
 
 .env.local
 supabase/.temp/
+
+# Recovery snapshots
+*.bak
+
+# Audit / report artifacts
+/evidence/G0/
+/evidence/G3-publication-audit-*/
+/reports/
+
+# Binary/demo assets
+sales-engine-production.png
+*.mp4
+*.jpg
+*.jpeg
+*.png
+
+# Probe scripts (diagnostic, not source)
+/scripts/check-*.cjs
+/scripts/check-*.mjs
+/scripts/inspect-*.mjs
+/scripts/inspect-*.cjs
+/scripts/probe-*.cjs
+/scripts/fetch-*.cjs
+/scripts/live-schema-spec.json
+
+# HOEOS trace scripts (runtime verification; not source)
+scripts/trace-phase-*.mjs
+
+# Test fixtures (regenerable)
+tests/fixtures/media/
+
+# Trace evidence outputs
+evidence/pipeline-*/
+
+# ============================================================
+# HOEOS Transient Files (added R6-D)
+# ============================================================
+# One-off diagnostic scripts — regenerate as needed
+scripts/debug-img.mjs
+scripts/discover-columns.mjs
+scripts/generate-manifest.cjs
+scripts/hash-migrations.cjs
+scripts/test-five-funnels.cjs
+scripts/test-postgrest.mjs
+scripts/trace-phase2.mjs
+scripts/transcode-flow-assets.mjs
+scripts/verify-frontend-ssot.mjs
+scripts/audit-forms.cjs
+scripts/build-cms-form-inventory.cjs
+scripts/Recover-ProductionMigrations.ps1
+
+# Root-level one-off scripts
+/production-identity.mjs
+/sales-certification.mjs
+/sales-runtime-test.mjs
+
+# Supabase CLI generated config
+supabase/.gitignore
+supabase/config.toml
+
+# Session logs
+phase-b-run.log
