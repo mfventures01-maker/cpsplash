@@ -1,0 +1,22 @@
+﻿-- Migration: 20261017000002_grant_anon_analytics_events_insert.sql
+-- Description: Restore anon INSERT table grant on analytics_events.
+--
+-- Root cause: Migration 20261011005429 executed:
+--   REVOKE INSERT ON ALL TABLES IN SCHEMA public FROM anon;
+--   GRANT INSERT ON TABLE public.sales_leads TO anon;
+--
+-- This revoked the anon INSERT grant on analytics_events. The RLS policy
+-- analytics_public_insert already correctly allows anonymous inserts with
+-- strict tenant + event-name constraints. The only gap is the missing
+-- table-level SQL grant, which PostgreSQL evaluates BEFORE RLS.
+--
+-- This migration restores exactly that grant. It does NOT modify any
+-- policy. The existing analytics_public_insert policy is complete and
+-- correct as-is (14 allowed event names + tenant_id constraint).
+--
+-- The proposed earlier draft of this migration would have created a
+-- duplicate permissive policy "anon_insert_analytics_events" that only
+-- enforced tenant_id, thereby loosening the event_name constraint.
+-- That draft is rejected per forensic review.
+
+GRANT INSERT ON TABLE public.analytics_events TO anon;
