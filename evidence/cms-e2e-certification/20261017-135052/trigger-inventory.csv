@@ -1,0 +1,9 @@
+event_object_table,trigger_name,action_timing,event_manipulation,action_statement
+"media_placements","trigger_media_placement_tenant_consistency","BEFORE","INSERT","EXECUTE FUNCTION check_media_placement_tenant_consistency()"
+"media_placements","trigger_media_placement_tenant_consistency","BEFORE","UPDATE","EXECUTE FUNCTION check_media_placement_tenant_consistency()"
+"media_placements","trigger_media_placements_modtime","BEFORE","UPDATE","EXECUTE FUNCTION update_media_placements_modtime()"
+"product_media","trg_product_media_tenant_consistency","BEFORE","INSERT","EXECUTE FUNCTION enforce_tenant_consistency()"
+"product_media","trg_product_media_tenant_consistency","BEFORE","UPDATE","EXECUTE FUNCTION enforce_tenant_consistency()"
+"products","trg_products_tenant_consistency","BEFORE","INSERT","EXECUTE FUNCTION enforce_tenant_consistency()"
+"products","trg_products_tenant_consistency","BEFORE","UPDATE","EXECUTE FUNCTION enforce_tenant_consistency()"
+"sales_journeys","sales_journeys_updated_at","BEFORE","UPDATE","EXECUTE FUNCTION touch_sales_updated_at()"

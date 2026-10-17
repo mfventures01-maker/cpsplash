@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-10-16T22:47:21.663Z",
+  "results": [
+    {
+      "filename": "test-video.mp4",
+      "mime": "video/mp4",
+      "media_type": "video",
+      "bytes": 3387,
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792190722367_p0qoyr_test-video.mp4",
+      "status": "LOADED",
+      "w": 640,
+      "h": 480,
+      "duration": 2
+    },
+    {
+      "filename": "test-animation.gif",
+      "mime": "image/gif",
+      "media_type": "image",
+      "bytes": 156,
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792190721034_tmlah8_test-animation.gif",
+      "status": "LOADED",
+      "w": 100,
+      "h": 100
+    },
+    {
+      "filename": "test-animated.webp",
+      "mime": "image/webp",
+      "media_type": "image",
+      "bytes": 362,
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792190719866_rcdzt6_test-animated.webp",
+      "status": "LOADED",
+      "w": 400,
+      "h": 400
+    },
+    {
+      "filename": "test-jpeg.jpg",
+      "mime": "image/jpeg",
+      "media_type": "image",
+      "bytes": 2435,
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792190718317_4gtby0_test-jpeg.jpg",
+      "status": "LOADED",
+      "w": 600,
+      "h": 600
+    },
+    {
+      "filename": "test-product.png",
+      "mime": "image/png",
+      "media_type": "image",
+      "bytes": 1235,
+      "url": "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792190715299_czlguq_test-product.png",
+      "status": "LOADED",
+      "w": 400,
+      "h": 400
+    }
+  ]
+}

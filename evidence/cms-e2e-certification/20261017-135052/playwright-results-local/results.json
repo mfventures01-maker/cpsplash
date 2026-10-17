@@ -1,0 +1,506 @@
+[
+  {
+    "id": "R_HOME",
+    "name": "Homepage",
+    "route": "/",
+    "source_component": "src/pages/HomePage.tsx",
+    "data_service": "src/services/placementService.ts, productsService.ts",
+    "local_preview_url": "http://localhost:4173/",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "CP Splash Social Commerce Engine",
+        "content_matched": true,
+        "broken_images_count": 3,
+        "broken_images": [
+          "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792095138375_fwwfcv_beetroot_mix_cpsplash.png",
+          "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792095138375_fwwfcv_beetroot_mix_cpsplash.png",
+          "https://efvvczmopacoroudzfnl.supabase.co/storage/v1/object/public/cp-public/media/42d36cee-4cd6-43d1-af5d-334e5a07e37c/1792095138375_fwwfcv_beetroot_mix_cpsplash.png"
+        ],
+        "page_errors_count": 1,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20Sapele%20Hub%2C%20I%20would%20like%20to%20enquire%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_home.png",
+        "result": "FAIL"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "CP Splash Social Commerce Engine",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 1,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20Sapele%20Hub%2C%20I%20would%20like%20to%20enquire%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_home.png",
+        "result": "FAIL"
+      }
+    },
+    "overall_status": "FAIL",
+    "failure_reason": "Broken images: 0, Page errors: 1, Content match: true"
+  },
+  {
+    "id": "R_MENU",
+    "name": "Product Catalog / Menu",
+    "route": "/shop",
+    "source_component": "src/pages/ProductsCatalogPage.tsx",
+    "data_service": "src/services/productsService.ts",
+    "local_preview_url": "http://localhost:4173/shop",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "CP Splash Social Commerce Engine",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 0,
+        "page_errors": [],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_menu.png",
+        "result": "PASS"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "CP Splash Social Commerce Engine",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 0,
+        "page_errors": [],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_menu.png",
+        "result": "PASS"
+      }
+    },
+    "overall_status": "PASS",
+    "failure_reason": null
+  },
+  {
+    "id": "R_DETAIL",
+    "name": "Product Detail View",
+    "route": "/shop/hoeos-hibiscus-0580",
+    "source_component": "src/pages/ProductDetailPage.tsx",
+    "data_service": "src/services/productsService.ts, productHelpers.ts",
+    "local_preview_url": "http://localhost:4173/shop/hoeos-hibiscus-0580",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "CP Splash Social Commerce Engine",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 1,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_detail.png",
+        "result": "FAIL"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "CP Splash Social Commerce Engine",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 1,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_detail.png",
+        "result": "FAIL"
+      }
+    },
+    "overall_status": "FAIL",
+    "failure_reason": "Broken images: 0, Page errors: 1, Content match: true"
+  },
+  {
+    "id": "R_FUNNEL_SPORTS",
+    "name": "Funnel 1: Sports & Athletics",
+    "route": "/sports",
+    "source_component": "src/pages/CommercialFunnelPage.tsx (territorySlug=sports)",
+    "data_service": "src/services/placementService.ts, salesService.ts",
+    "local_preview_url": "http://localhost:4173/sports",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "Sports & Athletics Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_funnel_sports.png",
+        "result": "FAIL"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "Sports & Athletics Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_funnel_sports.png",
+        "result": "FAIL"
+      }
+    },
+    "overall_status": "FAIL",
+    "failure_reason": "Broken images: 0, Page errors: 2, Content match: true"
+  },
+  {
+    "id": "R_FUNNEL_EVENTS",
+    "name": "Funnel 2: Parties & Events",
+    "route": "/parties-events",
+    "source_component": "src/pages/CommercialFunnelPage.tsx (territorySlug=parties-events)",
+    "data_service": "src/services/placementService.ts, salesService.ts",
+    "local_preview_url": "http://localhost:4173/parties-events",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "Parties & Events Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_funnel_events.png",
+        "result": "FAIL"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "Parties & Events Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_funnel_events.png",
+        "result": "FAIL"
+      }
+    },
+    "overall_status": "FAIL",
+    "failure_reason": "Broken images: 0, Page errors: 2, Content match: true"
+  },
+  {
+    "id": "R_FUNNEL_HOTELS",
+    "name": "Funnel 3: Hotels & Hospitality",
+    "route": "/hotels-hospitality",
+    "source_component": "src/pages/CommercialFunnelPage.tsx (territorySlug=hotels-hospitality)",
+    "data_service": "src/services/placementService.ts, salesService.ts",
+    "local_preview_url": "http://localhost:4173/hotels-hospitality",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "Hotels & Hospitality Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_funnel_hotels.png",
+        "result": "FAIL"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "Hotels & Hospitality Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_funnel_hotels.png",
+        "result": "FAIL"
+      }
+    },
+    "overall_status": "FAIL",
+    "failure_reason": "Broken images: 0, Page errors: 2, Content match: true"
+  },
+  {
+    "id": "R_FUNNEL_SCHOOLS",
+    "name": "Funnel 4: Schools & Campuses",
+    "route": "/schools",
+    "source_component": "src/pages/CommercialFunnelPage.tsx (territorySlug=schools)",
+    "data_service": "src/services/placementService.ts, salesService.ts",
+    "local_preview_url": "http://localhost:4173/schools",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "Schools & Campuses Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_funnel_schools.png",
+        "result": "FAIL"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "Schools & Campuses Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_funnel_schools.png",
+        "result": "FAIL"
+      }
+    },
+    "overall_status": "FAIL",
+    "failure_reason": "Broken images: 0, Page errors: 2, Content match: true"
+  },
+  {
+    "id": "R_FUNNEL_INDIVIDUALS",
+    "name": "Funnel 5: Individuals & Direct Orders",
+    "route": "/individuals",
+    "source_component": "src/pages/CommercialFunnelPage.tsx (territorySlug=individuals)",
+    "data_service": "src/services/placementService.ts, salesService.ts",
+    "local_preview_url": "http://localhost:4173/individuals",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "Individuals & Direct Orders Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 2,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_funnel_individuals.png",
+        "result": "FAIL"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "Individuals & Direct Orders Supply & Pricing | CP Fruit Splash Nigeria",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 3,
+        "page_errors": [
+          "Failed to load resource: net::ERR_CONNECTION_CLOSED",
+          "Failed to load resource: the server responded with a status of 401 ()",
+          "Failed to load resource: the server responded with a status of 401 ()"
+        ],
+        "failed_requests_count": 1,
+        "failed_requests": [
+          {
+            "url": "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
+            "failure": "net::ERR_CONNECTION_CLOSED"
+          }
+        ],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_funnel_individuals.png",
+        "result": "FAIL"
+      }
+    },
+    "overall_status": "FAIL",
+    "failure_reason": "Broken images: 0, Page errors: 3, Content match: true"
+  },
+  {
+    "id": "R_DETAIL_UNAVAILABLE",
+    "name": "Product Detail Controlled Unavailable State",
+    "route": "/shop/non-existent-product-slug-12345",
+    "source_component": "src/pages/ProductDetailPage.tsx",
+    "data_service": "src/services/productsService.ts",
+    "local_preview_url": "http://localhost:4173/shop/non-existent-product-slug-12345",
+    "viewports": {
+      "desktop": {
+        "viewport": "desktop",
+        "http_status": 200,
+        "page_title": "CP Splash Social Commerce Engine",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 1,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 406 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/desktop_r_detail_unavailable.png",
+        "result": "FAIL"
+      },
+      "mobile": {
+        "viewport": "mobile",
+        "http_status": 200,
+        "page_title": "CP Splash Social Commerce Engine",
+        "content_matched": true,
+        "broken_images_count": 0,
+        "broken_images": [],
+        "page_errors_count": 1,
+        "page_errors": [
+          "Failed to load resource: the server responded with a status of 406 ()"
+        ],
+        "failed_requests_count": 0,
+        "failed_requests": [],
+        "whatsapp_ctas": [
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20would%20like%20to%20order%20CP%20Fruit%20Splash%20drinks!",
+          "https://wa.me/2348127700724?text=Hello%20CP%20Splash%2C%20I%20have%20an%20enquiry%20about%20your%20products!"
+        ],
+        "screenshot": "screenshots-local/mobile_r_detail_unavailable.png",
+        "result": "FAIL"
+      }
+    },
+    "overall_status": "FAIL",
+    "failure_reason": "Broken images: 0, Page errors: 1, Content match: true"
+  }
+]

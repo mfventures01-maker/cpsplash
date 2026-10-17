@@ -1,0 +1,16 @@
+=== CP SPLASH TEST INVENTORY ===
+
+Execution methods: npx tsx <test-file>, node <test-file>, npx playwright test
+
+e2e_cms_storage_storefront.cjs (12713 bytes)
+e2e_five_funnels_certification.cjs (7075 bytes)
+fixtures (0 bytes) [DIR]
+media_pipeline_placements.test.ts (35039 bytes)
+media_service_contract.test.ts (30839 bytes)
+media_service_contract.test.ts.before-cleanup-tests-20261013-091312.bak (25422 bytes)
+media_service_contract.test.ts.before-cleanup-tests-20261013-091649.bak (25422 bytes)
+probe_auth_chain.cjs (12274 bytes)
+probe_media_animation.cjs (6171 bytes)
+probe_round_trip.cjs (11378 bytes)
+product_publication_gate.test.ts (30994 bytes)
+run_test.mjs (46847 bytes)

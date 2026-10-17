@@ -1,0 +1,23 @@
+tablename,policyname,cmd,roles,permissive,qual,with_check
+"campaigns","campaigns_public_select","SELECT","public","PERMISSIVE","(status = 'active'::text)",""
+"campaigns","campaigns_staff_manage","ALL","authenticated","PERMISSIVE","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+"media_assets","media_public_select","SELECT","anon,authenticated","PERMISSIVE","((status = 'active'::text) AND (bucket = 'cp-public'::text))",""
+"media_assets","media_staff_manage","ALL","authenticated","PERMISSIVE","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+"media_placements","Public read access for active media placements","SELECT","public","PERMISSIVE","((active = true) AND (EXISTS ( SELECT 1
+   FROM media_assets ma
+  WHERE ((ma.id = media_placements.media_id) AND (ma.status = 'active'::text) AND (ma.bucket = 'cp-public'::text)))))",""
+"media_placements","Tenant admin manage media placements","ALL","authenticated","PERMISSIVE","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+"product_media","product_media_public_select","SELECT","public","PERMISSIVE","(EXISTS ( SELECT 1
+   FROM products p
+  WHERE ((p.id = product_media.product_id) AND (p.status = 'published'::text))))",""
+"product_media","product_media_staff_manage","ALL","authenticated","PERMISSIVE","(EXISTS ( SELECT 1
+   FROM products p
+  WHERE ((p.id = product_media.product_id) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))))","(EXISTS ( SELECT 1
+   FROM products p
+  WHERE ((p.id = product_media.product_id) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))))"
+"products","products_public_select","SELECT","public","PERMISSIVE","(status = 'published'::text)",""
+"products","products_staff_manage","ALL","authenticated","PERMISSIVE","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+"sales_journeys","sales_journeys_public_select","SELECT","anon,authenticated","PERMISSIVE","((tenant_id = '42d36cee-4cd6-43d1-af5d-334e5a07e37c'::uuid) AND (active = true))",""
+"sales_journeys","sales_journeys_staff_manage","ALL","authenticated","PERMISSIVE","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])","has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+"tenants","tenant_member_manage","ALL","authenticated","PERMISSIVE","has_tenant_role(id, ARRAY['owner'::text, 'admin'::text])","has_tenant_role(id, ARRAY['owner'::text, 'admin'::text])"
+"tenants","tenant_public_select","SELECT","public","PERMISSIVE","(status = 'active'::text)",""

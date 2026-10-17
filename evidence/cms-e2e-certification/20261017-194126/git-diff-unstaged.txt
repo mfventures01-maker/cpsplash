@@ -1,0 +1,39 @@
+diff --git a/package-lock.json b/package-lock.json
+index 53c2eb5..4fd3cab 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -31,7 +31,8 @@
+         "sharp": "^0.35.5",
+         "tailwindcss": "^4.3.3",
+         "tsx": "^4.21.0",
+-        "typescript": "^7.0.2"
++        "typescript": "^7.0.2",
++        "ws": "^8.22.0"
+       }
+     },
+     "node_modules/@emnapi/runtime": {
+diff --git a/package.json b/package.json
+index cddc9e2..80d273e 100644
+--- a/package.json
++++ b/package.json
+@@ -34,6 +34,7 @@
+     "sharp": "^0.35.5",
+     "tailwindcss": "^4.3.3",
+     "tsx": "^4.21.0",
+-    "typescript": "^7.0.2"
++    "typescript": "^7.0.2",
++    "ws": "^8.22.0"
+   }
+ }
+diff --git a/src/types/database.types.ts b/src/types/database.types.ts
+index 580c444..66443a1 100644
+--- a/src/types/database.types.ts
++++ b/src/types/database.types.ts
+@@ -152,6 +152,7 @@ export interface MediaAsset {
+   created_at: string;
+   // Computed property:
+   public_url?: string;
++  poster_url?: string;
+ }
+ 
+ export type MediaSequenceRole =

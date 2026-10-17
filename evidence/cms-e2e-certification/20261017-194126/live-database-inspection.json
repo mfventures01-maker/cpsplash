@@ -1,0 +1,516 @@
+{
+  "timestamp": "2026-10-17T18:49:03.811Z",
+  "target_project": "efvvczmopacoroudzfnl",
+  "trigger_function": [
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.check_media_placement_tenant_consistency()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE\n    v_asset_tenant_id UUID;\nBEGIN\n    SELECT tenant_id INTO v_asset_tenant_id\n    FROM public.media_assets\n    WHERE id = NEW.media_id;\n\n    IF v_asset_tenant_id IS NULL THEN\n        RAISE EXCEPTION 'Referenced media asset % does not exist', NEW.media_id;\n    END IF;\n\n    IF v_asset_tenant_id <> NEW.tenant_id THEN\n        RAISE EXCEPTION 'Tenant mismatch: placement tenant % does not match media asset tenant %',\n            NEW.tenant_id, v_asset_tenant_id;\n    END IF;\n\n    IF NEW.scope_type = 'campaign' AND NEW.scope_id IS NOT NULL\n       AND NEW.scope_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN\n        IF NOT EXISTS (\n            SELECT 1 FROM public.campaigns c\n            WHERE c.id = NEW.scope_id::uuid AND c.tenant_id = NEW.tenant_id\n        ) THEN\n            RAISE EXCEPTION 'Referenced campaign % does not belong to tenant %', NEW.scope_id, NEW.tenant_id;\n        END IF;\n    END IF;\n\n    IF NEW.scope_type = 'sales_journey' AND NEW.scope_id IS NOT NULL\n       AND NEW.scope_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN\n        IF NOT EXISTS (\n            SELECT 1 FROM public.sales_journeys sj\n            WHERE sj.id = NEW.scope_id::uuid AND sj.tenant_id = NEW.tenant_id\n        ) THEN\n            RAISE EXCEPTION 'Referenced sales journey % does not belong to tenant %', NEW.scope_id, NEW.tenant_id;\n        END IF;\n    END IF;\n\n    RETURN NEW;\nEND;\n$function$\n",
+      "proacl": "=X/postgres; postgres=X/postgres; anon=X/postgres; authenticated=X/postgres; service_role=X/postgres",
+      "proname": "check_media_placement_tenant_consistency",
+      "prosecdef": false,
+      "provolatile": "v"
+    }
+  ],
+  "trigger_bindings": [
+    {
+      "action_orientation": "ROW",
+      "action_statement": "EXECUTE FUNCTION check_media_placement_tenant_consistency()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "INSERT",
+      "event_object_table": "media_placements",
+      "trigger_name": "trigger_media_placement_tenant_consistency"
+    },
+    {
+      "action_orientation": "ROW",
+      "action_statement": "EXECUTE FUNCTION check_media_placement_tenant_consistency()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "media_placements",
+      "trigger_name": "trigger_media_placement_tenant_consistency"
+    },
+    {
+      "action_orientation": "ROW",
+      "action_statement": "EXECUTE FUNCTION update_media_placements_modtime()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "media_placements",
+      "trigger_name": "trigger_media_placements_modtime"
+    }
+  ],
+  "analytics_events": {
+    "table_info": [
+      {
+        "rowsecurity": true,
+        "schemaname": "public",
+        "tablename": "analytics_events"
+      }
+    ],
+    "columns": [
+      {
+        "column_default": "gen_random_uuid()",
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "ordinal_position": 1
+      },
+      {
+        "column_default": null,
+        "column_name": "tenant_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "ordinal_position": 2
+      },
+      {
+        "column_default": null,
+        "column_name": "session_id",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "ordinal_position": 3
+      },
+      {
+        "column_default": null,
+        "column_name": "customer_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "ordinal_position": 4
+      },
+      {
+        "column_default": null,
+        "column_name": "event_name",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "ordinal_position": 5
+      },
+      {
+        "column_default": null,
+        "column_name": "product_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "ordinal_position": 6
+      },
+      {
+        "column_default": null,
+        "column_name": "campaign_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "ordinal_position": 7
+      },
+      {
+        "column_default": null,
+        "column_name": "order_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "ordinal_position": 8
+      },
+      {
+        "column_default": null,
+        "column_name": "page_path",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "ordinal_position": 9
+      },
+      {
+        "column_default": null,
+        "column_name": "source",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "ordinal_position": 10
+      },
+      {
+        "column_default": null,
+        "column_name": "medium",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "ordinal_position": 11
+      },
+      {
+        "column_default": null,
+        "column_name": "campaign",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "ordinal_position": 12
+      },
+      {
+        "column_default": null,
+        "column_name": "content",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "ordinal_position": 13
+      },
+      {
+        "column_default": "'{}'::jsonb",
+        "column_name": "metadata",
+        "data_type": "jsonb",
+        "is_nullable": "NO",
+        "ordinal_position": 14
+      },
+      {
+        "column_default": "now()",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "ordinal_position": 15
+      },
+      {
+        "column_default": null,
+        "column_name": "lead_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "ordinal_position": 16
+      },
+      {
+        "column_default": null,
+        "column_name": "territory_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "ordinal_position": 17
+      },
+      {
+        "column_default": null,
+        "column_name": "offer_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "ordinal_position": 18
+      },
+      {
+        "column_default": null,
+        "column_name": "journey_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "ordinal_position": 19
+      }
+    ],
+    "constraints": [
+      {
+        "column_name": "campaign_id",
+        "constraint_name": "analytics_events_campaign_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "campaigns"
+      },
+      {
+        "column_name": "customer_id",
+        "constraint_name": "analytics_events_customer_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "customers"
+      },
+      {
+        "column_name": "journey_id",
+        "constraint_name": "analytics_events_journey_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "sales_journeys"
+      },
+      {
+        "column_name": "lead_id",
+        "constraint_name": "analytics_events_lead_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "sales_leads"
+      },
+      {
+        "column_name": "offer_id",
+        "constraint_name": "analytics_events_offer_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "sales_offers"
+      },
+      {
+        "column_name": "order_id",
+        "constraint_name": "analytics_events_order_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "orders"
+      },
+      {
+        "column_name": "id",
+        "constraint_name": "analytics_events_pkey",
+        "constraint_type": "PRIMARY KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "analytics_events"
+      },
+      {
+        "column_name": "product_id",
+        "constraint_name": "analytics_events_product_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "products"
+      },
+      {
+        "column_name": "tenant_id",
+        "constraint_name": "analytics_events_tenant_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "tenants"
+      },
+      {
+        "column_name": "territory_id",
+        "constraint_name": "analytics_events_territory_id_fkey",
+        "constraint_type": "FOREIGN KEY",
+        "foreign_column_name": "id",
+        "foreign_table_name": "sales_territories"
+      }
+    ],
+    "indexes": [
+      {
+        "indexdef": "CREATE UNIQUE INDEX analytics_events_pkey ON public.analytics_events USING btree (id)",
+        "indexname": "analytics_events_pkey"
+      },
+      {
+        "indexdef": "CREATE INDEX idx_events_tenant_created ON public.analytics_events USING btree (tenant_id, created_at DESC)",
+        "indexname": "idx_events_tenant_created"
+      }
+    ],
+    "grants": [
+      {
+        "grantee": "postgres",
+        "is_grantable": "YES",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "postgres",
+        "is_grantable": "YES",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "postgres",
+        "is_grantable": "YES",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "postgres",
+        "is_grantable": "YES",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "postgres",
+        "is_grantable": "YES",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "postgres",
+        "is_grantable": "YES",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "postgres",
+        "is_grantable": "YES",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "authenticated",
+        "is_grantable": "NO",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "authenticated",
+        "is_grantable": "NO",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "authenticated",
+        "is_grantable": "NO",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "authenticated",
+        "is_grantable": "NO",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "authenticated",
+        "is_grantable": "NO",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "authenticated",
+        "is_grantable": "NO",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "authenticated",
+        "is_grantable": "NO",
+        "privilege_type": "TRIGGER"
+      },
+      {
+        "grantee": "service_role",
+        "is_grantable": "NO",
+        "privilege_type": "INSERT"
+      },
+      {
+        "grantee": "service_role",
+        "is_grantable": "NO",
+        "privilege_type": "SELECT"
+      },
+      {
+        "grantee": "service_role",
+        "is_grantable": "NO",
+        "privilege_type": "UPDATE"
+      },
+      {
+        "grantee": "service_role",
+        "is_grantable": "NO",
+        "privilege_type": "DELETE"
+      },
+      {
+        "grantee": "service_role",
+        "is_grantable": "NO",
+        "privilege_type": "TRUNCATE"
+      },
+      {
+        "grantee": "service_role",
+        "is_grantable": "NO",
+        "privilege_type": "REFERENCES"
+      },
+      {
+        "grantee": "service_role",
+        "is_grantable": "NO",
+        "privilege_type": "TRIGGER"
+      }
+    ],
+    "rls_policies": [
+      {
+        "cmd": "INSERT",
+        "permissive": "PERMISSIVE",
+        "policyname": "analytics_public_insert",
+        "qual": null,
+        "roles": "{anon,authenticated}",
+        "schemaname": "public",
+        "tablename": "analytics_events",
+        "with_check": "((tenant_id = '42d36cee-4cd6-43d1-af5d-334e5a07e37c'::uuid) AND (event_name = ANY (ARRAY['page_view'::text, 'territory_selected'::text, 'sales_form_started'::text, 'sales_form_completed'::text, 'lead_created'::text, 'whatsapp_started'::text, 'lead_qualified'::text, 'quote_created'::text, 'order_started'::text, 'order_completed'::text, 'product_view'::text, 'whatsapp_click'::text, 'product_video_play'::text, 'social_click'::text])))"
+      },
+      {
+        "cmd": "SELECT",
+        "permissive": "PERMISSIVE",
+        "policyname": "analytics_staff_select",
+        "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'manager'::text, 'marketing'::text, 'sales'::text])",
+        "roles": "{authenticated}",
+        "schemaname": "public",
+        "tablename": "analytics_events",
+        "with_check": null
+      }
+    ]
+  },
+  "tenant_helpers": [
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.has_tenant_role(_tenant_id uuid, _role_names text[])\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  SELECT EXISTS (\n    SELECT 1\n    FROM public.tenant_memberships tm\n    JOIN public.roles r ON r.id = tm.role_id\n    WHERE tm.tenant_id = _tenant_id\n      AND tm.user_id = auth.uid()\n      AND tm.status = 'active'\n      AND r.name = ANY(_role_names)\n  );\n$function$\n",
+      "proacl": "postgres=X/postgres; service_role=X/postgres; authenticated=X/postgres",
+      "proname": "has_tenant_role",
+      "prosecdef": true
+    },
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.is_tenant_member(_tenant_id uuid)\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  SELECT EXISTS (\n    SELECT 1\n    FROM public.tenant_memberships tm\n    WHERE tm.tenant_id = _tenant_id\n      AND tm.user_id = auth.uid()\n      AND tm.status = 'active'\n  );\n$function$\n",
+      "proacl": "postgres=X/postgres; service_role=X/postgres; authenticated=X/postgres",
+      "proname": "is_tenant_member",
+      "prosecdef": true
+    },
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.update_media_placements_modtime()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nBEGIN\n    NEW.updated_at = NOW();\n    RETURN NEW;\nEND;\n$function$\n",
+      "proacl": "=X/postgres; postgres=X/postgres; anon=X/postgres; authenticated=X/postgres; service_role=X/postgres",
+      "proname": "update_media_placements_modtime",
+      "prosecdef": false
+    }
+  ],
+  "live_migrations": [
+    {
+      "name": "create_multi_tenant_ecommerce_engine",
+      "version": "20261001093826"
+    },
+    {
+      "name": "harden_multi_tenant_integrity_and_function_privileges",
+      "version": "20261001093846"
+    },
+    {
+      "name": "restore_authenticated_tenant_function_execution",
+      "version": "20261001184542"
+    },
+    {
+      "name": "create_cp_splash_storage_buckets",
+      "version": "20261001191133"
+    },
+    {
+      "name": "cp_splash_storage_object_rls",
+      "version": "20261005215338"
+    },
+    {
+      "name": "cp_splash_storage_object_rls_path_fix",
+      "version": "20261005215347"
+    },
+    {
+      "name": "recovered_touch_sales_updated_at_fn",
+      "version": "20261011000001"
+    },
+    {
+      "name": "recovered_normalize_sales_lead_fn",
+      "version": "20261011000002"
+    },
+    {
+      "name": "recovered_sales_lead_number_seq",
+      "version": "20261011000003"
+    },
+    {
+      "name": "recovered_sales_territories",
+      "version": "20261011000004"
+    },
+    {
+      "name": "recovered_sales_offers",
+      "version": "20261011000005"
+    },
+    {
+      "name": "recovered_sales_journeys",
+      "version": "20261011000006"
+    },
+    {
+      "name": "recovered_sales_leads",
+      "version": "20261011000007"
+    },
+    {
+      "name": "recovered_sales_questions",
+      "version": "20261011000008"
+    },
+    {
+      "name": "cp_splash_harden_public_grants_and_tenant_helpers",
+      "version": "20261011005429"
+    },
+    {
+      "name": "cp_splash_revoke_anonymous_private_reads",
+      "version": "20261011005448"
+    },
+    {
+      "name": "cp_splash_scope_public_media_metadata_to_public_bucket",
+      "version": "20261011010205"
+    },
+    {
+      "name": "cp_splash_allow_gif_product_media_uploads",
+      "version": "20261011011157"
+    },
+    {
+      "name": "media_placements",
+      "version": "20261014000000"
+    },
+    {
+      "name": "media_placements_table",
+      "version": "20261014000001"
+    },
+    {
+      "name": "media_placements_modtime",
+      "version": "20261014000002"
+    },
+    {
+      "name": "media_placements_integrity",
+      "version": "20261014000003"
+    },
+    {
+      "name": "media_placements_rls",
+      "version": "20261014000004"
+    },
+    {
+      "name": "cp_public_storage_scope",
+      "version": "20261014000005"
+    },
+    {
+      "name": "cp_public_media_policies",
+      "version": "20261016000001"
+    }
+  ]
+}

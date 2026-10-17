@@ -1,0 +1,1481 @@
+{
+  "timestamp": "2026-10-17T13:15:08.424Z",
+  "target_tables": [
+    "media_placements",
+    "media_assets",
+    "product_media",
+    "products",
+    "campaigns",
+    "sales_journeys",
+    "tenants"
+  ],
+  "columns": [
+    {
+      "column_default": "gen_random_uuid()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "tenant_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "slug",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 5,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": "'draft'::text",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 6,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "starts_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 7,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "ends_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES",
+      "ordinal_position": 8,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "landing_path",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 9,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "default_utm_source",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 10,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "default_utm_medium",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 11,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": null,
+      "column_name": "default_utm_campaign",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 12,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 13,
+      "table_name": "campaigns"
+    },
+    {
+      "column_default": "gen_random_uuid()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "tenant_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "bucket",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "path",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "media_type",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "mime_type",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "filename",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 7,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "size_bytes",
+      "data_type": "bigint",
+      "is_nullable": "YES",
+      "ordinal_position": 8,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "width",
+      "data_type": "integer",
+      "is_nullable": "YES",
+      "ordinal_position": 9,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "height",
+      "data_type": "integer",
+      "is_nullable": "YES",
+      "ordinal_position": 10,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "duration_seconds",
+      "data_type": "numeric",
+      "is_nullable": "YES",
+      "ordinal_position": 11,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "alt_text",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 12,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "caption",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 13,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": "'active'::text",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 14,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": null,
+      "column_name": "uploaded_by",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "ordinal_position": 15,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 16,
+      "table_name": "media_assets"
+    },
+    {
+      "column_default": "gen_random_uuid()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": null,
+      "column_name": "tenant_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": null,
+      "column_name": "media_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": null,
+      "column_name": "placement_key",
+      "data_type": "character varying",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": null,
+      "column_name": "scope_type",
+      "data_type": "character varying",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": null,
+      "column_name": "scope_id",
+      "data_type": "character varying",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": "0",
+      "column_name": "sort_order",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "ordinal_position": 7,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": "true",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "ordinal_position": 8,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": null,
+      "column_name": "alt_text_override",
+      "data_type": "character varying",
+      "is_nullable": "YES",
+      "ordinal_position": 9,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 10,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 11,
+      "table_name": "media_placements"
+    },
+    {
+      "column_default": null,
+      "column_name": "product_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "product_media"
+    },
+    {
+      "column_default": null,
+      "column_name": "media_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "product_media"
+    },
+    {
+      "column_default": "0",
+      "column_name": "sort_order",
+      "data_type": "integer",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "product_media"
+    },
+    {
+      "column_default": "false",
+      "column_name": "is_primary",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "product_media"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "product_media"
+    },
+    {
+      "column_default": "gen_random_uuid()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "tenant_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "category_id",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "ordinal_position": 3,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "slug",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "sku",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 6,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "brand",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 7,
+      "table_name": "products"
+    },
+    {
+      "column_default": "'physical'::text",
+      "column_name": "product_type",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 8,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "short_description",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 9,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 10,
+      "table_name": "products"
+    },
+    {
+      "column_default": "'draft'::text",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 11,
+      "table_name": "products"
+    },
+    {
+      "column_default": "false",
+      "column_name": "featured",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "ordinal_position": 12,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "seo_title",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 13,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "seo_description",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 14,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "seo_keywords",
+      "data_type": "ARRAY",
+      "is_nullable": "YES",
+      "ordinal_position": 15,
+      "table_name": "products"
+    },
+    {
+      "column_default": "'{}'::jsonb",
+      "column_name": "metadata",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "ordinal_position": 16,
+      "table_name": "products"
+    },
+    {
+      "column_default": null,
+      "column_name": "created_by",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "ordinal_position": 17,
+      "table_name": "products"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 18,
+      "table_name": "products"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 19,
+      "table_name": "products"
+    },
+    {
+      "column_default": "gen_random_uuid()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": null,
+      "column_name": "tenant_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": null,
+      "column_name": "territory_id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": null,
+      "column_name": "slug",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 4,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": null,
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": "'lead'::text",
+      "column_name": "journey_type",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 6,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": "'whatsapp'::text",
+      "column_name": "destination",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 7,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": null,
+      "column_name": "cta_label",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 8,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": null,
+      "column_name": "whatsapp_number",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 9,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": null,
+      "column_name": "manychat_flow_key",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 10,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": "true",
+      "column_name": "active",
+      "data_type": "boolean",
+      "is_nullable": "NO",
+      "ordinal_position": 11,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": "'{}'::jsonb",
+      "column_name": "config",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "ordinal_position": 12,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": null,
+      "column_name": "created_by",
+      "data_type": "uuid",
+      "is_nullable": "YES",
+      "ordinal_position": 13,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 14,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 15,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_default": "gen_random_uuid()",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO",
+      "ordinal_position": 1,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": null,
+      "column_name": "name",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 2,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": null,
+      "column_name": "slug",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 3,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": null,
+      "column_name": "legal_name",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 4,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": "'active'::text",
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 5,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": "'NGN'::bpchar",
+      "column_name": "default_currency",
+      "data_type": "character",
+      "is_nullable": "NO",
+      "ordinal_position": 6,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": "'NG'::text",
+      "column_name": "default_country",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 7,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": "'Africa/Lagos'::text",
+      "column_name": "timezone",
+      "data_type": "text",
+      "is_nullable": "NO",
+      "ordinal_position": 8,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": null,
+      "column_name": "logo_url",
+      "data_type": "text",
+      "is_nullable": "YES",
+      "ordinal_position": 9,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": "'{}'::jsonb",
+      "column_name": "settings",
+      "data_type": "jsonb",
+      "is_nullable": "NO",
+      "ordinal_position": 10,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 11,
+      "table_name": "tenants"
+    },
+    {
+      "column_default": "now()",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO",
+      "ordinal_position": 12,
+      "table_name": "tenants"
+    }
+  ],
+  "constraints": [
+    {
+      "column_name": "id",
+      "constraint_name": "campaigns_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "campaigns",
+      "table_name": "campaigns"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "campaigns_tenant_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "tenants",
+      "table_name": "campaigns"
+    },
+    {
+      "column_name": "slug",
+      "constraint_name": "campaigns_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "slug",
+      "foreign_table_name": "campaigns",
+      "table_name": "campaigns"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "campaigns_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "slug",
+      "foreign_table_name": "campaigns",
+      "table_name": "campaigns"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "campaigns_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "campaigns",
+      "table_name": "campaigns"
+    },
+    {
+      "column_name": "slug",
+      "constraint_name": "campaigns_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "campaigns",
+      "table_name": "campaigns"
+    },
+    {
+      "column_name": "id",
+      "constraint_name": "media_assets_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "path",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "path",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "bucket",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "bucket",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "bucket",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "path",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "bucket",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "bucket",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "bucket",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "path",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "path",
+      "constraint_name": "media_assets_tenant_id_bucket_path_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "path",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "media_assets_tenant_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "tenants",
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "uploaded_by",
+      "constraint_name": "media_assets_uploaded_by_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": null,
+      "foreign_table_name": null,
+      "table_name": "media_assets"
+    },
+    {
+      "column_name": "media_id",
+      "constraint_name": "media_placements_media_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "media_assets",
+      "table_name": "media_placements"
+    },
+    {
+      "column_name": "id",
+      "constraint_name": "media_placements_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "media_placements",
+      "table_name": "media_placements"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "media_placements_tenant_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "tenants",
+      "table_name": "media_placements"
+    },
+    {
+      "column_name": "media_id",
+      "constraint_name": "product_media_media_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "media_assets",
+      "table_name": "product_media"
+    },
+    {
+      "column_name": "media_id",
+      "constraint_name": "product_media_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "product_id",
+      "foreign_table_name": "product_media",
+      "table_name": "product_media"
+    },
+    {
+      "column_name": "product_id",
+      "constraint_name": "product_media_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "media_id",
+      "foreign_table_name": "product_media",
+      "table_name": "product_media"
+    },
+    {
+      "column_name": "product_id",
+      "constraint_name": "product_media_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "product_id",
+      "foreign_table_name": "product_media",
+      "table_name": "product_media"
+    },
+    {
+      "column_name": "media_id",
+      "constraint_name": "product_media_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "media_id",
+      "foreign_table_name": "product_media",
+      "table_name": "product_media"
+    },
+    {
+      "column_name": "product_id",
+      "constraint_name": "product_media_product_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "products",
+      "table_name": "product_media"
+    },
+    {
+      "column_name": "category_id",
+      "constraint_name": "products_category_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "product_categories",
+      "table_name": "products"
+    },
+    {
+      "column_name": "created_by",
+      "constraint_name": "products_created_by_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": null,
+      "foreign_table_name": null,
+      "table_name": "products"
+    },
+    {
+      "column_name": "id",
+      "constraint_name": "products_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "products_tenant_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "tenants",
+      "table_name": "products"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "products_tenant_id_sku_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "products_tenant_id_sku_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "sku",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "sku",
+      "constraint_name": "products_tenant_id_sku_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "sku",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "sku",
+      "constraint_name": "products_tenant_id_sku_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "products_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "slug",
+      "constraint_name": "products_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "slug",
+      "constraint_name": "products_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "slug",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "products_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "slug",
+      "foreign_table_name": "products",
+      "table_name": "products"
+    },
+    {
+      "column_name": "created_by",
+      "constraint_name": "sales_journeys_created_by_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": null,
+      "foreign_table_name": null,
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_name": "id",
+      "constraint_name": "sales_journeys_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "sales_journeys",
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "sales_journeys_tenant_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "tenants",
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "sales_journeys_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "sales_journeys",
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_name": "slug",
+      "constraint_name": "sales_journeys_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "slug",
+      "foreign_table_name": "sales_journeys",
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_name": "slug",
+      "constraint_name": "sales_journeys_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "tenant_id",
+      "foreign_table_name": "sales_journeys",
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_name": "tenant_id",
+      "constraint_name": "sales_journeys_tenant_id_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "slug",
+      "foreign_table_name": "sales_journeys",
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_name": "territory_id",
+      "constraint_name": "sales_journeys_territory_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "sales_territories",
+      "table_name": "sales_journeys"
+    },
+    {
+      "column_name": "id",
+      "constraint_name": "tenants_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "foreign_column_name": "id",
+      "foreign_table_name": "tenants",
+      "table_name": "tenants"
+    },
+    {
+      "column_name": "slug",
+      "constraint_name": "tenants_slug_key",
+      "constraint_type": "UNIQUE",
+      "foreign_column_name": "slug",
+      "foreign_table_name": "tenants",
+      "table_name": "tenants"
+    }
+  ],
+  "triggers": [
+    {
+      "action_statement": "EXECUTE FUNCTION check_media_placement_tenant_consistency()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "INSERT",
+      "event_object_table": "media_placements",
+      "trigger_name": "trigger_media_placement_tenant_consistency"
+    },
+    {
+      "action_statement": "EXECUTE FUNCTION check_media_placement_tenant_consistency()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "media_placements",
+      "trigger_name": "trigger_media_placement_tenant_consistency"
+    },
+    {
+      "action_statement": "EXECUTE FUNCTION update_media_placements_modtime()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "media_placements",
+      "trigger_name": "trigger_media_placements_modtime"
+    },
+    {
+      "action_statement": "EXECUTE FUNCTION enforce_tenant_consistency()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "INSERT",
+      "event_object_table": "product_media",
+      "trigger_name": "trg_product_media_tenant_consistency"
+    },
+    {
+      "action_statement": "EXECUTE FUNCTION enforce_tenant_consistency()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "product_media",
+      "trigger_name": "trg_product_media_tenant_consistency"
+    },
+    {
+      "action_statement": "EXECUTE FUNCTION enforce_tenant_consistency()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "INSERT",
+      "event_object_table": "products",
+      "trigger_name": "trg_products_tenant_consistency"
+    },
+    {
+      "action_statement": "EXECUTE FUNCTION enforce_tenant_consistency()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "products",
+      "trigger_name": "trg_products_tenant_consistency"
+    },
+    {
+      "action_statement": "EXECUTE FUNCTION touch_sales_updated_at()",
+      "action_timing": "BEFORE",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "sales_journeys",
+      "trigger_name": "sales_journeys_updated_at"
+    }
+  ],
+  "rls_state": [
+    {
+      "rowsecurity": true,
+      "schemaname": "public",
+      "tablename": "campaigns"
+    },
+    {
+      "rowsecurity": true,
+      "schemaname": "public",
+      "tablename": "media_assets"
+    },
+    {
+      "rowsecurity": true,
+      "schemaname": "public",
+      "tablename": "media_placements"
+    },
+    {
+      "rowsecurity": true,
+      "schemaname": "public",
+      "tablename": "product_media"
+    },
+    {
+      "rowsecurity": true,
+      "schemaname": "public",
+      "tablename": "products"
+    },
+    {
+      "rowsecurity": true,
+      "schemaname": "public",
+      "tablename": "sales_journeys"
+    },
+    {
+      "rowsecurity": true,
+      "schemaname": "public",
+      "tablename": "tenants"
+    }
+  ],
+  "table_policies": [
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "campaigns_public_select",
+      "qual": "(status = 'active'::text)",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "campaigns",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "campaigns_staff_manage",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "campaigns",
+      "with_check": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "media_public_select",
+      "qual": "((status = 'active'::text) AND (bucket = 'cp-public'::text))",
+      "roles": "{anon,authenticated}",
+      "schemaname": "public",
+      "tablename": "media_assets",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "media_staff_manage",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "media_assets",
+      "with_check": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Public read access for active media placements",
+      "qual": "((active = true) AND (EXISTS ( SELECT 1\n   FROM media_assets ma\n  WHERE ((ma.id = media_placements.media_id) AND (ma.status = 'active'::text) AND (ma.bucket = 'cp-public'::text)))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "media_placements",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Tenant admin manage media placements",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "media_placements",
+      "with_check": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "product_media_public_select",
+      "qual": "(EXISTS ( SELECT 1\n   FROM products p\n  WHERE ((p.id = product_media.product_id) AND (p.status = 'published'::text))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "product_media",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "product_media_staff_manage",
+      "qual": "(EXISTS ( SELECT 1\n   FROM products p\n  WHERE ((p.id = product_media.product_id) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "product_media",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM products p\n  WHERE ((p.id = product_media.product_id) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "products_public_select",
+      "qual": "(status = 'published'::text)",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "products",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "products_staff_manage",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "products",
+      "with_check": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "sales_journeys_public_select",
+      "qual": "((tenant_id = '42d36cee-4cd6-43d1-af5d-334e5a07e37c'::uuid) AND (active = true))",
+      "roles": "{anon,authenticated}",
+      "schemaname": "public",
+      "tablename": "sales_journeys",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "sales_journeys_staff_manage",
+      "qual": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "sales_journeys",
+      "with_check": "has_tenant_role(tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "tenant_member_manage",
+      "qual": "has_tenant_role(id, ARRAY['owner'::text, 'admin'::text])",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "tenants",
+      "with_check": "has_tenant_role(id, ARRAY['owner'::text, 'admin'::text])"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "tenant_public_select",
+      "qual": "(status = 'active'::text)",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "tenants",
+      "with_check": null
+    }
+  ],
+  "bucket_info": [
+    {
+      "allowed_mime_types": [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif",
+        "video/mp4",
+        "video/webm"
+      ],
+      "file_size_limit": 31457280,
+      "id": "cp-public",
+      "name": "cp-public",
+      "public": true
+    }
+  ],
+  "storage_policies": [
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_cms_delete",
+      "qual": "((bucket_id = 'cp-public'::text) AND (EXISTS ( SELECT 1\n   FROM media_assets ma\n  WHERE ((ma.bucket = 'cp-public'::text) AND (ma.path = objects.name) AND has_tenant_role(ma.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_media_delete",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'media'::text) AND ((storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'::text) AND has_tenant_role(((storage.foldername(name))[2])::uuid, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))",
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_media_insert",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'media'::text) AND ((storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'::text) AND has_tenant_role(((storage.foldername(name))[2])::uuid, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_media_select",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'media'::text) AND ((storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'::text) AND has_tenant_role(((storage.foldername(name))[2])::uuid, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))",
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_media_update",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'media'::text) AND ((storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'::text) AND has_tenant_role(((storage.foldername(name))[2])::uuid, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))",
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'media'::text) AND ((storage.foldername(name))[2] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'::text) AND has_tenant_role(((storage.foldername(name))[2])::uuid, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text]))"
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_staff_delete",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS ( SELECT 1\n   FROM products p\n  WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_staff_insert",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS ( SELECT 1\n   FROM products p\n  WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_staff_select",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS ( SELECT 1\n   FROM products p\n  WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "cp_public_staff_update",
+      "qual": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS ( SELECT 1\n   FROM products p\n  WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))",
+      "roles": "{authenticated}",
+      "schemaname": "storage",
+      "tablename": "objects",
+      "with_check": "((bucket_id = 'cp-public'::text) AND (array_length(storage.foldername(name), 1) = 2) AND ((storage.foldername(name))[1] = 'products'::text) AND (EXISTS ( SELECT 1\n   FROM products p\n  WHERE (((p.id)::text = (storage.foldername(objects.name))[2]) AND has_tenant_role(p.tenant_id, ARRAY['owner'::text, 'admin'::text, 'editor'::text, 'manager'::text])))))"
+    }
+  ]
+}

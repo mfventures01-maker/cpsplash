@@ -1,0 +1,395 @@
+{
+  "timestamp_utc": "2026-10-17T13:00:38.813Z",
+  "repo_path": "c:\\Projects\\cp-splash",
+  "git_branch": "detached",
+  "git_head": "b57faf7eea479c72b5046de9eb3549f6e84d49aa",
+  "node_version": "v20.20.2",
+  "npm_version": "10.8.2",
+  "supabase_project_ref": "efvvczmopacoroudzfnl",
+  "primary_tenant_id": "42d36cee-4cd6-43d1-af5d-334e5a07e37c",
+  "vercel_project": {
+    "project_id": "prj_7c7TOz3fJfkKW9glWZ4zbvCvovPL",
+    "org_id": "team_ZUkK1zAZdEggVtrvcN1VjU6i",
+    "project_name": "cp-splash",
+    "node_version": "24.x"
+  },
+  "typescript_config": {
+    "target": "ES2022",
+    "include": [
+      "src/**/*"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist",
+      "evidence",
+      "supabase",
+      "tests",
+      "scripts"
+    ],
+    "compiler_effective_scope": "Includes src/**/* only; excludes tests, scripts, supabase, evidence."
+  },
+  "package_scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "clean": "rm -rf dist server.js",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@supabase/supabase-js": "^2.117.2",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "vite": "^8.3.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.63.0",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2",
+    "ws": "^8.22.0"
+  },
+  "last_ten_commits": [
+    "b57faf7eea479c72b5046de9eb3549f6e84d49aa | 2026-10-16 23:28:26 +0100 | Amend: Certification reports with sealed state reconciliation",
+    "819b6e99dc729001100b7e4c0532421b88ae4684 | 2026-10-16 23:27:00 +0100 | R6-D: Add transient scripts and Supabase CLI config to .gitignore",
+    "91456617757208955b4608ffc8f9b362942c1850 | 2026-10-16 23:26:46 +0100 | R6-C: Commit CertificationPage modification",
+    "d4f81a8e5ee4a97b432a835852a0618f2f840533 | 2026-10-16 23:17:33 +0100 | R6-B: Archive prior-session forensic evidence and documentation",
+    "6256aaa8de694bb4c76c679091054144a67f8972 | 2026-10-16 23:17:10 +0100 | R6-A: Seal certified runtime state and evidence",
+    "0c424c9771e6afc27feac3bf676f8f37d75ac4c4 | 2026-10-16 21:20:16 +0100 | Certify: Complete HOEOS E2E Image Pipeline Certification & Factory Asset Extraction (R1-R5)",
+    "79bc7e5b84a50bb6d43253c435dae8efd93b3b13 | 2026-10-16 21:19:22 +0100 | R5: Blog featured image resolution and SEO meta injection",
+    "a934bde91844981699e4fff09444b77dae426917 | 2026-10-16 21:05:35 +0100 | R4: Polymorphic funnel media pipeline certification",
+    "5ef3d33bd4938867cb02f32c3ba0b3321d40d18d | 2026-10-16 20:52:26 +0100 | R2: Re-upload valid fixtures to cp-public storage",
+    "3f60f2f7b5d9aba6ae4d9953035f38736acd019f | 2026-10-16 20:48:19 +0100 | R1: Regenerate media fixtures with valid bytes"
+  ],
+  "working_tree_status": [
+    "HEAD detached at b57faf7",
+    "Changes not staged for commit:",
+    "  (use \"git add <file>...\" to update what will be committed)",
+    "  (use \"git restore <file>...\" to discard changes in working directory)",
+    "\tmodified:   package-lock.json",
+    "\tmodified:   package.json",
+    "\tmodified:   src/types/database.types.ts",
+    "",
+    "Untracked files:",
+    "  (use \"git add <file>...\" to include in what will be committed)",
+    "\tevidence/r7-decode-test-1792190841660.json",
+    "\tevidence/r7-upload-test-1792190723489.json",
+    "\tscripts/test-decode-all-formats.mjs",
+    "\tscripts/test-upload-all-formats.mjs",
+    "",
+    "no changes added to commit (use \"git add\" and/or \"git commit -a\")"
+  ],
+  "migrations_count": 25,
+  "tracked_source_files_count": 112,
+  "existing_evidence_inventory": [
+    {
+      "name": "certification-2026-10-16T14-33-09",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T14:11:25.061Z"
+    },
+    {
+      "name": "cms-e2e-certification",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-17T12:51:46.058Z"
+    },
+    {
+      "name": "demo-gate-20261015-000818",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-14T23:08:23.883Z"
+    },
+    {
+      "name": "FINAL-CERTIFICATION.md",
+      "is_directory": false,
+      "size_bytes": 4676,
+      "last_modified": "2026-10-16T22:28:26.211Z"
+    },
+    {
+      "name": "G0",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-15T07:50:16.206Z"
+    },
+    {
+      "name": "G3-publication-audit-20261013-184853",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-13T17:56:10.210Z"
+    },
+    {
+      "name": "G6-20261015-114143",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-15T12:43:32.227Z"
+    },
+    {
+      "name": "gap3",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T22:17:32.687Z"
+    },
+    {
+      "name": "ledger-export.json",
+      "is_directory": false,
+      "size_bytes": 49369,
+      "last_modified": "2026-10-14T19:22:39.635Z"
+    },
+    {
+      "name": "legacy",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-15T09:10:15.725Z"
+    },
+    {
+      "name": "media-review-20261014-165338",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-14T15:53:38.826Z"
+    },
+    {
+      "name": "media-review-20261014-165338.zip",
+      "is_directory": false,
+      "size_bytes": 32845,
+      "last_modified": "2026-10-14T15:53:41.128Z"
+    },
+    {
+      "name": "migration-recovery",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-15T08:07:00.867Z"
+    },
+    {
+      "name": "phase-b-2026-10-16T19-19-36-568Z",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T19:20:16.449Z"
+    },
+    {
+      "name": "phase-b-2026-10-16T19-53-33-490Z",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T19:53:56.304Z"
+    },
+    {
+      "name": "phase0-20261016-002550",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-15T23:53:02.148Z"
+    },
+    {
+      "name": "phase0-20261016-021818",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T01:28:57.941Z"
+    },
+    {
+      "name": "phase1-20261016-005354",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T00:11:10.248Z"
+    },
+    {
+      "name": "phase1-20261016-022908",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T01:29:49.248Z"
+    },
+    {
+      "name": "phase2-20261016-012315",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T00:25:50.790Z"
+    },
+    {
+      "name": "pipeline-A-2026-10-16T01-49-14-882Z",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T01:49:24.962Z"
+    },
+    {
+      "name": "pipeline-A-2026-10-16T01-56-14-530Z",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T01:57:05.692Z"
+    },
+    {
+      "name": "pipeline-B-2026-10-16T02-08-29-953Z",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T02:08:44.916Z"
+    },
+    {
+      "name": "pipeline-B-2026-10-16T02-22-39-765Z",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-16T02:24:43.349Z"
+    },
+    {
+      "name": "PIPELINE-F-CERTIFICATION.md",
+      "is_directory": false,
+      "size_bytes": 4379,
+      "last_modified": "2026-10-16T22:28:26.211Z"
+    },
+    {
+      "name": "PIPELINE-H-CERTIFICATION.md",
+      "is_directory": false,
+      "size_bytes": 3850,
+      "last_modified": "2026-10-16T22:28:26.211Z"
+    },
+    {
+      "name": "PIPELINE-S-CERTIFICATION.md",
+      "is_directory": false,
+      "size_bytes": 3916,
+      "last_modified": "2026-10-16T22:28:26.211Z"
+    },
+    {
+      "name": "PRE-R6-COMMIT.txt",
+      "is_directory": false,
+      "size_bytes": 45,
+      "last_modified": "2026-10-16T22:16:48.079Z"
+    },
+    {
+      "name": "R4-sports.png",
+      "is_directory": false,
+      "size_bytes": 219919,
+      "last_modified": "2026-10-16T20:04:45.259Z"
+    },
+    {
+      "name": "R5-blog.png",
+      "is_directory": false,
+      "size_bytes": 178105,
+      "last_modified": "2026-10-16T20:12:58.780Z"
+    },
+    {
+      "name": "r7-decode-test-1792190841660.json",
+      "is_directory": false,
+      "size_bytes": 1873,
+      "last_modified": "2026-10-16T22:47:21.664Z"
+    },
+    {
+      "name": "r7-upload-test-1792190723489.json",
+      "is_directory": false,
+      "size_bytes": 2274,
+      "last_modified": "2026-10-16T22:45:24.067Z"
+    },
+    {
+      "name": "repair-baseline-commit.txt",
+      "is_directory": false,
+      "size_bytes": 45,
+      "last_modified": "2026-10-16T19:37:18.299Z"
+    },
+    {
+      "name": "repair-fixture-baseline.csv",
+      "is_directory": false,
+      "size_bytes": 578,
+      "last_modified": "2026-10-16T19:37:33.403Z"
+    },
+    {
+      "name": "schema-audit",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-14T23:38:19.209Z"
+    },
+    {
+      "name": "SEALED-COMMIT.txt",
+      "is_directory": false,
+      "size_bytes": 45,
+      "last_modified": "2026-10-16T22:27:11.152Z"
+    },
+    {
+      "name": "superseded",
+      "is_directory": true,
+      "size_bytes": null,
+      "last_modified": "2026-10-15T09:37:52.782Z"
+    }
+  ],
+  "test_inventory": [
+    {
+      "name": "e2e_cms_storage_storefront.cjs",
+      "is_directory": false,
+      "size_bytes": 12713,
+      "path": "tests/e2e_cms_storage_storefront.cjs"
+    },
+    {
+      "name": "e2e_five_funnels_certification.cjs",
+      "is_directory": false,
+      "size_bytes": 7075,
+      "path": "tests/e2e_five_funnels_certification.cjs"
+    },
+    {
+      "name": "fixtures",
+      "is_directory": true,
+      "size_bytes": 0,
+      "path": "tests/fixtures"
+    },
+    {
+      "name": "media_pipeline_placements.test.ts",
+      "is_directory": false,
+      "size_bytes": 35039,
+      "path": "tests/media_pipeline_placements.test.ts"
+    },
+    {
+      "name": "media_service_contract.test.ts",
+      "is_directory": false,
+      "size_bytes": 30839,
+      "path": "tests/media_service_contract.test.ts"
+    },
+    {
+      "name": "media_service_contract.test.ts.before-cleanup-tests-20261013-091312.bak",
+      "is_directory": false,
+      "size_bytes": 25422,
+      "path": "tests/media_service_contract.test.ts.before-cleanup-tests-20261013-091312.bak"
+    },
+    {
+      "name": "media_service_contract.test.ts.before-cleanup-tests-20261013-091649.bak",
+      "is_directory": false,
+      "size_bytes": 25422,
+      "path": "tests/media_service_contract.test.ts.before-cleanup-tests-20261013-091649.bak"
+    },
+    {
+      "name": "probe_auth_chain.cjs",
+      "is_directory": false,
+      "size_bytes": 12274,
+      "path": "tests/probe_auth_chain.cjs"
+    },
+    {
+      "name": "probe_media_animation.cjs",
+      "is_directory": false,
+      "size_bytes": 6171,
+      "path": "tests/probe_media_animation.cjs"
+    },
+    {
+      "name": "probe_round_trip.cjs",
+      "is_directory": false,
+      "size_bytes": 11378,
+      "path": "tests/probe_round_trip.cjs"
+    },
+    {
+      "name": "product_publication_gate.test.ts",
+      "is_directory": false,
+      "size_bytes": 30994,
+      "path": "tests/product_publication_gate.test.ts"
+    },
+    {
+      "name": "run_test.mjs",
+      "is_directory": false,
+      "size_bytes": 46847,
+      "path": "tests/run_test.mjs"
+    }
+  ]
+}

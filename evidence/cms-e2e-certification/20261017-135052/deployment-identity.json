@@ -1,0 +1,32 @@
+{
+  "certification_timestamp": "2026-10-17T14:16:33.326Z",
+  "target_project": "cp-splash",
+  "supabase_project_ref": "efvvczmopacoroudzfnl",
+  "primary_tenant_id": "42d36cee-4cd6-43d1-af5d-334e5a07e37c",
+  "git_status": {
+    "head_commit": "b57faf7eea479c72b5046de9eb3549f6e84d49aa",
+    "branch": "detached",
+    "working_tree_clean": false,
+    "modified_tracked_files": [
+      "package-lock.json",
+      "package.json",
+      "src/types/database.types.ts"
+    ]
+  },
+  "deployed_environment": {
+    "platform": "Vercel",
+    "project_id": "prj_7c7TOz3fJfkKW9glWZ4zbvCvovPL",
+    "org_id": "team_ZUkK1zAZdEggVtrvcN1VjU6i",
+    "deployed_url": "https://cp-splash-nine.vercel.app",
+    "deployed_bundle_assets": [
+      "assets/index-DimlsVZL.js",
+      "assets/index-BuL0fUUc.css"
+    ],
+    "deployed_last_modified_header": "Sat, 10 Oct 2026 23:28:32 GMT",
+    "inferred_deployed_commit": "5c6185f8c6795f54316d84aa7dcf200aeec89388 (2026-10-10)",
+    "matches_head_commit": false,
+    "deployment_gap_summary": "The deployed Vercel site is running build from 2026-10-10 (commit 5c6185f), prior to database migrations 20261011005429 - 20261016000001 and local certification repairs R1-R6."
+  },
+  "deployment_certification_decision": "BLOCKED",
+  "blocker_reason": "Production deployment commit does not match repository HEAD commit being certified."
+}

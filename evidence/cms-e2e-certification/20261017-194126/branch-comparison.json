@@ -1,0 +1,19 @@
+{
+  "hoEOS_repair_branch": {
+    "exists_locally": true,
+    "local_commit": "b57faf7eea479c72b5046de9eb3549f6e84d49aa",
+    "exists_remotely": false,
+    "remote_ref": null
+  },
+  "main": {
+    "local_commit": "9861b0dc563c354ed623a87d4ecfbdfbdfd27ea1",
+    "remote_origin_main": "5c6185f4007591866eac7153ab9123b0d091cecf",
+    "commits_ahead_of_origin": "3",
+    "commits_behind_origin": "0"
+  },
+  "production_deployed_commit": {
+    "inferred_sha": "5c6185f4007591866eac7153ab9123b0d091cecf",
+    "matches_origin_main": true,
+    "matches_local_head": false
+  }
+}

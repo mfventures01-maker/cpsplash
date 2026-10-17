@@ -152,6 +152,7 @@ export interface MediaAsset {
   created_at: string;
   // Computed property:
   public_url?: string;
+  poster_url?: string;
 }
 
 export type MediaSequenceRole =

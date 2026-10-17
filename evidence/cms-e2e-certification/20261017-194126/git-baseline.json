@@ -1,0 +1,78 @@
+{
+  "timestamp": "2026-10-17T18:46:47.864Z",
+  "head_commit": "b57faf7eea479c72b5046de9eb3549f6e84d49aa",
+  "detached": true,
+  "branches": {
+    "local": [
+      "* (HEAD detached at b57faf7)   b57faf7 Amend: Certification reports with sealed state reconciliation",
+      "  hoEOS-repair-20261016-203717 b57faf7 Amend: Certification reports with sealed state reconciliation",
+      "  main                         9861b0d [ahead 3] chore(schema): archive recovered sales catalog artifacts"
+    ],
+    "all": [
+      "* (HEAD detached at b57faf7)   b57faf7 Amend: Certification reports with sealed state reconciliation",
+      "  hoEOS-repair-20261016-203717 b57faf7 Amend: Certification reports with sealed state reconciliation",
+      "  main                         9861b0d [ahead 3] chore(schema): archive recovered sales catalog artifacts",
+      "  remotes/origin/HEAD          -> origin/main",
+      "  remotes/origin/main          5c6185f feat(sales): integrate five-funnel commercial sales engine, live CMS brain, and contextual WhatsApp routing"
+    ],
+    "remote_origin": [
+      "5c6185f4007591866eac7153ab9123b0d091cecf\tHEAD",
+      "22abdcbd81e62215e4c07ffaae5e886440985859\trefs/heads/fix/cp-splash-cms-media-upload",
+      "5c6185f4007591866eac7153ab9123b0d091cecf\trefs/heads/main",
+      "22abdcbd81e62215e4c07ffaae5e886440985859\trefs/pull/1/head",
+      "33087c1d03b3afd7af584f7a4e0ac8fa1cdf0408\trefs/pull/1/merge"
+    ]
+  },
+  "working_tree": {
+    "status": [
+      "HEAD detached at b57faf7",
+      "Changes not staged for commit:",
+      "  (use \"git add <file>...\" to update what will be committed)",
+      "  (use \"git restore <file>...\" to discard changes in working directory)",
+      "\tmodified:   package-lock.json",
+      "\tmodified:   package.json",
+      "\tmodified:   src/types/database.types.ts",
+      "",
+      "Untracked files:",
+      "  (use \"git add <file>...\" to include in what will be committed)",
+      "\tevidence/cms-e2e-certification/",
+      "\tevidence/r7-decode-test-1792190841660.json",
+      "\tevidence/r7-upload-test-1792190723489.json",
+      "\tscripts/test-decode-all-formats.mjs",
+      "\tscripts/test-upload-all-formats.mjs",
+      "",
+      "no changes added to commit (use \"git add\" and/or \"git commit -a\")"
+    ],
+    "untracked": [
+      "evidence/cms-e2e-certification/20261017-135052/CERTIFICATION-REPORT.md",
+      "evidence/cms-e2e-certification/20261017-135052/baseline-summary.md",
+      "evidence/cms-e2e-certification/20261017-135052/baseline.json",
+      "evidence/cms-e2e-certification/20261017-135052/build-output.txt",
+      "evidence/cms-e2e-certification/20261017-135052/cms-operation-trace.md",
+      "evidence/cms-e2e-certification/20261017-135052/deployment-identity.json",
+      "evidence/cms-e2e-certification/20261017-135052/environment-identity.json",
+      "evidence/cms-e2e-certification/20261017-135052/file-hashes.csv",
+      "evidence/cms-e2e-certification/20261017-135052/function-definitions.sql",
+      "evidence/cms-e2e-certification/20261017-135052/git-diff-stat.txt",
+      "evidence/cms-e2e-certification/20261017-135052/git-status.txt",
+      "evidence/cms-e2e-certification/20261017-135052/migration-inventory.csv",
+      "evidence/cms-e2e-certification/20261017-135052/migration-reconciliation.csv",
+      "evidence/cms-e2e-certification/20261017-135052/playwright-results-local/results.json",
+      "evidence/cms-e2e-certification/20261017-135052/playwright-results/results.json",
+      "evidence/cms-e2e-certification/20261017-135052/rls-policy-inventory.csv",
+      "evidence/cms-e2e-certification/20261017-135052/route-inventory.csv",
+      "evidence/cms-e2e-certification/20261017-135052/schema-object-inventory.json",
+      "evidence/cms-e2e-certification/20261017-135052/sha256-manifest.txt",
+      "evidence/cms-e2e-certification/20261017-135052/storage-policy-inventory.csv",
+      "evidence/cms-e2e-certification/20261017-135052/test-inventory.txt",
+      "evidence/cms-e2e-certification/20261017-135052/test-matrix.csv",
+      "evidence/cms-e2e-certification/20261017-135052/test-results/route-inventory.csv",
+      "evidence/cms-e2e-certification/20261017-135052/trigger-inventory.csv",
+      "evidence/cms-e2e-certification/20261017-135052/typecheck-output.txt",
+      "evidence/r7-decode-test-1792190841660.json",
+      "evidence/r7-upload-test-1792190723489.json",
+      "scripts/test-decode-all-formats.mjs",
+      "scripts/test-upload-all-formats.mjs"
+    ]
+  }
+}
