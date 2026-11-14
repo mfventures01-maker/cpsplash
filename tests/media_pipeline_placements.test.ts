@@ -591,6 +591,8 @@ await test('9b. Primary asset linking uses the atomic RPC and leaves exactly one
   assert.equal(linkRes.error, null);
   assert.ok(linkRes.data);
   assert.equal(linkRes.data.is_primary, true);
+  assert.equal(linkRes.data.media_assets?.id, createdAssetId);
+  assert.equal(linkRes.data.media_assets?.status, 'active');
   const primaries = mockProductMedia.filter(m => m.product_id === TEST_PRODUCT_ID && m.is_primary);
   assert.equal(primaries.length, 1);
   assert.equal(primaries[0].media_id, createdAssetId);
