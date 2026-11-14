@@ -374,7 +374,6 @@ supabase.from = (table: string) => {
 
 // Mock the transaction-backed primary-media RPC. Mutations happen only
 // after all simulated checks pass, mirroring PostgreSQL transaction rollback.
-const originalRpc = supabase.rpc.bind(supabase);
 (supabase as any).rpc = async (fn: string, args: Record<string, unknown>) => {
   if (fn !== 'set_product_primary_media') {
     return { data: null, error: { message: `Unexpected RPC: ${fn}` } };
