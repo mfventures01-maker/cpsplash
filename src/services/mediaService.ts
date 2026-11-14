@@ -385,16 +385,16 @@ export async function inspectFileSignature(
 ): Promise<{ detectedMime?: string; isValid: boolean; error?: string }> {
   try {
     if (!file || typeof (file as { slice?: unknown }).slice !== 'function') {
-      return { isValid: true };
+      return { isValid: false, error: 'File signature inspection is unavailable' };
     }
     const slice = file.slice(0, 32);
     if (!slice || typeof (slice as { arrayBuffer?: unknown }).arrayBuffer !== 'function') {
-      return { isValid: true };
+      return { isValid: false, error: 'File signature data could not be read' };
     }
     const buffer = await slice.arrayBuffer();
     const bytes = new Uint8Array(buffer);
     if (bytes.length < 3) {
-      return { isValid: true };
+      return { isValid: false, error: 'File signature is too short to validate' };
     }
 
     // JPEG: FF D8 FF
@@ -441,9 +441,9 @@ export async function inspectFileSignature(
       return { detectedMime: 'video/webm', isValid: true };
     }
 
-    return { isValid: true };
+    return { isValid: false, error: 'Unrecognized file signature for the declared media format' };
   } catch {
-    return { isValid: true };
+    return { isValid: false, error: 'Unable to inspect file signature' };
   }
 }
 
@@ -506,6 +506,9 @@ export const mediaService = {
 
       // 1b. Reject a readable file signature that contradicts the declared format.
       const signatureCheck = await inspectFileSignature(file);
+      if (!signatureCheck.isValid) {
+        return { data: null, error: signatureCheck.error || 'File signature validation failed' };
+      }
       if (signatureCheck.detectedMime && signatureCheck.detectedMime !== validation.mimeType) {
         return {
           data: null,
@@ -997,6 +1000,9 @@ export const mediaService = {
 
       // 2. File signature validation where feasible
       const signatureCheck = await inspectFileSignature(file);
+      if (!signatureCheck.isValid) {
+        return { data: null, error: signatureCheck.error || 'File signature validation failed' };
+      }
       if (signatureCheck.detectedMime && signatureCheck.detectedMime !== validation.mimeType) {
         const isJpegAlias =
           (signatureCheck.detectedMime === 'image/jpeg' && validation.mimeType === 'image/jpeg') ||
