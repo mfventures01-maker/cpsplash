@@ -304,33 +304,38 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
 
     setError(null);
     setUploadingMedia(true);
+    let uploadFailed = false;
     try {
       for (let i = 0; i < validFiles.length; i++) {
-      const item = validFiles[i];
-      setUploadProgressText(`Uploading ${i + 1} of ${validFiles.length}: ${item.name}...`);
+        const item = validFiles[i];
+        setUploadProgressText(`Uploading ${i + 1} of ${validFiles.length}: ${item.name}...`);
 
-      const isPrimary = (!mediaList || mediaList.length === 0) && i === 0;
-      const res = await mediaService.uploadMedia(
-        productId,
-        item.file,
-        item.formatCategory,
-        mediaAltText || name || item.name,
-        isPrimary
-      );
+        const isPrimary = (!mediaList || mediaList.length === 0) && i === 0;
+        const res = await mediaService.uploadMedia(
+          productId,
+          item.file,
+          item.formatCategory,
+          mediaAltText || name || item.name,
+          isPrimary
+        );
 
-      if (res.data) {
-        setMediaList(prev => [...prev, res.data!]);
-        setStagedFiles(prev => prev.filter(f => f.id !== item.id));
-        URL.revokeObjectURL(item.previewUrl);
-      } else {
-        setError(`Failed to upload ${item.name}: ${res.error || 'Unknown upload error'}. The file remains in the staging queue for retry.`);
-      }
+        if (res.data) {
+          setMediaList(prev => [...prev, res.data!]);
+          setStagedFiles(prev => prev.filter(f => f.id !== item.id));
+          URL.revokeObjectURL(item.previewUrl);
+        } else {
+          uploadFailed = true;
+          setError(`Failed to upload ${item.name}: ${res.error || 'Unknown upload error'}. The file remains in the staging queue for retry.`);
+        }
       }
     } finally {
       setUploadingMedia(false);
       setUploadProgressText('');
     }
-    setMediaAltText('');
+
+    if (!uploadFailed) {
+      setMediaAltText('');
+    }
   };
 
   const handleMoveMedia = async (index: number, direction: 'up' | 'down') => {
