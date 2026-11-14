@@ -34,3 +34,7 @@ jobs:
       - name: Run mock-only media contract tests
         run: npm run test:media:mock
         timeout-minutes: 2
+
+      - name: Run isolated media pipeline and placements tests
+        run: npm run test:media:pipeline:mock
+        timeout-minutes: 3
