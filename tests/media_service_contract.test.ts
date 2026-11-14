@@ -43,7 +43,7 @@ class MockFile {
       'video/webm': [0x1a, 0x45, 0xdf, 0xa3],
     };
     const bytes = Uint8Array.from(signatures[this.type] || []);
-    return { arrayBuffer: async () => bytes.buffer };
+    return { arrayBuffer: async () => bytes.buffer as ArrayBuffer };
   }
 }
 
@@ -554,7 +554,7 @@ await runTest('Failure 2b: Signature mismatch is rejected before product lookup 
       name: 'spoofed.gif',
       size: jpegBytes.byteLength,
       type: 'image/gif',
-      slice: () => ({ arrayBuffer: async () => jpegBytes.buffer }),
+      slice: () => ({ arrayBuffer: async () => jpegBytes.buffer as ArrayBuffer }),
     } as unknown as File;
     const res = await mediaService.uploadMedia(VALID_PRODUCT_ID, spoofedGif);
     assert.equal(res.data, null);
