@@ -299,6 +299,7 @@ function createSupabaseMock(options: {
   assetDeleteRows?: Array<{ id: string }> | null;
   storageRemoveError?: unknown | null;
   storageRemoveData?: Array<{ name?: string }> | null;
+  primaryRpcError?: unknown | null;
 }) {
   const calls = {
     storageUploads: [] as StorageUploadCall[],
@@ -306,9 +307,26 @@ function createSupabaseMock(options: {
     dbInserts: [] as DbInsertCall[],
     dbUpdates: [] as Array<{ table: string; values: Record<string, unknown> }>,
     dbDeletes: [] as Array<{ table: string; id: string }>,
+    rpcCalls: [] as Array<{ name: string; args: Record<string, unknown> }>,
   };
 
   const mockClient = {
+    rpc: async (name: string, args: Record<string, unknown>) => {
+      calls.rpcCalls.push({ name, args });
+      if (options.primaryRpcError) {
+        return { data: null, error: options.primaryRpcError };
+      }
+      return {
+        data: [{
+          product_id: args.p_product_id,
+          media_id: args.p_media_id,
+          sort_order: args.p_sort_order ?? 3,
+          is_primary: true,
+          created_at: new Date().toISOString(),
+        }],
+        error: null,
+      };
+    },
     storage: {
       from: (bucketName: string) => ({
         upload: async (path: string, _file: unknown, opts: { contentType?: string; upsert?: boolean }) => {
@@ -435,6 +453,7 @@ function createSupabaseMock(options: {
 }
 // Helper to replace supabase client temporarily
 const originalFrom = supabase.from.bind(supabase);
+const originalRpc = supabase.rpc.bind(supabase);
 const originalStorage = supabase.storage;
 
 async function withMockedSupabase(
@@ -442,11 +461,13 @@ async function withMockedSupabase(
   fn: () => Promise<void>
 ) {
   (supabase as unknown as { from: unknown }).from = mock.from;
+  (supabase as unknown as { rpc: unknown }).rpc = mock.rpc;
   (supabase as unknown as { storage: unknown }).storage = mock.storage;
   try {
     await fn();
   } finally {
     (supabase as unknown as { from: unknown }).from = originalFrom;
+    (supabase as unknown as { rpc: unknown }).rpc = originalRpc;
     (supabase as unknown as { storage: unknown }).storage = originalStorage;
   }
 }
@@ -477,12 +498,14 @@ await runTest('Metadata test: Upload WebP creates exact canonical metadata', asy
     assert.equal(assetCall.record.size_bytes, 2048);
     assert.equal(assetCall.record.status, 'active');
 
-    // Verify product_media link
-    const linkCall = calls.dbInserts.find(c => c.table === 'product_media');
-    assert.ok(linkCall);
-    assert.equal(linkCall.record.product_id, VALID_PRODUCT_ID);
-    assert.equal(linkCall.record.is_primary, true);
-    assert.equal(linkCall.record.sort_order, 3); // 2 + 1 from mock
+    // Verify atomic product_media link + primary switch RPC
+    assert.equal(calls.rpcCalls.length, 1);
+    assert.equal(calls.rpcCalls[0].name, 'set_product_primary_media');
+    assert.equal(calls.rpcCalls[0].args.p_product_id, VALID_PRODUCT_ID);
+    assert.equal(calls.rpcCalls[0].args.p_media_id, res.data.media_id);
+    assert.equal(calls.rpcCalls[0].args.p_create_link, true);
+    assert.equal(calls.rpcCalls[0].args.p_sort_order, 3); // 2 + 1 from mock
+    assert.equal(res.data.is_primary, true);
   });
 });
 
