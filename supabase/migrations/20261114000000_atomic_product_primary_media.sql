@@ -29,7 +29,7 @@ create or replace function public.set_product_primary_media(
 returns setof public.product_media
 language plpgsql
 security definer
-set search_path = public, auth
+set search_path = pg_catalog
 as $$
 declare
   v_actor_id uuid;
@@ -71,7 +71,8 @@ begin
   select ma.tenant_id, ma.status
     into v_asset_tenant_id, v_asset_status
   from public.media_assets ma
-  where ma.id = p_media_id;
+  where ma.id = p_media_id
+  for share;
 
   if v_asset_tenant_id is null
      or v_asset_tenant_id <> v_tenant_id
