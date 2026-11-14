@@ -33,3 +33,4 @@ jobs:
 
       - name: Run mock-only media contract tests
         run: npm run test:media:mock
+        timeout-minutes: 2
