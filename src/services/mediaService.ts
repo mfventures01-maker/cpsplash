@@ -667,59 +667,32 @@ export const mediaService = {
 
         : 1;
 
-      // 6. If isPrimary, clear existing primary flags
-
-      if (isPrimary) {
-
-        const { error: clearPrimaryErr } = await supabase
-
-          .from('product_media')
-
-          .update({ is_primary: false })
-
-          .eq('product_id', productId);
-
-        if (clearPrimaryErr) {
-
-          await safeCleanupUnreferencedAsset(mediaAsset.id, storagePath);
-
-          return {
-
-            data: null,
-
-            error: getErrMsg(clearPrimaryErr, 'Failed to update existing primary media'),
-
-          };
-
-        }
-
-      }
-
-      // 7. Link in product_media
-
+      // 6. Link the media. Primary assignment and relation creation share one
+      // database transaction through the RPC, so a failed insert cannot clear
+      // the product's existing primary media.
       const productMediaRecord = {
-
         product_id: productId,
-
         media_id: mediaAsset.id,
-
         sort_order: nextOrder,
-
         is_primary: isPrimary,
-
       };
 
-      const { data: linkCreated, error: linkErr } = await supabase
+      const { data: linkCreated, error: linkErr } = isPrimary
+        ? await supabase.rpc('set_product_primary_media', {
+            p_product_id: productId,
+            p_media_id: mediaAsset.id,
+            p_create_link: true,
+            p_sort_order: nextOrder,
+          })
+        : await supabase
+            .from('product_media')
+            .insert(productMediaRecord)
+            .select('*, media_assets(*)')
+            .single();
 
-        .from('product_media')
+      const linkedRow = Array.isArray(linkCreated) ? linkCreated[0] : linkCreated;
 
-        .insert(productMediaRecord)
-
-        .select('*, media_assets(*)')
-
-        .single();
-
-      if (linkErr || !linkCreated) {
+      if (linkErr || !linkedRow) {
 
         await safeCleanupUnreferencedAsset(mediaAsset.id, storagePath);
 
@@ -737,7 +710,7 @@ export const mediaService = {
 
       notifySyncEvent('product_media', { productId, mediaId: mediaAsset.id }, 'INSERT');
 
-      return { data: linkCreated as ProductMediaRelation, error: null };
+      return { data: linkedRow as ProductMediaRelation, error: null };
 
     } catch (err: unknown) {
 
@@ -857,34 +830,21 @@ export const mediaService = {
 
       }
 
-      const { error: clearErr } = await supabase
+      const { data, error } = await supabase.rpc('set_product_primary_media', {
+        p_product_id: productId,
+        p_media_id: mediaId,
+        p_create_link: false,
+        p_sort_order: null,
+      });
 
-        .from('product_media')
-
-        .update({ is_primary: false })
-
-        .eq('product_id', productId);
-
-      if (clearErr) {
-
-        return { success: false, error: getErrMsg(clearErr, 'Failed to clear primary media') };
-
-      }
-
-      const { error } = await supabase
-
-        .from('product_media')
-
-        .update({ is_primary: true })
-
-        .eq('product_id', productId)
-
-        .eq('media_id', mediaId);
-
-      if (error) {
-
-        return { success: false, error: getErrMsg(error, 'Failed to set primary media') };
-
+      const confirmed = Array.isArray(data) ? data.length === 1 : Boolean(data);
+      if (error || !confirmed) {
+        return {
+          success: false,
+          error: error
+            ? getErrMsg(error, 'Failed to set primary media')
+            : 'Primary media update was not confirmed; existing primary state was preserved',
+        };
       }
 
       notifySyncEvent('product_media', { productId, mediaId }, 'UPDATE');
@@ -1203,10 +1163,23 @@ export const mediaService = {
       const nextOrder = mediaArr.length > 0 ? (Number((mediaArr[0] as { sort_order?: number }).sort_order || 0) + 1) : 1;
 
       if (isPrimary) {
-        await supabase
-          .from('product_media')
-          .update({ is_primary: false })
-          .eq('product_id', productId);
+        const { data, error } = await supabase.rpc('set_product_primary_media', {
+          p_product_id: productId,
+          p_media_id: mediaId,
+          p_create_link: true,
+          p_sort_order: nextOrder,
+        });
+        const link = Array.isArray(data) ? data[0] : data;
+        if (error || !link) {
+          return {
+            data: null,
+            error: error
+              ? getErrMsg(error, 'Failed to atomically link primary product media')
+              : 'Primary media link was not confirmed; existing primary state was preserved',
+          };
+        }
+        notifySyncEvent('product_media', { productId, mediaId }, 'INSERT');
+        return { data: link as ProductMediaRelation, error: null };
       }
 
       const { data: link, error: linkErr } = await supabase
@@ -1215,7 +1188,7 @@ export const mediaService = {
           product_id: productId,
           media_id: mediaId,
           sort_order: nextOrder,
-          is_primary: isPrimary,
+          is_primary: false,
         })
         .select('*, media_assets(*)')
         .single();
