@@ -771,6 +771,8 @@ try {
   supabase.realtime.disconnect();
 } catch {}
 
-process.exitCode = passedTests === totalTests ? 0 : 1;
+// This file is a standalone Node test runner. Exit explicitly after cleanup so
+// platform handles cannot keep a mock-only CI process alive indefinitely.
+process.exit(passedTests === totalTests ? 0 : 1);
 
 
