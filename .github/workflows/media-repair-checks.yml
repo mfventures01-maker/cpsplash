@@ -38,3 +38,7 @@ jobs:
       - name: Run isolated media pipeline and placements tests
         run: npm run test:media:pipeline:mock
         timeout-minutes: 3
+
+      - name: Verify primary-media migration contract
+        run: npm run test:media:migration:contract
+        timeout-minutes: 1
