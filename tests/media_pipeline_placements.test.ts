@@ -25,27 +25,17 @@
  */
 
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-
-// 1. Setup environment before importing service
-const envContent = fs.readFileSync('C:/Projects/cp-splash/.env', 'utf-8');
-const envVars: Record<string, string> = {};
-envContent.split('\n').forEach(line => {
-  const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-  if (match) {
-    let val = match[2] || '';
-    if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-    if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
-    envVars[match[1]] = val.trim();
-  }
-});
-
-Object.assign(process.env, envVars);
+// This suite is mock-only. Never read local env files or inherit remote
+// Supabase credentials. Live certification is a separately authorized task.
+process.env.HOEOS_MOCK_ONLY = '1';
+process.env.VITE_SUPABASE_URL = 'http://127.0.0.1:54321';
+process.env.VITE_SUPABASE_ANON_KEY = 'mock-anon-key-not-valid';
+process.env.VITE_CP_SPLASH_TENANT_ID = '4b9995ce-0000-4000-8000-000000000001';
 
 (import.meta as unknown as { env: Record<string, string> }).env = {
-  VITE_SUPABASE_URL: envVars.VITE_SUPABASE_URL || 'https://efvvczmopacoroudzfnl.supabase.co',
-  VITE_SUPABASE_ANON_KEY: envVars.VITE_SUPABASE_ANON_KEY || '',
-  VITE_CP_SPLASH_TENANT_ID: envVars.VITE_CP_SPLASH_TENANT_ID || '42d36cee-4cd6-43d1-af5d-334e5a07e37c',
+  VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
+  VITE_SUPABASE_ANON_KEY: 'mock-anon-key-not-valid',
+  VITE_CP_SPLASH_TENANT_ID: '4b9995ce-0000-4000-8000-000000000001',
 };
 
 const { mediaService, BUCKET_NAME } = await import('../src/services/mediaService');
