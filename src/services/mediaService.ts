@@ -1098,19 +1098,19 @@ export const mediaService = {
         .single();
 
       if (assetErr || !assetCreated) {
-        // Safe compensation: Remove newly uploaded storage object
+        // The insert outcome may be ambiguous: the database can commit the row
+        // while the response is lost or the client receives an error. Deleting
+        // Storage here could create a dangling media_assets record. Preserve the
+        // object and require reconciliation before any destructive cleanup.
         console.error(
-          '[HOEOS RECOVERY] General asset insert failed; cleaning up newly uploaded Storage object.',
+          '[HOEOS RECOVERY] Asset insert was not confirmed; preserving Storage object for reconciliation.',
           { storagePath, assetErr: assetErr ?? null }
         );
-        try {
-          await supabase.storage.from(BUCKET_NAME).remove([storagePath]);
-        } catch (cleanupErr) {
-          console.error('[HOEOS RECOVERY] Failed to compensate storage object:', cleanupErr);
-        }
         return {
           data: null,
-          error: assetErr ? getErrMsg(assetErr, 'Failed to create media asset record') : 'Failed to create media asset',
+          error: assetErr
+            ? `${getErrMsg(assetErr, 'Failed to create media asset record')}; uploaded object preserved for reconciliation`
+            : 'Failed to create media asset; uploaded object preserved for reconciliation',
         };
       }
 
