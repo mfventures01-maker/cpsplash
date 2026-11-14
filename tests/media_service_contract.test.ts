@@ -506,6 +506,8 @@ await runTest('Metadata test: Upload WebP creates exact canonical metadata', asy
     assert.equal(calls.rpcCalls[0].args.p_create_link, true);
     assert.equal(calls.rpcCalls[0].args.p_sort_order, 3); // 2 + 1 from mock
     assert.equal(res.data.is_primary, true);
+    assert.equal(res.data.media_assets?.id, 'asset-uuid-999');
+    assert.equal(res.data.media_assets?.filename, 'hero_specimen.webp');
   });
 });
 
