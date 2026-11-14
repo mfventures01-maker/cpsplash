@@ -690,7 +690,13 @@ export const mediaService = {
             .select('*, media_assets(*)')
             .single();
 
-      const linkedRow = Array.isArray(linkCreated) ? linkCreated[0] : linkCreated;
+      const rpcRow = Array.isArray(linkCreated) ? linkCreated[0] : linkCreated;
+      // The atomic RPC intentionally returns the relation row only. Preserve
+      // the service contract used by AdminProductEditor by attaching the
+      // asset record already confirmed above, without an extra network read.
+      const linkedRow = rpcRow
+        ? { ...rpcRow, media_assets: mediaAsset }
+        : null;
 
       if (linkErr || !linkedRow) {
 
@@ -1169,8 +1175,8 @@ export const mediaService = {
           p_create_link: true,
           p_sort_order: nextOrder,
         });
-        const link = Array.isArray(data) ? data[0] : data;
-        if (error || !link) {
+        const rpcRow = Array.isArray(data) ? data[0] : data;
+        if (error || !rpcRow) {
           return {
             data: null,
             error: error
@@ -1178,6 +1184,9 @@ export const mediaService = {
               : 'Primary media link was not confirmed; existing primary state was preserved',
           };
         }
+        // The asset was fetched and tenant/status-validated above. Attach it
+        // so primary and non-primary linking return the same relation shape.
+        const link = { ...rpcRow, media_assets: asset };
         notifySyncEvent('product_media', { productId, mediaId }, 'INSERT');
         return { data: link as ProductMediaRelation, error: null };
       }
