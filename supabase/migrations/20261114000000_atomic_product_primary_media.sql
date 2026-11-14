@@ -62,6 +62,9 @@ begin
     where tm.tenant_id = v_tenant_id
       and tm.user_id = v_actor_id
       and tm.status = 'active'
+      -- Memberships may reference tenant-scoped roles or the seeded global
+      -- system roles. Never accept a role belonging to a different tenant.
+      and (r.tenant_id is null or r.tenant_id = v_tenant_id)
       and r.name = any (array['owner','admin','editor','manager']::text[])
   ) then
     raise exception 'Not authorized to manage product media'
