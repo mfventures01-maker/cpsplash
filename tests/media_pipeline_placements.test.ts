@@ -67,6 +67,7 @@ let forceStorageError = false;
 let forceAssetInsertError = false;
 let forcePlacementInsertError = false;
 let forcePlacementReloadError = false;
+let forcePrimaryRpcError = false;
 let storageDeletions: string[] = [];
 
 // Intercept Supabase Storage methods
@@ -371,6 +372,41 @@ supabase.from = (table: string) => {
   return originalFrom(table);
 };
 
+// Mock the transaction-backed primary-media RPC. Mutations happen only
+// after all simulated checks pass, mirroring PostgreSQL transaction rollback.
+const originalRpc = supabase.rpc.bind(supabase);
+(supabase as any).rpc = async (fn: string, args: Record<string, unknown>) => {
+  if (fn !== 'set_product_primary_media') {
+    return { data: null, error: { message: `Unexpected RPC: ${fn}` } };
+  }
+  if (forcePrimaryRpcError) {
+    return { data: null, error: { message: 'Simulated atomic primary switch failure' } };
+  }
+
+  const productId = String(args.p_product_id);
+  const mediaId = String(args.p_media_id);
+  let relation = mockProductMedia.find(m => m.product_id === productId && m.media_id === mediaId);
+  if (!args.p_create_link && !relation) {
+    return { data: null, error: { message: 'Media asset is not linked to this product' } };
+  }
+
+  if (args.p_create_link && !relation) {
+    relation = {
+      product_id: productId,
+      media_id: mediaId,
+      sort_order: Number(args.p_sort_order ?? 0),
+      is_primary: true,
+    };
+    mockProductMedia.push(relation);
+  }
+
+  for (const item of mockProductMedia) {
+    if (item.product_id === productId) item.is_primary = item.media_id === mediaId;
+  }
+  if (relation) relation.is_primary = true;
+  return { data: relation ? [{ ...relation }] : [], error: null };
+};
+
 // Test Runner
 console.log('======================================================================');
 console.log('HOEOS TEST SUITE: CMS MEDIA PIPELINE & PERSISTENT PLACEMENTS');
@@ -551,11 +587,33 @@ await test('9a. Link existing asset to product via linkAssetToProduct', async ()
   assert.equal(linkRes.data.is_primary, false);
 });
 
-await test('9b. Set primary media sets is_primary=true for target asset and clears prior primary', async () => {
+await test('9b. Primary asset linking uses the atomic RPC and leaves exactly one primary', async () => {
   const linkRes = await mediaService.linkAssetToProduct(TEST_PRODUCT_ID, createdAssetId, true);
   assert.equal(linkRes.error, null);
   assert.ok(linkRes.data);
   assert.equal(linkRes.data.is_primary, true);
+  const primaries = mockProductMedia.filter(m => m.product_id === TEST_PRODUCT_ID && m.is_primary);
+  assert.equal(primaries.length, 1);
+  assert.equal(primaries[0].media_id, createdAssetId);
+});
+
+await test('9c. Failed atomic primary switch preserves the previous primary', async () => {
+  const otherFile = new MockFile('alternate_primary.jpg', 12000, 'image/jpeg') as unknown as File;
+  const otherAsset = await mediaService.uploadAsset(otherFile);
+  assert.ok(otherAsset.data);
+  const otherLink = await mediaService.linkAssetToProduct(TEST_PRODUCT_ID, otherAsset.data.id, true);
+  assert.equal(otherLink.error, null);
+  assert.equal(otherLink.data?.is_primary, true);
+
+  forcePrimaryRpcError = true;
+  const failedSwitch = await mediaService.setPrimaryMedia(TEST_PRODUCT_ID, createdAssetId);
+  forcePrimaryRpcError = false;
+
+  assert.equal(failedSwitch.success, false);
+  assert.match(failedSwitch.error || '', /Simulated atomic primary switch failure/i);
+  const primaries = mockProductMedia.filter(m => m.product_id === TEST_PRODUCT_ID && m.is_primary);
+  assert.equal(primaries.length, 1);
+  assert.equal(primaries[0].media_id, otherAsset.data.id);
 });
 
 // ----------------------------------------------------------------------------
