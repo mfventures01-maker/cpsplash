@@ -498,17 +498,19 @@ await test('6. Storage upload failure returns structured error and aborts persis
 // ----------------------------------------------------------------------------
 // 7. media_assets Insert Failure & Safe Compensation
 // ----------------------------------------------------------------------------
-await test('7. DB insert failure safely deletes uploaded storage object (compensation)', async () => {
+await test('7. Ambiguous DB insert failure preserves uploaded Storage object for reconciliation', async () => {
   forceAssetInsertError = true;
   storageDeletions = [];
-  const file = new MockFile('compensate.jpg', 30000, 'image/jpeg') as unknown as File;
+  const file = new MockFile('preserve-on-uncertain-insert.jpg', 30000, 'image/jpeg') as unknown as File;
   const res = await mediaService.uploadAsset(file);
   forceAssetInsertError = false;
 
   assert.equal(res.data, null);
   assert.ok(res.error);
-  // Compensation assertion: Storage object must have been cleaned up
-  assert.ok(storageDeletions.length > 0, 'Storage object should be deleted during compensation');
+  assert.match(res.error, /preserved for reconciliation/i);
+  // The insert may have committed even when its response reports failure.
+  // Never delete the Storage object until database state is independently reconciled.
+  assert.equal(storageDeletions.length, 0, 'Storage must be preserved when asset-row persistence is unconfirmed');
 });
 
 // ----------------------------------------------------------------------------
