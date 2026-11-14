@@ -97,13 +97,13 @@ begin
      and is_primary = true;
 
   if p_create_link then
-    insert into public.product_media (product_id, media_id, sort_order, is_primary)
+    insert into public.product_media as current_link (product_id, media_id, sort_order, is_primary)
     values (p_product_id, p_media_id, coalesce(p_sort_order, 0), true)
     on conflict (product_id, media_id)
     do update set
       is_primary = true,
       sort_order = case
-        when p_sort_order is null then public.product_media.sort_order
+        when p_sort_order is null then current_link.sort_order
         else excluded.sort_order
       end;
   else
