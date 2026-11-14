@@ -16,6 +16,7 @@ assert.match(migration, /v_actor_id := auth\.uid\(\)/i);
 assert.match(migration, /for update/i);
 assert.match(migration, /for share/i);
 assert.match(migration, /tm\.status = 'active'/i);
+assert.match(migration, /r\.tenant_id is null or r\.tenant_id = v_tenant_id/i);
 assert.match(migration, /r\.name = any/i);
 assert.match(migration, /v_asset_status <> 'active'/i);
 assert.match(migration, /on conflict \(product_id, media_id\)/i);
