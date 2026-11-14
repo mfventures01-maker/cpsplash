@@ -504,6 +504,15 @@ export const mediaService = {
 
       }
 
+      // 1b. Reject a readable file signature that contradicts the declared format.
+      const signatureCheck = await inspectFileSignature(file);
+      if (signatureCheck.detectedMime && signatureCheck.detectedMime !== validation.mimeType) {
+        return {
+          data: null,
+          error: `File signature mismatch: detected ${signatureCheck.detectedMime}, expected ${validation.mimeType}`,
+        };
+      }
+
       // 2. Authoritative product existence and tenant authorization check
 
       const { data: product, error: productErr } = await supabase
