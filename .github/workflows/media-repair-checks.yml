@@ -2,7 +2,7 @@ name: CP Splash media repair checks
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, repair/cms-media-upload-integrity]
   workflow_dispatch:
 
 permissions:
