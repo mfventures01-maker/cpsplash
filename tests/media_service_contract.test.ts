@@ -644,16 +644,18 @@ await runTest('Failure 6: Preservation rule -> if asset is referenced elsewhere,
   });
 });
 
-await runTest('Failure 7: Clear primary fails -> aborts and cleans up new asset safely', async () => {
+await runTest('Failure 7: Atomic primary RPC fails -> aborts and safely compensates the unlinked asset', async () => {
   const { mockClient, calls } = createSupabaseMock({
-    clearPrimaryError: { message: 'RLS update denied on product_media' },
+    primaryRpcError: { message: 'RLS authorization denied by atomic primary RPC' },
     existingRefs: []
   });
   await withMockedSupabase(mockClient, async () => {
     const file = new MockFile('test.jpg', 1000, 'image/jpeg') as unknown as File;
     const res = await mediaService.uploadMedia(VALID_PRODUCT_ID, file, 'image', '', true);
     assert.equal(res.data, null);
-    assert.match(res.error || '', /RLS update denied|Failed to update existing primary media/i);
+    assert.match(res.error || '', /RLS authorization denied by atomic primary RPC/i);
+    assert.equal(calls.rpcCalls.length, 1);
+    assert.equal(calls.rpcCalls[0].name, 'set_product_primary_media');
     assert.equal(calls.storageRemovals.length, 1);
   });
 });
