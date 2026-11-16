@@ -545,7 +545,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
                 type="number"
                 required
                 value={basePrice}
-                onChange={(e) => setBasePrice(Number(e.target.value))}
+                onChange={(e) => setBasePrice(e.target.value === '' ? '' : Number(e.target.value))}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-mono text-base font-bold focus:ring-2 focus:ring-rose-500"
               />
             </div>
