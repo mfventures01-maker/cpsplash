@@ -42,3 +42,7 @@ jobs:
       - name: Verify primary-media migration contract
         run: npm run test:media:migration:contract
         timeout-minutes: 1
+
+      - name: Verify product publishing-to-WhatsApp contract
+        run: npm run test:products:contract
+        timeout-minutes: 1
