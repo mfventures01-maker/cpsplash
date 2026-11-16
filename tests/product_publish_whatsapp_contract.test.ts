@@ -36,6 +36,7 @@ assert.match(productsService, /price\.status === 'active'.*Number\(price\.amount
 assert.match(productsService, /select\('id, amount, status'\)/, 'price writes must be read back');
 assert.match(productsService, /asset\.bucket === BUCKET_NAME/, 'public catalog must require the approved storage bucket');
 assert.match(productsService, /asset\.path\?\.startsWith/, 'public catalog must require product-linked storage paths');
+assert.match(productsService, /media\\/\\$\\{TENANT_ID\\}/, 'publication and catalog gates must also accept the approved tenant-scoped CMS media path');
 
 assert.doesNotMatch(modal, /ordersService|createOrder|orderSent|Order Dispatched/, 'WhatsApp handoff must not create or claim persisted orders');
 assert.match(modal, /Product link:.*productUrl/, 'WhatsApp message must include the product URL');
