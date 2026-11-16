@@ -46,7 +46,6 @@ export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps
       metadata: { source: 'product_whatsapp_cta', quantity, unitPrice, subtotal },
     });
     // No order header, order item, or persistence claim is created in this MVP.
-    onClose();
   };
 
   return (
