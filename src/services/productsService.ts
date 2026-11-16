@@ -268,6 +268,7 @@ export const productsService = {
       .select('id')
       .eq('tenant_id', TENANT_ID)
       .eq('price_type', 'retail')
+      .eq('status', 'active')
       .limit(1);
 
     if (findErr) {
@@ -315,10 +316,29 @@ export const productsService = {
       }
 
       // Filter claims to verified only for public storefront
-      const sanitized = ((data as unknown as Product[]) || []).map(p => ({
-        ...p,
-        claims: (p.claims || []).filter(c => c.verification_status === 'verified'),
-      }));
+      const sanitized = ((data as unknown as Product[]) || [])
+        .filter(p => {
+          const activeVariant = (p.variants || []).find(v => v.status === 'active');
+          const activePrice = (activeVariant?.prices || []).find(price =>
+            price.status === 'active' && Number.isFinite(Number(price.amount)) && Number(price.amount) > 0
+          );
+          const primary = (p.media || []).find(media => media.is_primary);
+          const asset = primary?.media_assets || primary?.asset;
+          return Boolean(
+            activePrice &&
+            asset &&
+            asset.tenant_id === TENANT_ID &&
+            asset.bucket === BUCKET_NAME &&
+            asset.status === 'active' &&
+            asset.media_type === 'image' &&
+            ACCEPTED_IMAGE_MIME_TYPES.has(String(asset.mime_type || '').toLowerCase()) &&
+            asset.path?.startsWith(`products/${p.id}/`)
+          );
+        })
+        .map(p => ({
+          ...p,
+          claims: (p.claims || []).filter(c => c.verification_status === 'verified'),
+        }));
 
       return { data: sanitized, error: null };
     } catch (err: unknown) {
@@ -372,8 +392,14 @@ export const productsService = {
       }
 
       const prod = data as unknown as Product;
-      if (publicOnly && prod.claims) {
-        prod.claims = prod.claims.filter(c => c.verification_status === 'verified');
+      if (publicOnly) {
+        const validation = await validateProductPublication(prod.id);
+        if (!validation.isValid) {
+          return { data: null, error: validation.error || 'Published product failed media/price validation.' };
+        }
+        if (prod.claims) {
+          prod.claims = prod.claims.filter(c => c.verification_status === 'verified');
+        }
       }
 
       return { data: prod, error: null };
@@ -414,6 +440,9 @@ export const productsService = {
     try {
       if (!productData.name || !productData.slug) {
         return { data: null, error: 'Product name and slug are required' };
+      }
+      if (!Number.isFinite(Number(productData.price)) || Number(productData.price) <= 0) {
+        return { data: null, error: 'A positive product price is required before a product can be created.' };
       }
 
       if (productData.status === 'published') {
@@ -460,10 +489,6 @@ export const productsService = {
       const volumeMl = productData.volume !== undefined ? Number(productData.volume) : 500;
       const volumeUnit = productData.volume_unit || 'ml';
       const priceAmount = Number(productData.price);
-
-      if (!Number.isFinite(priceAmount) || priceAmount <= 0) {
-        return { data: null, error: 'A positive product price is required before a product can be created.' };
-      }
 
       const variantRecord = {
         tenant_id: TENANT_ID,
@@ -652,7 +677,11 @@ export const productsService = {
       const priceListId = await this.ensureDefaultPriceList();
 
       // Check existing price record
-      const { data: existingPrices } = await supabase
+      if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+        return { success: false, error: 'Product price must be a positive number.' };
+      }
+
+      const { data: existingPrices, error: existingErr } = await supabase
         .from('product_prices')
         .select('id')
         .eq('variant_id', variantId)
@@ -660,9 +689,14 @@ export const productsService = {
         .eq('tenant_id', TENANT_ID)
         .limit(1);
 
+      if (existingErr) {
+        return { success: false, error: getErrMsg(existingErr, 'Existing price lookup failed') };
+      }
+
+      let savedPrice: any = null;
       if (existingPrices && existingPrices.length > 0) {
         const priceId = (existingPrices[0] as { id: string }).id;
-        const { error: updateErr } = await supabase
+        const { data, error: updateErr } = await supabase
           .from('product_prices')
           .update({
             amount: Number(amount),
@@ -670,13 +704,16 @@ export const productsService = {
             status: 'active',
             change_reason: reason || 'Price update via CMS Price Engine',
           })
-          .eq('id', priceId);
+          .eq('id', priceId)
+          .select('id, amount, status')
+          .single();
 
-        if (updateErr) {
-          return { success: false, error: getErrMsg(updateErr, 'Failed to update price') };
+        if (updateErr || !data) {
+          return { success: false, error: getErrMsg(updateErr, 'Failed to update and read back price') };
         }
+        savedPrice = data;
       } else {
-        const { error: insertErr } = await supabase
+        const { data, error: insertErr } = await supabase
           .from('product_prices')
           .insert({
             tenant_id: TENANT_ID,
@@ -686,11 +723,18 @@ export const productsService = {
             compare_at_amount: compareAtAmount !== undefined ? compareAtAmount : null,
             status: 'active',
             change_reason: reason || 'Price creation via CMS Price Engine',
-          });
+          })
+          .select('id, amount, status')
+          .single();
 
-        if (insertErr) {
-          return { success: false, error: getErrMsg(insertErr, 'Failed to insert price') };
+        if (insertErr || !data) {
+          return { success: false, error: getErrMsg(insertErr, 'Failed to insert and read back price') };
         }
+        savedPrice = data;
+      }
+
+      if (savedPrice.status !== 'active' || Number(savedPrice.amount) !== Number(amount)) {
+        return { success: false, error: 'Product price persisted but failed active-price read-back verification.' };
       }
 
       notifySyncEvent('product_prices', { productId, amount }, 'UPDATE');
