@@ -23,14 +23,13 @@ export function getProductPrice(product?: Product | null): ResolvedProductPricin
     return { amount: 0, compare_at_amount: null, currency: DEFAULT_CURRENCY };
   }
 
-  // Find active variant
-  const variant = product.variants.find(v => v.status === 'active') || product.variants[0];
+  // Public pricing must never fall back to inactive variants or inactive prices.
+  const variant = product.variants.find(v => v.status === 'active');
   if (!variant || !variant.prices || variant.prices.length === 0) {
     return { amount: 0, compare_at_amount: null, currency: DEFAULT_CURRENCY };
   }
 
-  // Find active price
-  const price = variant.prices.find(p => p.status === 'active') || variant.prices[0];
+  const price = variant.prices.find(p => p.status === 'active' && Number(p.amount) > 0);
   if (!price) {
     return { amount: 0, compare_at_amount: null, currency: DEFAULT_CURRENCY };
   }
