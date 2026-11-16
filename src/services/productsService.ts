@@ -231,10 +231,21 @@ export async function validateProductPublication(
         continue;
       }
 
-      // 8. Storage path must belong to expected product path: products/{productId}/...
-      const expectedPrefix = `products/${cleanProductId}/`;
-      if (!asset.path || !asset.path.startsWith(expectedPrefix) || asset.path.length <= expectedPrefix.length) {
-        candidateFailureReason = `Media asset storage path "${asset.path}" does not belong to expected product storage path "${expectedPrefix}*"`;
+      // 8. Storage path must match one of the two approved cp-public
+      // layouts enforced by production Storage RLS:
+      // - products/{productId}/... for product-scoped uploads
+      // - media/{tenantId}/... for tenant-scoped CMS media uploads
+      const productPrefix = `products/${cleanProductId}/`;
+      const tenantMediaPrefix = `media/${TENANT_ID}/`;
+      const hasApprovedPath = Boolean(
+        asset.path &&
+        (
+          (asset.path.startsWith(productPrefix) && asset.path.length > productPrefix.length) ||
+          (asset.path.startsWith(tenantMediaPrefix) && asset.path.length > tenantMediaPrefix.length)
+        )
+      );
+      if (!hasApprovedPath) {
+        candidateFailureReason = `Media asset storage path "${asset.path}" does not match an approved product or tenant media path (" ${productPrefix}*" or "${tenantMediaPrefix}*")`;
         continue;
       }
 
@@ -332,7 +343,10 @@ export const productsService = {
             asset.status === 'active' &&
             asset.media_type === 'image' &&
             ACCEPTED_IMAGE_MIME_TYPES.has(String(asset.mime_type || '').toLowerCase()) &&
-            asset.path?.startsWith(`products/${p.id}/`)
+            (
+              asset.path?.startsWith(`products/${p.id}/`) ||
+              asset.path?.startsWith(`media/${TENANT_ID}/`)
+            )
           );
         })
         .map(p => ({
