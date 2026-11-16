@@ -104,6 +104,34 @@ export async function validateProductPublication(
       };
     }
 
+    // Publication also requires a persisted, positive active price on an active variant.
+    const { data: pricedVariants, error: priceErr } = await supabase
+      .from('product_variants')
+      .select('id, status, product_prices(id, amount, status)')
+      .eq('product_id', cleanProductId)
+      .eq('tenant_id', TENANT_ID)
+      .eq('status', 'active');
+
+    if (priceErr) {
+      return {
+        isValid: false,
+        error: `Database verification error checking active product price: ${getErrMsg(priceErr, 'Price query failed')}`,
+      };
+    }
+
+    const hasActivePrice = (pricedVariants || []).some((variant: any) =>
+      (variant.product_prices || []).some((price: any) =>
+        price.status === 'active' && Number.isFinite(Number(price.amount)) && Number(price.amount) > 0
+      )
+    );
+
+    if (!hasActivePrice) {
+      return {
+        isValid: false,
+        error: `Publication prerequisite failed: Product ${cleanProductId} must have an active variant with a positive active price in product_prices`,
+      };
+    }
+
     // 2. Query product_media for primary media association
     const { data: mediaLinks, error: mediaErr } = await supabase
       .from('product_media')
@@ -242,7 +270,10 @@ export const productsService = {
       .eq('price_type', 'retail')
       .limit(1);
 
-    if (!findErr && existing && existing.length > 0) {
+    if (findErr) {
+      throw new Error(`Failed to verify default price list: ${getErrMsg(findErr, 'Price list lookup failed')}`);
+    }
+    if (existing && existing.length > 0) {
       return (existing[0] as { id: string }).id;
     }
 
@@ -424,9 +455,15 @@ export const productsService = {
 
       const productId = (createdProduct as { id: string }).id;
 
-      // 2. Insert default variant in product_variants
+      // 2. Insert the required active variant. A product is not considered created
+      // successfully unless its initial active price is also persisted and read back.
       const volumeMl = productData.volume !== undefined ? Number(productData.volume) : 500;
       const volumeUnit = productData.volume_unit || 'ml';
+      const priceAmount = Number(productData.price);
+
+      if (!Number.isFinite(priceAmount) || priceAmount <= 0) {
+        return { data: null, error: 'A positive product price is required before a product can be created.' };
+      }
 
       const variantRecord = {
         tenant_id: TENANT_ID,
@@ -446,16 +483,16 @@ export const productsService = {
         .single();
 
       if (varErr || !createdVariant) {
-        console.error('Failed to create default variant:', varErr);
-      } else {
-        const variantId = (createdVariant as { id: string }).id;
+        return { data: null, error: `Product record was created as a draft, but its required variant could not be saved: ${getErrMsg(varErr, 'Variant insert returned no record')}` };
+      }
 
-        // 3. Ensure price list and create price record
-        const priceListId = await this.ensureDefaultPriceList();
-        const priceAmount = Number(productData.price) || 0;
-        const compareAtAmount = productData.compare_at_price ? Number(productData.compare_at_price) : null;
+      const variantId = (createdVariant as { id: string }).id;
+      const priceListId = await this.ensureDefaultPriceList();
+      const compareAtAmount = productData.compare_at_price != null ? Number(productData.compare_at_price) : null;
 
-        const priceRecord = {
+      const { data: createdPrice, error: priceErr } = await supabase
+        .from('product_prices')
+        .insert({
           tenant_id: TENANT_ID,
           price_list_id: priceListId,
           variant_id: variantId,
@@ -463,12 +500,16 @@ export const productsService = {
           compare_at_amount: compareAtAmount,
           status: 'active',
           change_reason: 'Initial creation via CMS',
-        };
+        })
+        .select('id, amount, status')
+        .single();
 
-        const { error: priceErr } = await supabase.from('product_prices').insert(priceRecord);
-        if (priceErr) {
-          console.error('Failed to create initial price record:', priceErr);
-        }
+      if (priceErr || !createdPrice) {
+        return { data: null, error: `Product draft and variant were created, but the required price could not be saved: ${getErrMsg(priceErr, 'Price insert returned no record')}` };
+      }
+
+      if (createdPrice.status !== 'active' || Number(createdPrice.amount) !== priceAmount) {
+        return { data: null, error: 'Initial product price failed persisted read-back verification.' };
       }
 
       notifySyncEvent('products', { id: productId }, 'INSERT');
@@ -525,16 +566,22 @@ export const productsService = {
 
       // If price or volume is provided, update variant and price
       if (updates.price !== undefined || updates.compare_at_price !== undefined) {
-        await this.updateProductPrice(
+        if (updates.price !== undefined && (!Number.isFinite(Number(updates.price)) || Number(updates.price) <= 0)) {
+          return { data: null, error: 'Product price must be a positive number.' };
+        }
+        const priceResult = await this.updateProductPrice(
           id,
           updates.price !== undefined ? Number(updates.price) : 0,
           updates.compare_at_price !== undefined ? updates.compare_at_price : null,
           'Price update via CMS'
         );
+        if (!priceResult.success) {
+          return { data: null, error: priceResult.error || 'Product price update failed.' };
+        }
       }
 
       if (updates.volume !== undefined) {
-        await supabase
+        const { error: volumeErr } = await supabase
           .from('product_variants')
           .update({
             volume: Number(updates.volume),
@@ -543,6 +590,9 @@ export const productsService = {
           })
           .eq('product_id', id)
           .eq('tenant_id', TENANT_ID);
+        if (volumeErr) {
+          return { data: null, error: getErrMsg(volumeErr, 'Failed to update product volume') };
+        }
       }
 
       notifySyncEvent('products', { id }, 'UPDATE');
@@ -665,14 +715,19 @@ export const productsService = {
         }
       }
 
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from('products')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .eq('tenant_id', TENANT_ID);
+        .eq('tenant_id', TENANT_ID)
+        .select('id, status')
+        .single();
 
-      if (error) {
-        return { success: false, error: getErrMsg(error, 'Failed to set status') };
+      if (error || !updated) {
+        return { success: false, error: getErrMsg(error, 'Failed to set status or verify the updated product') };
+      }
+      if (updated.status !== status) {
+        return { success: false, error: `Product status read-back mismatch: expected ${status}, received ${updated.status}` };
       }
 
       notifySyncEvent('products', { id, status }, 'UPDATE');
