@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { Product } from '../../types/database.types';
-import { X, MessageCircle, Plus, Minus, CheckCircle, ShieldCheck } from 'lucide-react';
+import { X, MessageCircle, Plus, Minus } from 'lucide-react';
 import { analyticsService } from '../../services/analyticsService';
-import { ordersService } from '../../services/ordersService';
 import {
   getProductPrice,
   getProductVolume,
   getProductHeroMediaUrl,
-  getProductPrimaryVariant
 } from '../../services/productHelpers';
-import { BUSINESS_CONFIG } from '../../services/businessConfig';
+import { BUSINESS_CONFIG, buildWhatsAppUrl } from '../../services/businessConfig';
 
 interface WhatsAppOrderModalProps {
   product: Product | null;
@@ -17,315 +15,107 @@ interface WhatsAppOrderModalProps {
 }
 
 export function WhatsAppOrderModal({ product, onClose }: WhatsAppOrderModalProps) {
-  if (!product) return null;
+  const [quantity, setQuantity] = useState(1);
 
-  const [quantity, setQuantity] = useState(2);
-  const [customerName, setCustomerName] = useState('');
-  const [deliveryLocation, setDeliveryLocation] = useState('Sapele, Delta State');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [note, setNote] = useState('');
-  const [orderSent, setOrderSent] = useState(false);
+  if (!product) return null;
 
   const price = getProductPrice(product);
   const volumeInfo = getProductVolume(product);
   const imageUrl = getProductHeroMediaUrl(product);
-  const primaryVariant = getProductPrimaryVariant(product);
-
   const unitPrice = price.amount;
   const subtotal = unitPrice * quantity;
-  const phoneNumber = BUSINESS_CONFIG.contact.whatsappNumber;
+  const productUrl = `${window.location.origin}/products/${product.slug}`;
 
-  const handleSendOrder = () => {
-    // 1. Generate Deterministic WhatsApp Order Message (Authoritative format)
-    const orderLines = [
-      `Hello CP Splash,`,
-      ``,
-      `I would like to order:`,
-      `Product: ${product.name}`,
-      `Quantity: ${quantity}`,
-      `Volume: ${volumeInfo.volume}${volumeInfo.unit}`,
-      `Unit Price: ₦${unitPrice.toLocaleString()}`,
-      `Subtotal: ₦${subtotal.toLocaleString()}`,
-      ``,
-      `Delivery Details:`,
-      `Customer: ${customerName.trim() || 'Valued Customer'}`,
-      `Location: ${deliveryLocation}`,
-      deliveryAddress ? `Address: ${deliveryAddress.trim()}` : null,
-      customerPhone ? `Contact Phone: ${customerPhone.trim()}` : null,
-      note ? `Special Note: ${note.trim()}` : null,
-      ``,
-      `Order generated via CP Splash Commerce Engine (HOEOS Verified).`
-    ].filter(Boolean);
+  const message = [
+    'Hello CP Splash, I would like to enquire about this product:',
+    `Product: ${product.name}`,
+    `Quantity: ${quantity}`,
+    `Pack size: ${volumeInfo.volume}${volumeInfo.unit}`,
+    `Unit price: ₦${unitPrice.toLocaleString()}`,
+    `Total: ₦${subtotal.toLocaleString()}`,
+    `Product link: ${productUrl}`,
+  ].join('\n');
 
-    const message = orderLines.join('\n');
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  const whatsappUrl = buildWhatsAppUrl(message);
 
-    // 2. Persist order record into Supabase orders & order_items tables
-    ordersService.createOrder({
-      customer_name: customerName.trim() || 'Valued Customer',
-      customer_phone: customerPhone.trim() || BUSINESS_CONFIG.contact.enquiryPhoneDisplay,
-      customer_location: deliveryLocation,
-      delivery_address: deliveryAddress.trim() || null,
-      channel: 'whatsapp',
-      status: 'pending',
-      currency: 'NGN',
-      total_amount: subtotal,
-      notes: note.trim() || null,
-      items: [
-        {
-          product_id: product.id,
-          variant_id: primaryVariant?.id || null,
-          product_name: product.name,
-          quantity,
-          unit_price: unitPrice,
-          volume: volumeInfo.volume,
-          subtotal,
-        }
-      ]
-    });
-
-    // 3. Track analytics event deterministically into Supabase
-    analyticsService.trackEvent('order_started', {
-      productId: product.id,
-      landingPage: window.location.pathname,
-      metadata: {
-        product_name: product.name,
-        quantity,
-        subtotal,
-        location: deliveryLocation,
-      }
-    });
-
+  const handleWhatsAppClick = () => {
+    if (!Number.isFinite(unitPrice) || unitPrice <= 0) return;
     analyticsService.trackEvent('whatsapp_click', {
       productId: product.id,
-      metadata: {
-        target: 'whatsapp_order_flow',
-        phone: phoneNumber
-      }
+      landingPage: window.location.pathname,
+      metadata: { source: 'product_whatsapp_cta', quantity, unitPrice, subtotal },
     });
-
-    setOrderSent(true);
-
-    // Open WhatsApp link in new tab
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    // No order header, order item, or persistence claim is created in this MVP.
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-stone-200 relative my-8">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors cursor-pointer"
-          aria-label="Close"
-        >
+        <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full text-stone-400 hover:text-stone-700 hover:bg-stone-100" aria-label="Close">
           <X className="w-5 h-5" />
         </button>
 
-        {!orderSent ? (
-          <div className="space-y-6">
-            {/* Header */}
-            <div>
-              <div className="flex items-center gap-2 text-emerald-600 font-semibold text-xs uppercase tracking-wider mb-1">
-                <MessageCircle className="w-4 h-4 fill-emerald-600 text-white" />
-                <span>Direct WhatsApp Commerce</span>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-black text-stone-900 leading-tight">
-                Order {product.name}
-              </h3>
-              <p className="text-xs text-stone-500 mt-1">
-                Authoritative pricing sourced directly from Supabase PostgreSQL engine.
-              </p>
+        <div className="space-y-6">
+          <div>
+            <div className="flex items-center gap-2 text-emerald-600 font-semibold text-xs uppercase tracking-wider mb-1">
+              <MessageCircle className="w-4 h-4" />
+              <span>Continue on WhatsApp</span>
             </div>
+            <h3 className="text-xl sm:text-2xl font-black text-stone-900">Enquire about {product.name}</h3>
+            <p className="text-xs text-stone-500 mt-1">Confirm availability and your order directly with CP Splash on WhatsApp.</p>
+          </div>
 
-            {/* Product Summary Box */}
-            <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl bg-stone-200 overflow-hidden shrink-0">
-                <img
-                  src={imageUrl}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-bold text-stone-900 text-sm truncate">{product.name}</h4>
-                <p className="text-xs text-stone-500">{volumeInfo.volume}{volumeInfo.unit} chilled bottle</p>
-                <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-base font-extrabold text-stone-900">
-                    ₦{unitPrice.toLocaleString()}
-                  </span>
-                  {price.compare_at_amount && (
-                    <span className="text-xs text-stone-400 line-through">
-                      ₦{price.compare_at_amount.toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              </div>
+          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 flex items-center gap-4">
+            <div className="w-16 h-16 rounded-xl bg-stone-200 overflow-hidden shrink-0">
+              <img src={imageUrl} alt={product.name} className="w-full h-full object-cover" />
             </div>
-
-            {/* Quantity Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block">
-                Quantity (Bottles)
-              </label>
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-stone-100 border border-stone-200">
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-9 h-9 rounded-xl bg-white border border-stone-300 flex items-center justify-center text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="text-lg font-bold text-stone-900 w-8 text-center font-mono">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-9 h-9 rounded-xl bg-white border border-stone-300 flex items-center justify-center text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-xs text-stone-500 block">Subtotal</span>
-                  <span className="text-lg font-black text-rose-700">
-                    ₦{subtotal.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Delivery Details */}
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-bold text-stone-700 block mb-1">
-                  Your Name / Contact Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Sandra Osagie"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-stone-700 block mb-1">
-                    City / Area
-                  </label>
-                  <select
-                    value={deliveryLocation}
-                    onChange={(e) => setDeliveryLocation(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm bg-white"
-                  >
-                    <option value="Sapele, Delta State">Sapele, Delta State (Local Delivery)</option>
-                    <option value="Warri / Effurun, Delta State">Warri / Effurun, Delta State</option>
-                    <option value="Asaba, Delta State">Asaba, Delta State</option>
-                    <option value="Benin City, Edo State">Benin City, Edo State</option>
-                    <option value="Port Harcourt, Rivers State">Port Harcourt, Rivers State</option>
-                    <option value="Lagos State">Lagos State</option>
-                    <option value="Abuja FCT">Abuja FCT</option>
-                    <option value="Other Nigeria City">Other Nigeria City</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-stone-700 block mb-1">
-                    Phone / WhatsApp Number
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="e.g. 08123456789"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-stone-700 block mb-1">
-                  Delivery Address / Landmark
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Close to Ajimele Junction, Ajogodo Road"
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-stone-700 block mb-1">
-                  Optional Order Notes
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Please deliver ice-chilled by 3 PM"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
-                />
-              </div>
-            </div>
-
-            {/* Dispatch Button */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleSendOrder}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-extrabold text-base shadow-lg shadow-emerald-700/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
-              >
-                <MessageCircle className="w-5 h-5 fill-white text-emerald-600" />
-                <span>Launch WhatsApp Order (₦{subtotal.toLocaleString()})</span>
-              </button>
-              <p className="text-[11px] text-center text-stone-500 mt-2 flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Verified Direct Line: {BUSINESS_CONFIG.contact.enquiryPhoneDisplay} ({BUSINESS_CONFIG.flagshipLocation.hubName})</span>
-              </p>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-bold text-stone-900 text-sm">{product.name}</h4>
+              <p className="text-xs text-stone-500">{volumeInfo.volume}{volumeInfo.unit}</p>
+              <span className="text-base font-extrabold text-stone-900">₦{unitPrice.toLocaleString()}</span>
             </div>
           </div>
-        ) : (
-          <div className="py-8 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-              <CheckCircle className="w-10 h-10" />
-            </div>
-            <h3 className="text-2xl font-black text-stone-900">
-              Order Dispatched to WhatsApp!
-            </h3>
-            <p className="text-sm text-stone-600 max-w-sm mx-auto leading-relaxed">
-              Your deterministic order for <strong>{quantity}x {product.name}</strong> was formatted with Supabase pricing and routed to CP Splash headquarters.
-            </p>
-            <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200 text-left text-xs font-mono space-y-1 text-stone-700">
-              <div>Product: {product.name}</div>
-              <div>Total: ₦{subtotal.toLocaleString()}</div>
-              <div>Destination: {deliveryLocation}</div>
-              <div>Target: {BUSINESS_CONFIG.contact.enquiryPhoneDisplay}</div>
-            </div>
-            <div className="pt-2 flex gap-3">
-              <button
-                onClick={handleSendOrder}
-                className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs cursor-pointer"
-              >
-                Re-open WhatsApp
-              </button>
-              <button
-                onClick={onClose}
-                className="px-6 py-3 rounded-xl border border-stone-300 text-stone-700 font-bold text-xs hover:bg-stone-50 cursor-pointer"
-              >
-                Done
-              </button>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block">Quantity</label>
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-stone-100 border border-stone-200">
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-9 h-9 rounded-xl bg-white border border-stone-300 flex items-center justify-center" aria-label="Decrease quantity">
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="text-lg font-bold text-stone-900 w-8 text-center font-mono">{quantity}</span>
+                <button type="button" onClick={() => setQuantity(q => q + 1)} className="w-9 h-9 rounded-xl bg-white border border-stone-300 flex items-center justify-center" aria-label="Increase quantity">
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="text-right">
+                <span className="text-xs text-stone-500 block">Estimated total</span>
+                <span className="text-lg font-black text-rose-700">₦{subtotal.toLocaleString()}</span>
+              </div>
             </div>
           </div>
-        )}
+
+          {unitPrice > 0 ? (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleWhatsAppClick}
+              className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span>Continue to WhatsApp</span>
+            </a>
+          ) : (
+            <div role="alert" className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
+              A valid active price is not available for this product. Please try again later.
+            </div>
+          )}
+          <p className="text-[11px] text-center text-stone-500">
+            WhatsApp: {BUSINESS_CONFIG.contact.enquiryPhoneDisplay}. Your message includes the current product price and product link. Your order is confirmed directly with the business.
+          </p>
+        </div>
       </div>
     </div>
   );
