@@ -302,6 +302,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     e.preventDefault();
     setSaving(true);
     setError(null);
+    let saveSucceeded = false;
 
     const mergedMetadata = {
       ...rawMetadata,
@@ -333,6 +334,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
       if (res.error) {
         setError(res.error);
       } else if (res.data) {
+        saveSucceeded = true;
         onSaved(res.data);
       }
     } else {
@@ -340,11 +342,12 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
       if (res.error) {
         setError(res.error);
       } else if (res.data) {
+        saveSucceeded = true;
         onSaved(res.data);
       }
     }
 
-    if (!error) {
+    if (saveSucceeded) {
       try {
         window.localStorage.removeItem(draftKey);
       } catch (draftError) {
