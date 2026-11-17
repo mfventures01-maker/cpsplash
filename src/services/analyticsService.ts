@@ -67,7 +67,18 @@ export const analyticsService = {
         created_at: new Date().toISOString(),
       };
 
-      await supabase.from('analytics_events').insert(record as unknown as Record<string, unknown>);
+      const { error } = await supabase
+        .from('analytics_events')
+        .insert(record as unknown as Record<string, unknown>);
+
+      if (error) {
+        console.warn('Analytics event was not persisted:', {
+          eventName,
+          pagePath: record.page_path,
+          code: error.code,
+          message: error.message,
+        });
+      }
     } catch (err) {
       console.warn('Analytics event tracking error:', err);
     }
