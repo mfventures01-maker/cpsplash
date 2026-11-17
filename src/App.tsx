@@ -16,6 +16,18 @@ import { AdminAuthProvider } from './auth/AdminAuthContext';
 import { AdminAuthGate } from './components/auth/AdminAuthGate';
 import { WhatsAppOrderModal } from './components/product/WhatsAppOrderModal';
 import { Product } from './types/database.types';
+import { AdminTab } from './components/admin/AdminLayout';
+
+const ADMIN_TABS: AdminTab[] = [
+  'dashboard', 'commercial_brain', 'sales_leads', 'orders', 'products',
+  'pricing', 'claims', 'media', 'blog', 'social', 'campaigns',
+  'retailers', 'analytics', 'settings',
+];
+
+function getAdminTab(path: string): AdminTab {
+  const segment = path.replace(/^\\/admin\\/?/, '').split('/')[0];
+  return ADMIN_TABS.includes(segment as AdminTab) ? segment as AdminTab : 'dashboard';
+}
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -47,8 +59,10 @@ export default function App() {
         <AdminAuthProvider>
           <AdminAuthGate onExitAdmin={() => navigate('/')}>
             <AdminApp
+              initialTab={getAdminTab(currentPath)}
               onExitAdmin={() => navigate('/')}
               onNavigatePublic={(path) => navigate(path)}
+              onNavigateAdmin={(tab) => navigate(tab === 'dashboard' ? '/admin' : `/admin/${tab}`)}
             />
           </AdminAuthGate>
         </AdminAuthProvider>
