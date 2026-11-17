@@ -54,7 +54,7 @@ export function CommercialFunnelPage({ territorySlug, onNavigate }: CommercialFu
           setHeroPlacements(heroData || []);
           setCardPlacements(cardData || []);
           analyticsService.trackEvent('page_view', {
-            landingPage: `/${territorySlug}`,
+            landingPage: typeof window !== 'undefined' ? window.location.pathname : `/${territorySlug}`,
             territoryId: tData.id,
             metadata: { territorySlug }
           });
