@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAdminAuth } from '../auth/AdminAuthContext';
+import { TENANT_ID } from '../lib/supabase';
 import { AdminLayout, AdminTab } from '../components/admin/AdminLayout';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
 import { AdminCommercialBrain } from '../components/admin/AdminCommercialBrain';
@@ -24,8 +26,34 @@ interface AdminAppProps {
 }
 
 export function AdminApp({ onExitAdmin, onNavigatePublic, initialTab = 'dashboard' }: AdminAppProps) {
-  const [currentTab, setCurrentTab] = useState<AdminTab>(initialTab);
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const { user } = useAdminAuth();
+  const routeStateKey = `cp-splash:admin-route:${TENANT_ID}:${user?.id || 'anonymous'}`;
+  const validTabs: AdminTab[] = ['dashboard', 'commercial_brain', 'sales_leads', 'orders', 'products', 'product_new', 'product_edit', 'pricing', 'media', 'claims', 'blog', 'social', 'campaigns', 'retailers', 'analytics', 'settings'];
+  const [restoredRoute] = useState(() => {
+    try {
+      const raw = window.sessionStorage.getItem(routeStateKey);
+      const saved = raw ? JSON.parse(raw) as { tab?: AdminTab; productId?: string | null } : null;
+      return saved && saved.tab && validTabs.includes(saved.tab)
+        ? { tab: saved.tab, productId: saved.productId || null }
+        : { tab: initialTab, productId: null };
+    } catch {
+      return { tab: initialTab, productId: null };
+    }
+  });
+  const [currentTab, setCurrentTab] = useState<AdminTab>(restoredRoute.tab);
+  const [editingProductId, setEditingProductId] = useState<string | null>(restoredRoute.productId);
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(routeStateKey, JSON.stringify({
+        tab: currentTab,
+        productId: editingProductId,
+        updatedAt: Date.now(),
+      }));
+    } catch (routeError) {
+      console.warn('[CP SPLASH ADMIN ROUTE] Could not persist active admin route:', routeError);
+    }
+  }, [routeStateKey, currentTab, editingProductId]);
 
   const handleEditProduct = (productId: string) => {
     setEditingProductId(productId);

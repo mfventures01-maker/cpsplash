@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { TENANT_ID } from '../../lib/supabase';
+import { useAdminAuth } from '../../auth/AdminAuthContext';
 import { productsService } from '../../services/productsService';
 import { mediaService } from '../../services/mediaService';
 import { claimsService } from '../../services/claimsService';
@@ -115,6 +117,7 @@ interface AdminProductEditorProps {
 }
 
 export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductEditorProps) {
+  const { user } = useAdminAuth();
   const isEditing = Boolean(productId);
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
@@ -157,6 +160,85 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   const [newClaimSource, setNewClaimSource] = useState('');
   const [newClaimType, setNewClaimType] = useState<ClaimType>('health');
   const [addingClaim, setAddingClaim] = useState(false);
+  const [draftHydrated, setDraftHydrated] = useState(false);
+  const [draftDirty, setDraftDirty] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
+  const lastDraftSnapshotRef = useRef<string>('');
+  const draftKey = `cp-splash:admin-product-draft:${TENANT_ID}:${user?.id || 'anonymous'}:${productId || 'new'}`;
+
+  const draftSnapshot = useMemo(() => ({
+    name, slug, sku, brand, categoryId, shortDescription, description, status, featured,
+    basePrice, salePrice, volumeMl, seoTitle, seoDescription, mediaSequence, animationConfig,
+    rawMetadata, mediaAltText, newClaimText, newClaimSource, newClaimType,
+  }), [
+    name, slug, sku, brand, categoryId, shortDescription, description, status, featured,
+    basePrice, salePrice, volumeMl, seoTitle, seoDescription, mediaSequence, animationConfig,
+    rawMetadata, mediaAltText, newClaimText, newClaimSource, newClaimType,
+  ]);
+
+  // Restore a product-scoped local draft only after the authoritative product load completes.
+  useEffect(() => {
+    if (loading) return;
+    try {
+      const raw = window.localStorage.getItem(draftKey);
+      if (raw) {
+        const saved = JSON.parse(raw) as { version?: number; productId?: string | null; updatedAt?: number; values?: Record<string, unknown> };
+        const values = saved?.values;
+        if (saved?.version === 1 && saved.productId === (productId || null) && values) {
+          if (typeof values.name === 'string') setName(values.name);
+          if (typeof values.slug === 'string') setSlug(values.slug);
+          if (typeof values.sku === 'string') setSku(values.sku);
+          if (typeof values.brand === 'string') setBrand(values.brand);
+          if (typeof values.categoryId === 'string') setCategoryId(values.categoryId);
+          if (typeof values.shortDescription === 'string') setShortDescription(values.shortDescription);
+          if (typeof values.description === 'string') setDescription(values.description);
+          if (['draft', 'published', 'archived'].includes(String(values.status))) setStatus(values.status as ProductStatus);
+          if (typeof values.featured === 'boolean') setFeatured(values.featured);
+          if (typeof values.basePrice === 'number') setBasePrice(values.basePrice);
+          if (typeof values.salePrice === 'number' || values.salePrice === '') setSalePrice(values.salePrice as number | '');
+          if (typeof values.volumeMl === 'number') setVolumeMl(values.volumeMl);
+          if (typeof values.seoTitle === 'string') setSeoTitle(values.seoTitle);
+          if (typeof values.seoDescription === 'string') setSeoDescription(values.seoDescription);
+          if (Array.isArray(values.mediaSequence)) setMediaSequence(values.mediaSequence as ProductMediaSequenceItem[]);
+          if (values.animationConfig && typeof values.animationConfig === 'object') setAnimationConfig(values.animationConfig as ProductAnimationConfig);
+          if (values.rawMetadata && typeof values.rawMetadata === 'object') setRawMetadata(values.rawMetadata as Record<string, unknown>);
+          if (typeof values.mediaAltText === 'string') setMediaAltText(values.mediaAltText);
+          if (typeof values.newClaimText === 'string') setNewClaimText(values.newClaimText);
+          if (typeof values.newClaimSource === 'string') setNewClaimSource(values.newClaimSource);
+          if (['health', 'benefit', 'marketing'].includes(String(values.newClaimType))) setNewClaimType(values.newClaimType as ClaimType);
+          setDraftDirty(true);
+          setDraftSavedAt(typeof saved.updatedAt === 'number' ? saved.updatedAt : null);
+        }
+      }
+    } catch (draftError) {
+      console.warn('[CP SPLASH DRAFT] Could not restore local product draft:', draftError);
+    } finally {
+      setDraftHydrated(true);
+    }
+  }, [loading, draftKey, productId]);
+
+  // Persist edits continuously; localStorage survives tab switches and browser reloads.
+  useEffect(() => {
+    if (!draftHydrated) return;
+    const serialized = JSON.stringify(draftSnapshot);
+    if (lastDraftSnapshotRef.current && lastDraftSnapshotRef.current !== serialized) {
+      setDraftDirty(true);
+    }
+    lastDraftSnapshotRef.current = serialized;
+    try {
+      const updatedAt = Date.now();
+      window.localStorage.setItem(draftKey, JSON.stringify({
+        version: 1,
+        productId: productId || null,
+        updatedAt,
+        values: draftSnapshot,
+      }));
+      setDraftSavedAt(updatedAt);
+    } catch (draftError) {
+      console.warn('[CP SPLASH DRAFT] Local draft could not be saved:', draftError);
+    }
+  }, [draftHydrated, draftKey, productId, draftSnapshot]);
+
 
   useEffect(() => {
     productsService.getCategories().then(setCategories);
@@ -213,6 +295,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     e.preventDefault();
     setSaving(true);
     setError(null);
+    let saveSucceeded = false;
 
     const mergedMetadata = {
       ...rawMetadata,
@@ -244,6 +327,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
       if (res.error) {
         setError(res.error);
       } else if (res.data) {
+        saveSucceeded = true;
         onSaved(res.data);
       }
     } else {
@@ -251,10 +335,21 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
       if (res.error) {
         setError(res.error);
       } else if (res.data) {
+        saveSucceeded = true;
         onSaved(res.data);
       }
     }
 
+    if (saveSucceeded) {
+      try {
+        window.localStorage.removeItem(draftKey);
+      } catch (draftError) {
+        console.warn('[CP SPLASH DRAFT] Could not clear saved draft after successful save:', draftError);
+      }
+      setDraftDirty(false);
+      setDraftSavedAt(null);
+      lastDraftSnapshotRef.current = '';
+    }
     setSaving(false);
   };
 
@@ -389,7 +484,17 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-20">
       {/* Top Bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <span className={`text-[11px] font-semibold px-3 py-1.5 rounded-full border ${draftDirty ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+            {draftDirty ? 'Unsaved changes • Draft saved on this device' : 'All changes saved'}
+          </span>
+          {draftSavedAt && (
+            <span className="text-[10px] text-stone-500">
+              Local recovery {new Date(draftSavedAt).toLocaleTimeString()}
+            </span>
+          )}
+        </div>
         <button
           onClick={onBack}
           className="inline-flex items-center gap-1.5 text-stone-600 hover:text-stone-900 text-xs font-bold transition-colors cursor-pointer"
