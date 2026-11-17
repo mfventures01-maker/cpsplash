@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AdminLayout, AdminTab } from '../components/admin/AdminLayout';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
 import { AdminCommercialBrain } from '../components/admin/AdminCommercialBrain';
@@ -20,35 +20,48 @@ import { Product } from '../types/database.types';
 interface AdminAppProps {
   onExitAdmin: () => void;
   onNavigatePublic: (path: string) => void;
+  onNavigateAdmin: (tab: AdminTab) => void;
   initialTab?: AdminTab;
 }
 
-export function AdminApp({ onExitAdmin, onNavigatePublic, initialTab = 'dashboard' }: AdminAppProps) {
+export function AdminApp({ onExitAdmin, onNavigatePublic, onNavigateAdmin, initialTab = 'dashboard' }: AdminAppProps) {
   const [currentTab, setCurrentTab] = useState<AdminTab>(initialTab);
+
+  // Keep the visible CMS section aligned with the URL, including browser back/forward.
+  useEffect(() => {
+    setCurrentTab(initialTab);
+  }, [initialTab]);
+
+  const handleSelectTab = (tab: AdminTab) => {
+    setCurrentTab(tab);
+    if (tab !== 'product_new' && tab !== 'product_edit') {
+      onNavigateAdmin(tab);
+    }
+  };
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   const handleEditProduct = (productId: string) => {
     setEditingProductId(productId);
-    setCurrentTab('product_edit');
+    handleSelectTab('product_edit');
   };
 
   const handleNewProduct = () => {
     setEditingProductId(null);
-    setCurrentTab('product_new');
+    handleSelectTab('product_new');
   };
 
   const handleProductSaved = (savedProduct: Product) => {
-    setCurrentTab('products');
+    handleSelectTab('products');
   };
 
   return (
     <AdminLayout
       currentTab={currentTab}
-      onSelectTab={setCurrentTab}
+      onSelectTab={handleSelectTab}
       onExitAdmin={onExitAdmin}
     >
       {currentTab === 'dashboard' && (
-        <AdminDashboard onSelectTab={setCurrentTab} />
+        <AdminDashboard onSelectTab={handleSelectTab} />
       )}
 
       {currentTab === 'commercial_brain' && (
@@ -74,7 +87,7 @@ export function AdminApp({ onExitAdmin, onNavigatePublic, initialTab = 'dashboar
       {(currentTab === 'product_new' || currentTab === 'product_edit') && (
         <AdminProductEditor
           productId={editingProductId}
-          onBack={() => setCurrentTab('products')}
+          onBack={() => handleSelectTab('products')}
           onSaved={handleProductSaved}
         />
       )}
