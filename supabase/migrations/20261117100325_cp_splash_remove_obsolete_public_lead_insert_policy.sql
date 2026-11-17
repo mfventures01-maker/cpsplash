@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS sales_leads_public_insert ON public.sales_leads;
