@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TENANT_ID } from '../../lib/supabase';
+import { useAdminAuth } from '../../auth/AdminAuthContext';
 import { productsService } from '../../services/productsService';
 import { mediaService } from '../../services/mediaService';
 import { claimsService } from '../../services/claimsService';
@@ -116,6 +117,7 @@ interface AdminProductEditorProps {
 }
 
 export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductEditorProps) {
+  const { user } = useAdminAuth();
   const isEditing = Boolean(productId);
   useEffect(() => {
     const preserveDraft = () => {
@@ -171,7 +173,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   const [draftDirty, setDraftDirty] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
   const lastDraftSnapshotRef = useRef<string>('');
-  const draftKey = `cp-splash:admin-product-draft:${TENANT_ID}:${productId || 'new'}`;
+  const draftKey = `cp-splash:admin-product-draft:${TENANT_ID}:${user?.id || 'anonymous'}:${productId || 'new'}`;
 
   const draftSnapshot = useMemo(() => ({
     name, slug, sku, brand, categoryId, shortDescription, description, status, featured,
