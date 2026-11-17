@@ -119,15 +119,6 @@ interface AdminProductEditorProps {
 export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductEditorProps) {
   const { user } = useAdminAuth();
   const isEditing = Boolean(productId);
-  useEffect(() => {
-    const preserveDraft = () => {
-      // The autosave effect writes the latest React state; this handler intentionally does not
-      // clear drafts or alter navigation during tab visibility/focus changes.
-    };
-    window.addEventListener('pagehide', preserveDraft);
-    return () => window.removeEventListener('pagehide', preserveDraft);
-  }, []);
-
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
