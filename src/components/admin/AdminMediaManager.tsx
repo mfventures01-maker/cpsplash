@@ -354,7 +354,7 @@ export function AdminMediaManager() {
     if (scopeFilter === 'product_menu') return p.scope_type === 'product_menu';
     if (scopeFilter.startsWith('funnel:')) {
       const slug = scopeFilter.split(':')[1];
-      return p.scope_type === 'funnel_hero' && p.scope_id === slug;
+      return (p.scope_type === 'funnel_hero' || p.scope_type === 'funnel_card') && p.scope_id === slug;
     }
     return true;
   });
