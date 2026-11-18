@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useAdminAuth } from '../auth/AdminAuthContext';
-import { TENANT_ID } from '../lib/supabase';
 import { AdminLayout, AdminTab } from '../components/admin/AdminLayout';
 import { AdminDashboard } from '../components/admin/AdminDashboard';
 import { AdminCommercialBrain } from '../components/admin/AdminCommercialBrain';
@@ -25,71 +24,104 @@ interface AdminAppProps {
   initialTab?: AdminTab;
 }
 
+const TAB_PATHS: Record<Exclude<AdminTab, 'product_new' | 'product_edit'>, string> = {
+  dashboard: '/admin',
+  commercial_brain: '/admin/commercial-brain',
+  sales_leads: '/admin/sales-leads',
+  orders: '/admin/orders',
+  products: '/admin/products',
+  pricing: '/admin/pricing',
+  media: '/admin/media',
+  claims: '/admin/claims',
+  blog: '/admin/blog',
+  social: '/admin/social',
+  campaigns: '/admin/campaigns',
+  retailers: '/admin/retailers',
+  analytics: '/admin/analytics',
+  settings: '/admin/settings',
+};
+
+const VALID_TABS: AdminTab[] = [
+  'dashboard', 'commercial_brain', 'sales_leads', 'orders', 'products',
+  'product_new', 'product_edit', 'pricing', 'media', 'claims', 'blog',
+  'social', 'campaigns', 'retailers', 'analytics', 'settings',
+];
+
+function resolveAdminRoute(pathname: string, fallback: AdminTab = 'dashboard') {
+  const path = pathname.replace(/\\/+$/, '') || '/admin';
+  const editMatch = path.match(/^\/admin\/products\/([^/]+)\/edit$/);
+
+  if (editMatch) {
+    return { tab: 'product_edit' as AdminTab, productId: decodeURIComponent(editMatch[1]) };
+  }
+  if (path === '/admin/products/new') return { tab: 'product_new' as AdminTab, productId: null };
+
+  const matchedTab = (Object.entries(TAB_PATHS) as [Exclude<AdminTab, 'product_new' | 'product_edit'>, string][])
+    .find(([, routePath]) => routePath === path)?.[0];
+
+  return {
+    tab: matchedTab && VALID_TABS.includes(matchedTab) ? matchedTab : fallback,
+    productId: null,
+  };
+}
+
+function getAdminPath(tab: AdminTab, productId: string | null): string {
+  if (tab === 'product_edit' && productId) {
+    return `/admin/products/${encodeURIComponent(productId)}/edit`;
+  }
+  if (tab === 'product_new') return '/admin/products/new';
+  return TAB_PATHS[tab as Exclude<AdminTab, 'product_new' | 'product_edit'>] || '/admin';
+}
+
 export function AdminApp({ onExitAdmin, onNavigatePublic, initialTab = 'dashboard' }: AdminAppProps) {
   const { user } = useAdminAuth();
-  const routeStateKey = `cp-splash:admin-route:${TENANT_ID}:${user?.id || 'anonymous'}`;
-  const validTabs: AdminTab[] = ['dashboard', 'commercial_brain', 'sales_leads', 'orders', 'products', 'product_new', 'product_edit', 'pricing', 'media', 'claims', 'blog', 'social', 'campaigns', 'retailers', 'analytics', 'settings'];
-  const [restoredRoute] = useState(() => {
-    try {
-      const raw = window.sessionStorage.getItem(routeStateKey);
-      const saved = raw ? JSON.parse(raw) as { tab?: AdminTab; productId?: string | null } : null;
-      return saved && saved.tab && validTabs.includes(saved.tab)
-        ? { tab: saved.tab, productId: saved.productId || null }
-        : { tab: initialTab, productId: null };
-    } catch {
-      return { tab: initialTab, productId: null };
-    }
-  });
-  const [currentTab, setCurrentTab] = useState<AdminTab>(restoredRoute.tab);
-  const [editingProductId, setEditingProductId] = useState<string | null>(restoredRoute.productId);
+  const [route, setRoute] = useState(() => resolveAdminRoute(window.location.pathname, initialTab));
+  const { tab: currentTab, productId: editingProductId } = route;
 
+  // The URL is the source of truth for CMS navigation. This survives refreshes,
+  // remounts, copied links, and browser Back/Forward without falling back to Dashboard.
   useEffect(() => {
-    try {
-      window.sessionStorage.setItem(routeStateKey, JSON.stringify({
-        tab: currentTab,
-        productId: editingProductId,
-        updatedAt: Date.now(),
-      }));
-    } catch (routeError) {
-      console.warn('[CP SPLASH ADMIN ROUTE] Could not persist active admin route:', routeError);
+    const handlePopState = () => {
+      setRoute(resolveAdminRoute(window.location.pathname, initialTab));
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [initialTab]);
+
+  const navigateTab = (tab: AdminTab, productId: string | null = null) => {
+    const nextPath = getAdminPath(tab, productId);
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({ admin: true, tab, productId }, '', nextPath);
     }
-  }, [routeStateKey, currentTab, editingProductId]);
+    setRoute({ tab, productId });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleEditProduct = (productId: string) => {
-    setEditingProductId(productId);
-    setCurrentTab('product_edit');
+    navigateTab('product_edit', productId);
   };
 
   const handleNewProduct = () => {
-    setEditingProductId(null);
-    setCurrentTab('product_new');
+    navigateTab('product_new');
   };
 
-  const handleProductSaved = (savedProduct: Product) => {
-    setCurrentTab('products');
+  const handleProductSaved = (_savedProduct: Product) => {
+    navigateTab('products');
   };
 
   return (
     <AdminLayout
       currentTab={currentTab}
-      onSelectTab={setCurrentTab}
+      onSelectTab={(tab) => navigateTab(tab)}
       onExitAdmin={onExitAdmin}
     >
       {currentTab === 'dashboard' && (
-        <AdminDashboard onSelectTab={setCurrentTab} />
+        <AdminDashboard onSelectTab={(tab) => navigateTab(tab)} />
       )}
 
-      {currentTab === 'commercial_brain' && (
-        <AdminCommercialBrain />
-      )}
-
-      {currentTab === 'sales_leads' && (
-        <AdminLeadsManager />
-      )}
-
-      {currentTab === 'orders' && (
-        <AdminOrdersManager />
-      )}
+      {currentTab === 'commercial_brain' && <AdminCommercialBrain />}
+      {currentTab === 'sales_leads' && <AdminLeadsManager />}
+      {currentTab === 'orders' && <AdminOrdersManager />}
 
       {currentTab === 'products' && (
         <AdminProductList
@@ -101,47 +133,22 @@ export function AdminApp({ onExitAdmin, onNavigatePublic, initialTab = 'dashboar
 
       {(currentTab === 'product_new' || currentTab === 'product_edit') && (
         <AdminProductEditor
+          key={`${currentTab}:${editingProductId || 'new'}`}
           productId={editingProductId}
-          onBack={() => setCurrentTab('products')}
+          onBack={() => navigateTab('products')}
           onSaved={handleProductSaved}
         />
       )}
 
-      {currentTab === 'pricing' && (
-        <AdminPriceManager />
-      )}
-
-      {currentTab === 'claims' && (
-        <AdminClaimsManager />
-      )}
-
-      {currentTab === 'media' && (
-        <AdminMediaManager />
-      )}
-
-      {currentTab === 'blog' && (
-        <AdminBlogManager />
-      )}
-
-      {currentTab === 'social' && (
-        <AdminSocialManager />
-      )}
-
-      {currentTab === 'campaigns' && (
-        <AdminCampaignManager />
-      )}
-
-      {currentTab === 'retailers' && (
-        <AdminRetailerManager />
-      )}
-
-      {currentTab === 'analytics' && (
-        <AdminAnalyticsViewer />
-      )}
-
-      {currentTab === 'settings' && (
-        <AdminSettings />
-      )}
+      {currentTab === 'pricing' && <AdminPriceManager />}
+      {currentTab === 'claims' && <AdminClaimsManager />}
+      {currentTab === 'media' && <AdminMediaManager />}
+      {currentTab === 'blog' && <AdminBlogManager />}
+      {currentTab === 'social' && <AdminSocialManager />}
+      {currentTab === 'campaigns' && <AdminCampaignManager />}
+      {currentTab === 'retailers' && <AdminRetailerManager />}
+      {currentTab === 'analytics' && <AdminAnalyticsViewer />}
+      {currentTab === 'settings' && <AdminSettings />}
     </AdminLayout>
   );
 }
