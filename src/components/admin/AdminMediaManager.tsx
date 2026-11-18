@@ -45,6 +45,10 @@ export function AdminMediaManager() {
   const [placements, setPlacements] = useState<MediaPlacement[]>([]);
   const [loadingPlacements, setLoadingPlacements] = useState(true);
   const [scopeFilter, setScopeFilter] = useState<string>('all');
+  const [funnelSlotSelections, setFunnelSlotSelections] = useState<Record<string, string>>({});
+  const [savingFunnelSlot, setSavingFunnelSlot] = useState<string | null>(null);
+  const [funnelSlotFeedback, setFunnelSlotFeedback] = useState<Record<string, string>>({});
+
 
   // Product media state
   const [products, setProducts] = useState<Product[]>([]);
@@ -218,6 +222,45 @@ export function AdminMediaManager() {
       setShowPlacementModal(false);
       fetchPlacements();
       setActiveTab('placements');
+    }
+  };
+
+  const handleSaveFunnelSlot = async (slug: string, slot: 'hero' | 'card') => {
+    const key = `${slug}:${slot}`;
+    const mediaId = funnelSlotSelections[key];
+    if (!mediaId) {
+      setFunnelSlotFeedback(previous => ({ ...previous, [key]: 'Choose an image before saving.' }));
+      return;
+    }
+    const asset = assets.find(item => item.id === mediaId);
+    if (!asset || !ACCEPTED_IMAGE_MIME_TYPES.has(asset.mime_type || '') || asset.status !== 'active' || asset.bucket !== 'cp-public') {
+      setFunnelSlotFeedback(previous => ({ ...previous, [key]: 'Select an active, approved image from cp-public.' }));
+      return;
+    }
+
+    setSavingFunnelSlot(key);
+    setFunnelSlotFeedback(previous => ({ ...previous, [key]: 'Saving and verifying placement…' }));
+    try {
+      const result = await placementService.replaceFunnelPlacement({
+        media_id: mediaId,
+        scope_id: slug,
+        slot,
+        alt_text_override: asset.alt_text || asset.filename || null,
+      });
+      if (result.error || !result.data) {
+        setFunnelSlotFeedback(previous => ({ ...previous, [key]: result.error || 'Placement could not be verified.' }));
+      } else {
+        setFunnelSlotSelections(previous => ({ ...previous, [key]: result.data!.media_id }));
+        setFunnelSlotFeedback(previous => ({ ...previous, [key]: 'Saved and verified in Supabase.' }));
+        await fetchPlacements();
+      }
+    } catch (err: unknown) {
+      setFunnelSlotFeedback(previous => ({
+        ...previous,
+        [key]: err instanceof Error ? err.message : 'Unexpected placement save failure.',
+      }));
+    } finally {
+      setSavingFunnelSlot(null);
     }
   };
 
@@ -727,6 +770,79 @@ export function AdminMediaManager() {
               <span>New Placement</span>
             </button>
           </div>
+
+          {/* Dedicated five-funnel / ten-image-slot assignment panel */}
+          <section className="rounded-3xl border border-stone-200 bg-white p-5 sm:p-6 space-y-5">
+            <div>
+              <h4 className="text-base font-black text-stone-900">Five Funnel Image Assignments</h4>
+              <p className="text-xs text-stone-500 mt-1">Each funnel has its own hero image and card image. Saving verifies the new row before retiring previous active placements.</p>
+            </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+              {FUNNEL_SLUGS.map(funnel => {
+                const activeFor = (slot: 'hero' | 'card') => placements.find(p =>
+                  p.active &&
+                  p.scope_type === (slot === 'hero' ? 'funnel_hero' : 'funnel_card') &&
+                  p.scope_id === funnel.slug
+                );
+                const imageAssets = assets.filter(asset =>
+                  asset.status === 'active' &&
+                  asset.bucket === 'cp-public' &&
+                  ACCEPTED_IMAGE_MIME_TYPES.has(asset.mime_type || '')
+                );
+                return (
+                  <div key={funnel.slug} className="rounded-2xl border border-stone-200 p-4 space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <h5 className="text-sm font-bold text-stone-900">{funnel.label}</h5>
+                      <span className="text-[10px] font-mono text-stone-400">{funnel.slug}</span>
+                    </div>
+                    {(['hero', 'card'] as const).map(slot => {
+                      const key = `${funnel.slug}:${slot}`;
+                      const current = activeFor(slot);
+                      const selected = funnelSlotSelections[key] ?? current?.media_id ?? '';
+                      const feedback = funnelSlotFeedback[key];
+                      return (
+                        <div key={slot} className="rounded-xl bg-stone-50 p-3 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <label className="text-xs font-bold text-stone-700">{slot === 'hero' ? 'Hero image' : 'Card image'}</label>
+                            <span className={`text-[10px] font-semibold ${current ? 'text-emerald-700' : 'text-amber-700'}`}>
+                              {current ? 'Assigned' : 'Not assigned'}
+                            </span>
+                          </div>
+                          <select
+                            value={selected}
+                            onChange={event => {
+                              setFunnelSlotSelections(previous => ({ ...previous, [key]: event.target.value }));
+                              setFunnelSlotFeedback(previous => ({ ...previous, [key]: '' }));
+                            }}
+                            className="w-full rounded-lg border border-stone-300 bg-white p-2 text-xs"
+                          >
+                            <option value="">Select an image asset…</option>
+                            {imageAssets.map(asset => (
+                              <option key={asset.id} value={asset.id}>{asset.filename} · {asset.mime_type}</option>
+                            ))}
+                          </select>
+                          {current && (
+                            <p className="text-[10px] text-stone-500">Live: {(current.media_assets || current.asset)?.filename || current.media_id}</p>
+                          )}
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-[10px] text-stone-500 min-w-0">{feedback || 'Only this funnel and slot will be changed.'}</p>
+                            <button
+                              type="button"
+                              disabled={!selected || savingFunnelSlot === key || selected === current?.media_id}
+                              onClick={() => handleSaveFunnelSlot(funnel.slug, slot)}
+                              className="shrink-0 rounded-lg bg-rose-600 px-3 py-2 text-[10px] font-bold text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              {savingFunnelSlot === key ? 'Saving…' : 'Save slot'}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
 
           {/* Scope Filter Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-semibold">
