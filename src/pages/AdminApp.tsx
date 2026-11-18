@@ -48,7 +48,7 @@ const VALID_TABS: AdminTab[] = [
 ];
 
 function resolveAdminRoute(pathname: string, fallback: AdminTab = 'dashboard') {
-  const path = pathname.replace(/\\/+$/, '') || '/admin';
+  const path = pathname.replace(/\/+$/, '') || '/admin';
   const editMatch = path.match(/^\/admin\/products\/([^/]+)\/edit$/);
 
   if (editMatch) {
