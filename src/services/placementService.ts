@@ -291,9 +291,15 @@ export const placementService = {
     const finalRows = await this.getPlacements(scopeType, scopeId, true);
     const verified = finalRows.find(row => row.id === created.data!.id);
     if (!verified || finalRows.length !== 1) {
+      const rollbackErrors: string[] = [];
+      for (const row of deactivated) {
+        const restored = await this.updatePlacement(row.id, { active: true });
+        if (restored.error || !restored.data?.active) rollbackErrors.push(row.id);
+      }
+      const removedNew = await this.updatePlacement(created.data.id, { active: false });
       return {
         data: null,
-        error: `Replacement read-back failed: expected exactly one active ${input.slot} placement for ${scopeId}, found ${finalRows.length}.`,
+        error: `Replacement read-back failed: expected exactly one active ${input.slot} placement for ${scopeId}, found ${finalRows.length}. ${rollbackErrors.length ? `Previous placements not restored: ${rollbackErrors.join(', ')}. ` : ''}${removedNew.error ? `New placement rollback failed: ${removedNew.error}` : 'New placement deactivated.'}`,
       };
     }
     return { data: verified, error: null };
