@@ -28,7 +28,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 // 1. Setup environment before importing service
-const envContent = fs.readFileSync('C:/Projects/cp-splash/.env', 'utf-8');
+const envPath = ['.env.local', '.env'].find(candidate => fs.existsSync(candidate));
+const envContent = envPath ? fs.readFileSync(envPath, 'utf-8') : '';
 const envVars: Record<string, string> = {};
 envContent.split('\n').forEach(line => {
   const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
@@ -624,6 +625,68 @@ for (const funnelSlug of FIVE_FUNNELS) {
     assert.equal(resolved[0].media_id, createdAssetId);
   });
 }
+
+// ----------------------------------------------------------------------------
+// 11b. Dedicated funnel slot replacement: verified create-before-retire
+// ----------------------------------------------------------------------------
+await test('11b. Replacing a funnel hero verifies the new row and leaves exactly one active placement', async () => {
+  const replacementUpload = await mediaService.uploadAsset(
+    new MockFile('sports_hero_replacement.png', 32000, 'image/png') as unknown as File
+  );
+  assert.equal(replacementUpload.error, null);
+  assert.ok(replacementUpload.data);
+
+  const result = await placementService.replaceFunnelPlacement({
+    media_id: replacementUpload.data.id,
+    scope_id: 'sports',
+    slot: 'hero',
+    alt_text_override: 'Sports funnel replacement hero',
+  });
+  assert.equal(result.error, null);
+  assert.ok(result.data);
+  assert.equal(result.data.media_id, replacementUpload.data.id);
+
+  const active = await placementService.getPlacements('funnel_hero', 'sports', true);
+  assert.equal(active.length, 1);
+  assert.equal(active[0].id, result.data.id);
+});
+
+await test('11c. Dedicated card slot is independent from the same funnel hero slot', async () => {
+  const cardUpload = await mediaService.uploadAsset(
+    new MockFile('sports_card_unique.png', 33000, 'image/png') as unknown as File
+  );
+  assert.equal(cardUpload.error, null);
+  assert.ok(cardUpload.data);
+
+  const result = await placementService.replaceFunnelPlacement({
+    media_id: cardUpload.data.id,
+    scope_id: 'sports',
+    slot: 'card',
+  });
+  assert.equal(result.error, null);
+  assert.ok(result.data);
+  assert.equal(result.data.scope_type, 'funnel_card');
+  assert.equal(result.data.media_id, cardUpload.data.id);
+
+  const hero = await placementService.getPlacements('funnel_hero', 'sports', true);
+  const card = await placementService.getPlacements('funnel_card', 'sports', true);
+  assert.equal(hero.length, 1);
+  assert.equal(card.length, 1);
+  assert.notEqual(hero[0].media_id, card[0].media_id);
+});
+
+await test('11d. Funnel slot replacement rejects unknown funnel slugs without writing', async () => {
+  const before = await placementService.getAllPlacements();
+  const result = await placementService.replaceFunnelPlacement({
+    media_id: createdAssetId,
+    scope_id: 'unknown-funnel',
+    slot: 'hero',
+  });
+  const after = await placementService.getAllPlacements();
+  assert.equal(result.data, null);
+  assert.match(result.error || '', /unsupported funnel scope/i);
+  assert.equal(after.length, before.length);
+});
 
 // ----------------------------------------------------------------------------
 // 12. Placement Ordering and Active Toggling
