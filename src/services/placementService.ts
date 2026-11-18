@@ -224,6 +224,82 @@ export const placementService = {
   },
 
   /**
+   * Replace the active image for one funnel slot.
+   *
+   * Compensated replacement: persist and reload-verify the new placement first,
+   * then deactivate previous active placements. If deactivation fails, restore
+   * prior rows and deactivate the new row. A database RPC is still required for
+   * strict transaction-level atomicity across concurrent writers.
+   */
+  async replaceFunnelPlacement(input: {
+    media_id: string;
+    scope_id: string;
+    slot: 'hero' | 'card';
+    alt_text_override?: string | null;
+  }): Promise<{ data: MediaPlacement | null; error: string | null }> {
+    const scopeType: PlacementScopeType = input.slot === 'hero' ? 'funnel_hero' : 'funnel_card';
+    const scopeId = input.scope_id.trim();
+    if (!['sports', 'parties-events', 'hotels-hospitality', 'schools', 'individuals'].includes(scopeId)) {
+      return { data: null, error: `Unsupported funnel scope: ${scopeId}` };
+    }
+    if (!isValidUuid(input.media_id)) {
+      return { data: null, error: 'A valid media asset must be selected.' };
+    }
+
+    const existing = await this.getPlacements(scopeType, scopeId, false);
+    const activeExisting = existing.filter(row => row.active);
+    const sameAsset = activeExisting.find(row => row.media_id === input.media_id);
+    if (sameAsset && activeExisting.length === 1) {
+      return { data: sameAsset, error: null };
+    }
+
+    const created = await this.createPlacement({
+      media_id: input.media_id,
+      placement_key: `funnel_${scopeId}_${input.slot}`,
+      scope_type: scopeType,
+      scope_id: scopeId,
+      sort_order: 0,
+      active: true,
+      alt_text_override: input.alt_text_override || null,
+    });
+    if (created.error || !created.data) {
+      return { data: null, error: created.error || 'New funnel placement could not be verified.' };
+    }
+
+    const deactivated: MediaPlacement[] = [];
+    for (const previous of activeExisting) {
+      const result = await this.updatePlacement(previous.id, { active: false });
+      if (result.error || !result.data || result.data.active) {
+        const rollbackErrors: string[] = [];
+        for (const row of deactivated) {
+          const restored = await this.updatePlacement(row.id, { active: true });
+          if (restored.error || !restored.data?.active) rollbackErrors.push(row.id);
+        }
+        const removedNew = await this.updatePlacement(created.data.id, { active: false });
+        const suffix = [
+          rollbackErrors.length ? ` Previous placements could not all be restored: ${rollbackErrors.join(', ')}.` : '',
+          removedNew.error ? ` New placement rollback failed: ${removedNew.error}` : '',
+        ].join('');
+        return {
+          data: null,
+          error: `Replacement was not completed: ${result.error || 'previous placement deactivation was not verified'}.${suffix}`,
+        };
+      }
+      deactivated.push(previous);
+    }
+
+    const finalRows = await this.getPlacements(scopeType, scopeId, true);
+    const verified = finalRows.find(row => row.id === created.data!.id);
+    if (!verified || finalRows.length !== 1) {
+      return {
+        data: null,
+        error: `Replacement read-back failed: expected exactly one active ${input.slot} placement for ${scopeId}, found ${finalRows.length}.`,
+      };
+    }
+    return { data: verified, error: null };
+  },
+
+  /**
    * Update an existing media placement with cross-tenant check and reload verification
    */
   async updatePlacement(
