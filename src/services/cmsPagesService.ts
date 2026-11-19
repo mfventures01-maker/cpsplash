@@ -91,8 +91,8 @@ export const cmsPagesService = {
         updated_at: new Date().toISOString(),
       }));
 
-      // Upsert each section by its stable page/section key. A failure is surfaced
-      // explicitly so the UI cannot claim the complete page save succeeded.
+      // Upsert desired sections first. Only after all writes succeed do we
+      // remove stale keys, so a failed save does not erase the previous layout.
       for (const section of sectionRows) {
         const { error: sectionError } = await supabase
           .from('cms_page_sections')
@@ -102,6 +102,29 @@ export const cmsPagesService = {
             data,
             error: `Page record saved, but section "${section.section_key}" failed: ${errorMessage(sectionError, 'Section persistence failed')}`,
           };
+        }
+      }
+
+      const { data: existingSections, error: existingSectionsError } = await supabase
+        .from('cms_page_sections')
+        .select('id,section_key')
+        .eq('page_id', data.id)
+        .eq('tenant_id', TENANT_ID);
+      if (existingSectionsError) {
+        return { data, error: `Page saved, but existing sections could not be reconciled: ${errorMessage(existingSectionsError, 'Section lookup failed')}` };
+      }
+      const keepKeys = new Set(sectionRows.map(section => section.section_key));
+      const staleIds = (existingSections || [])
+        .filter(section => !keepKeys.has(section.section_key))
+        .map(section => section.id);
+      if (staleIds.length) {
+        const { error: deleteError } = await supabase
+          .from('cms_page_sections')
+          .delete()
+          .in('id', staleIds)
+          .eq('tenant_id', TENANT_ID);
+        if (deleteError) {
+          return { data, error: `Page saved, but stale sections could not be removed: ${errorMessage(deleteError, 'Section cleanup failed')}` };
         }
       }
     }
