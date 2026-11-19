@@ -25,7 +25,7 @@ const ADMIN_TABS: AdminTab[] = [
 ];
 
 function getAdminTab(path: string): AdminTab {
-  const segment = path.replace(/^\\/admin\\/?/, '').split('/')[0];
+  const segment = path.startsWith('/admin/') ? path.slice('/admin/'.length).split('/')[0] : '';
   return ADMIN_TABS.includes(segment as AdminTab) ? segment as AdminTab : 'dashboard';
 }
 

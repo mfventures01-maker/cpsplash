@@ -138,8 +138,11 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setUserRole(null);
         setAuthError(null);
         setLoading(false);
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
-        // Schedule authorization check outside the synchronous callback to prevent auth lockups
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Initial sessions are checked by getSession() above, and password sign-in
+        // is checked by login(). Rechecking SIGNED_IN/INITIAL_SESSION here races
+        // those authoritative checks and can invalidate them via checkSeqRef.
+        // Revalidate only on token refresh, outside the auth callback to avoid lockups.
         setTimeout(() => {
           if (mounted && newSession?.user) {
             verifyTenantAuthorization(newSession.user);
