@@ -4,7 +4,8 @@ import {
   DollarSign, 
   Image as ImageIcon, 
   ShieldCheck, 
-  FileText, 
+  FileText,
+  Files, 
   Share2, 
   Users, 
   TrendingUp, 
@@ -38,6 +39,7 @@ export type AdminTab =
   | 'media'
   | 'claims'
   | 'blog'
+  | 'pages'
   | 'social'
   | 'campaigns'
   | 'retailers'
@@ -70,6 +72,7 @@ export function AdminLayout({ currentTab, onSelectTab, onExitAdmin, children }: 
     { id: 'claims', label: 'Verified Claims', icon: <ShieldCheck className="w-4 h-4" /> },
     { id: 'media', label: 'Media & Storage', icon: <ImageIcon className="w-4 h-4" /> },
     { id: 'blog', label: 'Blog Engine', icon: <FileText className="w-4 h-4" /> },
+    { id: 'pages', label: 'Website Pages', icon: <Files className="w-4 h-4" /> },
     { id: 'social', label: 'Social & UGC', icon: <Share2 className="w-4 h-4" /> },
     { id: 'campaigns', label: 'Campaigns & Influencers', icon: <Users className="w-4 h-4" /> },
     { id: 'retailers', label: 'Retailer Directory', icon: <MapPin className="w-4 h-4" /> },
