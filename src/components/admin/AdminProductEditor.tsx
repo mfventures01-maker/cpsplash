@@ -131,7 +131,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<ProductStatus>('draft');
   const [featured, setFeatured] = useState(false);
-  const [basePrice, setBasePrice] = useState<number>(1200);
+  const [basePrice, setBasePrice] = useState<number | ''>('');
   const [salePrice, setSalePrice] = useState<number | ''>('');
   const [volumeMl, setVolumeMl] = useState<number>(500);
   const [seoTitle, setSeoTitle] = useState('');
@@ -179,7 +179,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
           setSeoDescription(data.seo_description || '');
 
           const price = getProductPrice(data);
-          setBasePrice(price.amount || 1200);
+          setBasePrice(price.amount > 0 ? price.amount : '');
           setSalePrice(price.compare_at_amount || '');
 
           const volume = getProductVolume(data);
@@ -213,6 +213,12 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     e.preventDefault();
     setSaving(true);
     setError(null);
+
+    if (basePrice === '' || !Number.isFinite(Number(basePrice)) || Number(basePrice) <= 0) {
+      setError('Enter a valid product price greater than zero before saving.');
+      setSaving(false);
+      return;
+    }
 
     const mergedMetadata = {
       ...rawMetadata,
@@ -515,7 +521,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
                 type="number"
                 required
                 value={basePrice}
-                onChange={(e) => setBasePrice(Number(e.target.value))}
+                onChange={(e) => setBasePrice(e.target.value === '' ? '' : Number(e.target.value))}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-mono text-base font-bold focus:ring-2 focus:ring-rose-500"
               />
             </div>
