@@ -69,9 +69,9 @@ export function CmsPublicPage({ path, fallback }: CmsPublicPageProps) {
 
   const content = page.content || {};
   const contentSections = Array.isArray(content.sections) ? content.sections as Record<string, unknown>[] : [];
-  const blocks = sections.length
-    ? sections.map(section => ({ key: section.section_key, type: section.section_type, ...section.content }))
-    : contentSections.map((section, index) => ({ key: String(section.key || index), ...section }));
+  const blocks: Array<Record<string, unknown>> = sections.length
+    ? sections.map(section => ({ ...section.content, key: section.section_key, type: section.section_type }))
+    : contentSections.map((section, index) => ({ ...section, key: String(section.key || index) }));
 
   return (
     <article className="mx-auto max-w-6xl space-y-8 px-5 py-12 sm:px-8 sm:py-16">
