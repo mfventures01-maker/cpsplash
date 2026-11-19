@@ -104,6 +104,33 @@ export async function validateProductPublication(
       };
     }
 
+    // Publication also requires a persisted positive active price on an active variant.
+    const { data: pricedVariants, error: priceErr } = await supabase
+      .from('product_variants')
+      .select('id, status, product_prices(id, amount, status)')
+      .eq('product_id', cleanProductId)
+      .eq('tenant_id', TENANT_ID)
+      .eq('status', 'active');
+
+    if (priceErr) {
+      return {
+        isValid: false,
+        error: `Database verification error checking active product price: ${getErrMsg(priceErr, 'Price query failed')}`,
+      };
+    }
+
+    const hasActivePrice = (pricedVariants || []).some((variant: any) =>
+      (variant.product_prices || []).some((price: any) =>
+        price.status === 'active' && Number.isFinite(Number(price.amount)) && Number(price.amount) > 0
+      )
+    );
+    if (!hasActivePrice) {
+      return {
+        isValid: false,
+        error: `Publication prerequisite failed: Product ${cleanProductId} must have an active variant with a positive active price.`,
+      };
+    }
+
     // 2. Query product_media for primary media association
     const { data: mediaLinks, error: mediaErr } = await supabase
       .from('product_media')
@@ -203,10 +230,19 @@ export async function validateProductPublication(
         continue;
       }
 
-      // 8. Storage path must belong to expected product path: products/{productId}/...
-      const expectedPrefix = `products/${cleanProductId}/`;
-      if (!asset.path || !asset.path.startsWith(expectedPrefix) || asset.path.length <= expectedPrefix.length) {
-        candidateFailureReason = `Media asset storage path "${asset.path}" does not belong to expected product storage path "${expectedPrefix}*"`;
+      // 8. Accept both approved Storage layouts used by the CMS:
+      // product-scoped uploads and tenant-scoped Media Library uploads.
+      const productPrefix = `products/${cleanProductId}/`;
+      const tenantMediaPrefix = `media/${TENANT_ID}/`;
+      const hasApprovedPath = Boolean(
+        asset.path &&
+        (
+          (asset.path.startsWith(productPrefix) && asset.path.length > productPrefix.length) ||
+          (asset.path.startsWith(tenantMediaPrefix) && asset.path.length > tenantMediaPrefix.length)
+        )
+      );
+      if (!hasApprovedPath) {
+        candidateFailureReason = `Media asset path "${asset.path}" is outside the approved product and tenant media paths.`;
         continue;
       }
 
