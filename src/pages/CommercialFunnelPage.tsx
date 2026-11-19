@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { SalesTerritory, MediaPlacement } from '../types/database.types';
+import { SalesTerritory, MediaPlacement, Product } from '../types/database.types';
+import { useProducts } from '../hooks/useProducts';
+import { ProductCard } from '../components/product/ProductCard';
 import { salesService } from '../services/salesService';
 import { placementService } from '../services/placementService';
 import { mediaService } from '../services/mediaService';
@@ -25,9 +27,11 @@ import {
 interface CommercialFunnelPageProps {
   territorySlug: string;
   onNavigate: (path: string) => void;
+  onOpenOrderModal: (product: Product) => void;
 }
 
-export function CommercialFunnelPage({ territorySlug, onNavigate }: CommercialFunnelPageProps) {
+export function CommercialFunnelPage({ territorySlug, onNavigate, onOpenOrderModal }: CommercialFunnelPageProps) {
+  const { products, loading: productsLoading, error: productsError } = useProducts();
   const [territory, setTerritory] = useState<SalesTerritory | null>(null);
   const [heroPlacements, setHeroPlacements] = useState<MediaPlacement[]>([]);
   const [cardPlacements, setCardPlacements] = useState<MediaPlacement[]>([]);
@@ -301,6 +305,33 @@ export function CommercialFunnelPage({ territorySlug, onNavigate }: CommercialFu
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Shared published catalogue: same Supabase product, media and active price as the storefront. */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-rose-600">Published Product Catalogue</span>
+            <h2 className="text-2xl sm:text-3xl font-black text-stone-900">Products for {territory.name}</h2>
+            <p className="text-sm text-stone-600 mt-1">Live products, images and current prices from the CP Splash product catalogue.</p>
+          </div>
+          <button onClick={() => onNavigate('/products')} className="text-xs font-bold text-rose-700 hover:underline">View full catalogue</button>
+        </div>
+        {productsLoading ? (
+          <p className="text-sm text-stone-500" role="status">Loading published products...</p>
+        ) : productsError ? (
+          <div role="alert" className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
+            Published products could not be loaded: {productsError}
+          </div>
+        ) : products.length === 0 ? (
+          <p className="p-5 rounded-xl bg-stone-50 border border-stone-200 text-stone-600 text-sm">There are no published products available for this funnel yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} onNavigate={onNavigate} onOpenOrderModal={onOpenOrderModal} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Trust & Supply Pillars */}

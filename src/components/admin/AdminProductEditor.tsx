@@ -131,7 +131,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<ProductStatus>('draft');
   const [featured, setFeatured] = useState(false);
-  const [basePrice, setBasePrice] = useState<number>(1200);
+  const [basePrice, setBasePrice] = useState<number | ''>('');
   const [salePrice, setSalePrice] = useState<number | ''>('');
   const [volumeMl, setVolumeMl] = useState<number>(500);
   const [seoTitle, setSeoTitle] = useState('');
@@ -179,7 +179,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
           setSeoDescription(data.seo_description || '');
 
           const price = getProductPrice(data);
-          setBasePrice(price.amount || 1200);
+          setBasePrice(price.amount > 0 ? price.amount : '');
           setSalePrice(price.compare_at_amount || '');
 
           const volume = getProductVolume(data);
@@ -213,6 +213,12 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     e.preventDefault();
     setSaving(true);
     setError(null);
+
+    if (basePrice === '' || !Number.isFinite(Number(basePrice)) || Number(basePrice) <= 0) {
+      setError('Enter a valid product price greater than zero before saving.');
+      setSaving(false);
+      return;
+    }
 
     const mergedMetadata = {
       ...rawMetadata,
@@ -281,6 +287,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
   };
 
   const handleRemoveStagedFile = (id: string) => {
+    if (uploadingMedia) return;
     setStagedFiles(prev => {
       const target = prev.find(f => f.id === id);
       if (target) {
@@ -301,32 +308,40 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
       return;
     }
 
+    setError(null);
     setUploadingMedia(true);
-    for (let i = 0; i < validFiles.length; i++) {
-      const item = validFiles[i];
-      setUploadProgressText(`Uploading ${i + 1} of ${validFiles.length}: ${item.name}...`);
+    let uploadFailed = false;
+    try {
+      for (let i = 0; i < validFiles.length; i++) {
+        const item = validFiles[i];
+        setUploadProgressText(`Uploading ${i + 1} of ${validFiles.length}: ${item.name}...`);
 
-      const isPrimary = (!mediaList || mediaList.length === 0) && i === 0;
-      const res = await mediaService.uploadMedia(
-        productId,
-        item.file,
-        item.formatCategory,
-        mediaAltText || name || item.name,
-        isPrimary
-      );
+        const isPrimary = (!mediaList || mediaList.length === 0) && i === 0;
+        const res = await mediaService.uploadMedia(
+          productId,
+          item.file,
+          item.formatCategory,
+          mediaAltText || name || item.name,
+          isPrimary
+        );
 
-      if (res.data) {
-        setMediaList(prev => [...prev, res.data!]);
-        setStagedFiles(prev => prev.filter(f => f.id !== item.id));
-        URL.revokeObjectURL(item.previewUrl);
-      } else {
-        alert(`Failed to upload ${item.name}: ${res.error}`);
+        if (res.data) {
+          setMediaList(prev => [...prev, res.data!]);
+          setStagedFiles(prev => prev.filter(f => f.id !== item.id));
+          URL.revokeObjectURL(item.previewUrl);
+        } else {
+          uploadFailed = true;
+          setError(`Failed to upload ${item.name}: ${res.error || 'Unknown upload error'}. The file remains in the staging queue for retry.`);
+        }
       }
+    } finally {
+      setUploadingMedia(false);
+      setUploadProgressText('');
     }
 
-    setUploadingMedia(false);
-    setUploadProgressText('');
-    setMediaAltText('');
+    if (!uploadFailed) {
+      setMediaAltText('');
+    }
   };
 
   const handleMoveMedia = async (index: number, direction: 'up' | 'down') => {
@@ -338,21 +353,36 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
     const [moved] = updated.splice(index, 1);
     updated.splice(targetIndex, 0, moved);
 
-    setMediaList(updated);
     const orderedIds = updated.map(m => m.media_id);
-    await mediaService.reorderMedia(productId, orderedIds);
+    const result = await mediaService.reorderMedia(productId, orderedIds);
+    if (!result.success) {
+      setError(result.error || 'Failed to save media order. The previous order has been retained.');
+      return;
+    }
+    setError(null);
+    setMediaList(updated);
   };
 
   const handleSetPrimaryMedia = async (mediaId: string) => {
     if (!productId) return;
-    await mediaService.setPrimaryMedia(productId, mediaId);
+    const result = await mediaService.setPrimaryMedia(productId, mediaId);
+    if (!result.success) {
+      setError(result.error || 'Failed to update primary media.');
+      return;
+    }
+    setError(null);
     setMediaList(prev => prev.map(m => ({ ...m, is_primary: m.media_id === mediaId })));
   };
 
   const handleDeleteMedia = async (mediaId: string) => {
     if (!productId) return;
     if (!confirm('Remove this media asset?')) return;
-    await mediaService.deleteMedia(productId, mediaId);
+    const result = await mediaService.deleteMedia(productId, mediaId);
+    if (!result.success) {
+      setError(result.error || 'Failed to remove media from this product.');
+      return;
+    }
+    setError(null);
     setMediaList(prev => prev.filter(m => m.media_id !== mediaId));
   };
 
@@ -515,7 +545,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
                 type="number"
                 required
                 value={basePrice}
-                onChange={(e) => setBasePrice(Number(e.target.value))}
+                onChange={(e) => setBasePrice(e.target.value === '' ? '' : Number(e.target.value))}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 font-mono text-base font-bold focus:ring-2 focus:ring-rose-500"
               />
             </div>
@@ -640,6 +670,7 @@ export function AdminProductEditor({ productId, onBack, onSaved }: AdminProductE
                 <input
                   type="file"
                   multiple
+                  disabled={uploadingMedia}
                   accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
                   onChange={handleSelectFiles}
                   className="w-full px-3 py-2 rounded-xl border border-stone-300 text-xs bg-white cursor-pointer file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100"

@@ -71,23 +71,23 @@ export default function App() {
 
     // Five Commercial Acquisition Funnels
     if (currentPath === '/sports') {
-      return <CommercialFunnelPage territorySlug="sports" onNavigate={navigate} />;
+      return <CommercialFunnelPage territorySlug="sports" onNavigate={navigate} onOpenOrderModal={setOrderModalProduct} />;
     }
     if (currentPath === '/events' || currentPath === '/parties-events') {
-      return <CommercialFunnelPage territorySlug="parties-events" onNavigate={navigate} />;
+      return <CommercialFunnelPage territorySlug="parties-events" onNavigate={navigate} onOpenOrderModal={setOrderModalProduct} />;
     }
     if (currentPath === '/hotels' || currentPath === '/hotels-hospitality') {
-      return <CommercialFunnelPage territorySlug="hotels-hospitality" onNavigate={navigate} />;
+      return <CommercialFunnelPage territorySlug="hotels-hospitality" onNavigate={navigate} onOpenOrderModal={setOrderModalProduct} />;
     }
     if (currentPath === '/schools') {
-      return <CommercialFunnelPage territorySlug="schools" onNavigate={navigate} />;
+      return <CommercialFunnelPage territorySlug="schools" onNavigate={navigate} onOpenOrderModal={setOrderModalProduct} />;
     }
     if (currentPath === '/individuals') {
-      return <CommercialFunnelPage territorySlug="individuals" onNavigate={navigate} />;
+      return <CommercialFunnelPage territorySlug="individuals" onNavigate={navigate} onOpenOrderModal={setOrderModalProduct} />;
     }
     if (currentPath.startsWith('/funnel/')) {
       const slug = currentPath.replace('/funnel/', '').trim();
-      return <CommercialFunnelPage territorySlug={slug} onNavigate={navigate} />;
+      return <CommercialFunnelPage territorySlug={slug} onNavigate={navigate} onOpenOrderModal={setOrderModalProduct} />;
     }
 
     // Dynamic Product Detail: /shop/:slug or /products/:slug

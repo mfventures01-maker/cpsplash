@@ -104,6 +104,34 @@ export async function validateProductPublication(
       };
     }
 
+    // Publication also requires a persisted, positive active price on an active variant.
+    const { data: pricedVariants, error: priceErr } = await supabase
+      .from('product_variants')
+      .select('id, status, product_prices(id, amount, status)')
+      .eq('product_id', cleanProductId)
+      .eq('tenant_id', TENANT_ID)
+      .eq('status', 'active');
+
+    if (priceErr) {
+      return {
+        isValid: false,
+        error: `Database verification error checking active product price: ${getErrMsg(priceErr, 'Price query failed')}`,
+      };
+    }
+
+    const hasActivePrice = (pricedVariants || []).some((variant: any) =>
+      (variant.product_prices || []).some((price: any) =>
+        price.status === 'active' && Number.isFinite(Number(price.amount)) && Number(price.amount) > 0
+      )
+    );
+
+    if (!hasActivePrice) {
+      return {
+        isValid: false,
+        error: `Publication prerequisite failed: Product ${cleanProductId} must have an active variant with a positive active price in product_prices`,
+      };
+    }
+
     // 2. Query product_media for primary media association
     const { data: mediaLinks, error: mediaErr } = await supabase
       .from('product_media')
@@ -203,10 +231,21 @@ export async function validateProductPublication(
         continue;
       }
 
-      // 8. Storage path must belong to expected product path: products/{productId}/...
-      const expectedPrefix = `products/${cleanProductId}/`;
-      if (!asset.path || !asset.path.startsWith(expectedPrefix) || asset.path.length <= expectedPrefix.length) {
-        candidateFailureReason = `Media asset storage path "${asset.path}" does not belong to expected product storage path "${expectedPrefix}*"`;
+      // 8. Storage path must match one of the two approved cp-public
+      // layouts enforced by production Storage RLS:
+      // - products/{productId}/... for product-scoped uploads
+      // - media/{tenantId}/... for tenant-scoped CMS media uploads
+      const productPrefix = `products/${cleanProductId}/`;
+      const tenantMediaPrefix = `media/${TENANT_ID}/`;
+      const hasApprovedPath = Boolean(
+        asset.path &&
+        (
+          (asset.path.startsWith(productPrefix) && asset.path.length > productPrefix.length) ||
+          (asset.path.startsWith(tenantMediaPrefix) && asset.path.length > tenantMediaPrefix.length)
+        )
+      );
+      if (!hasApprovedPath) {
+        candidateFailureReason = `Media asset storage path "${asset.path}" does not match an approved product or tenant media path (" ${productPrefix}*" or "${tenantMediaPrefix}*")`;
         continue;
       }
 
@@ -240,9 +279,13 @@ export const productsService = {
       .select('id')
       .eq('tenant_id', TENANT_ID)
       .eq('price_type', 'retail')
+      .eq('status', 'active')
       .limit(1);
 
-    if (!findErr && existing && existing.length > 0) {
+    if (findErr) {
+      throw new Error(`Failed to verify default price list: ${getErrMsg(findErr, 'Price list lookup failed')}`);
+    }
+    if (existing && existing.length > 0) {
       return (existing[0] as { id: string }).id;
     }
 
@@ -284,10 +327,32 @@ export const productsService = {
       }
 
       // Filter claims to verified only for public storefront
-      const sanitized = ((data as unknown as Product[]) || []).map(p => ({
-        ...p,
-        claims: (p.claims || []).filter(c => c.verification_status === 'verified'),
-      }));
+      const sanitized = ((data as unknown as Product[]) || [])
+        .filter(p => {
+          const activeVariant = (p.variants || []).find(v => v.status === 'active');
+          const activePrice = (activeVariant?.prices || []).find(price =>
+            price.status === 'active' && Number.isFinite(Number(price.amount)) && Number(price.amount) > 0
+          );
+          const primary = (p.media || []).find(media => media.is_primary);
+          const asset = primary?.media_assets || primary?.asset;
+          return Boolean(
+            activePrice &&
+            asset &&
+            asset.tenant_id === TENANT_ID &&
+            asset.bucket === BUCKET_NAME &&
+            asset.status === 'active' &&
+            asset.media_type === 'image' &&
+            ACCEPTED_IMAGE_MIME_TYPES.has(String(asset.mime_type || '').toLowerCase()) &&
+            (
+              asset.path?.startsWith(`products/${p.id}/`) ||
+              asset.path?.startsWith(`media/${TENANT_ID}/`)
+            )
+          );
+        })
+        .map(p => ({
+          ...p,
+          claims: (p.claims || []).filter(c => c.verification_status === 'verified'),
+        }));
 
       return { data: sanitized, error: null };
     } catch (err: unknown) {
@@ -341,8 +406,14 @@ export const productsService = {
       }
 
       const prod = data as unknown as Product;
-      if (publicOnly && prod.claims) {
-        prod.claims = prod.claims.filter(c => c.verification_status === 'verified');
+      if (publicOnly) {
+        const validation = await validateProductPublication(prod.id);
+        if (!validation.isValid) {
+          return { data: null, error: validation.error || 'Published product failed media/price validation.' };
+        }
+        if (prod.claims) {
+          prod.claims = prod.claims.filter(c => c.verification_status === 'verified');
+        }
       }
 
       return { data: prod, error: null };
@@ -384,6 +455,9 @@ export const productsService = {
       if (!productData.name || !productData.slug) {
         return { data: null, error: 'Product name and slug are required' };
       }
+      if (!Number.isFinite(Number(productData.price)) || Number(productData.price) <= 0) {
+        return { data: null, error: 'A positive product price is required before a product can be created.' };
+      }
 
       if (productData.status === 'published') {
         return {
@@ -424,9 +498,11 @@ export const productsService = {
 
       const productId = (createdProduct as { id: string }).id;
 
-      // 2. Insert default variant in product_variants
+      // 2. Insert the required active variant. A product is not considered created
+      // successfully unless its initial active price is also persisted and read back.
       const volumeMl = productData.volume !== undefined ? Number(productData.volume) : 500;
       const volumeUnit = productData.volume_unit || 'ml';
+      const priceAmount = Number(productData.price);
 
       const variantRecord = {
         tenant_id: TENANT_ID,
@@ -446,16 +522,16 @@ export const productsService = {
         .single();
 
       if (varErr || !createdVariant) {
-        console.error('Failed to create default variant:', varErr);
-      } else {
-        const variantId = (createdVariant as { id: string }).id;
+        return { data: null, error: `Product record was created as a draft, but its required variant could not be saved: ${getErrMsg(varErr, 'Variant insert returned no record')}` };
+      }
 
-        // 3. Ensure price list and create price record
-        const priceListId = await this.ensureDefaultPriceList();
-        const priceAmount = Number(productData.price) || 0;
-        const compareAtAmount = productData.compare_at_price ? Number(productData.compare_at_price) : null;
+      const variantId = (createdVariant as { id: string }).id;
+      const priceListId = await this.ensureDefaultPriceList();
+      const compareAtAmount = productData.compare_at_price != null ? Number(productData.compare_at_price) : null;
 
-        const priceRecord = {
+      const { data: createdPrice, error: priceErr } = await supabase
+        .from('product_prices')
+        .insert({
           tenant_id: TENANT_ID,
           price_list_id: priceListId,
           variant_id: variantId,
@@ -463,12 +539,16 @@ export const productsService = {
           compare_at_amount: compareAtAmount,
           status: 'active',
           change_reason: 'Initial creation via CMS',
-        };
+        })
+        .select('id, amount, status')
+        .single();
 
-        const { error: priceErr } = await supabase.from('product_prices').insert(priceRecord);
-        if (priceErr) {
-          console.error('Failed to create initial price record:', priceErr);
-        }
+      if (priceErr || !createdPrice) {
+        return { data: null, error: `Product draft and variant were created, but the required price could not be saved: ${getErrMsg(priceErr, 'Price insert returned no record')}` };
+      }
+
+      if (createdPrice.status !== 'active' || Number(createdPrice.amount) !== priceAmount) {
+        return { data: null, error: 'Initial product price failed persisted read-back verification.' };
       }
 
       notifySyncEvent('products', { id: productId }, 'INSERT');
@@ -525,16 +605,22 @@ export const productsService = {
 
       // If price or volume is provided, update variant and price
       if (updates.price !== undefined || updates.compare_at_price !== undefined) {
-        await this.updateProductPrice(
+        if (updates.price !== undefined && (!Number.isFinite(Number(updates.price)) || Number(updates.price) <= 0)) {
+          return { data: null, error: 'Product price must be a positive number.' };
+        }
+        const priceResult = await this.updateProductPrice(
           id,
           updates.price !== undefined ? Number(updates.price) : 0,
           updates.compare_at_price !== undefined ? updates.compare_at_price : null,
           'Price update via CMS'
         );
+        if (!priceResult.success) {
+          return { data: null, error: priceResult.error || 'Product price update failed.' };
+        }
       }
 
       if (updates.volume !== undefined) {
-        await supabase
+        const { error: volumeErr } = await supabase
           .from('product_variants')
           .update({
             volume: Number(updates.volume),
@@ -543,6 +629,9 @@ export const productsService = {
           })
           .eq('product_id', id)
           .eq('tenant_id', TENANT_ID);
+        if (volumeErr) {
+          return { data: null, error: getErrMsg(volumeErr, 'Failed to update product volume') };
+        }
       }
 
       notifySyncEvent('products', { id }, 'UPDATE');
@@ -602,7 +691,11 @@ export const productsService = {
       const priceListId = await this.ensureDefaultPriceList();
 
       // Check existing price record
-      const { data: existingPrices } = await supabase
+      if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+        return { success: false, error: 'Product price must be a positive number.' };
+      }
+
+      const { data: existingPrices, error: existingErr } = await supabase
         .from('product_prices')
         .select('id')
         .eq('variant_id', variantId)
@@ -610,9 +703,14 @@ export const productsService = {
         .eq('tenant_id', TENANT_ID)
         .limit(1);
 
+      if (existingErr) {
+        return { success: false, error: getErrMsg(existingErr, 'Existing price lookup failed') };
+      }
+
+      let savedPrice: any = null;
       if (existingPrices && existingPrices.length > 0) {
         const priceId = (existingPrices[0] as { id: string }).id;
-        const { error: updateErr } = await supabase
+        const { data, error: updateErr } = await supabase
           .from('product_prices')
           .update({
             amount: Number(amount),
@@ -620,13 +718,16 @@ export const productsService = {
             status: 'active',
             change_reason: reason || 'Price update via CMS Price Engine',
           })
-          .eq('id', priceId);
+          .eq('id', priceId)
+          .select('id, amount, status')
+          .single();
 
-        if (updateErr) {
-          return { success: false, error: getErrMsg(updateErr, 'Failed to update price') };
+        if (updateErr || !data) {
+          return { success: false, error: getErrMsg(updateErr, 'Failed to update and read back price') };
         }
+        savedPrice = data;
       } else {
-        const { error: insertErr } = await supabase
+        const { data, error: insertErr } = await supabase
           .from('product_prices')
           .insert({
             tenant_id: TENANT_ID,
@@ -636,11 +737,18 @@ export const productsService = {
             compare_at_amount: compareAtAmount !== undefined ? compareAtAmount : null,
             status: 'active',
             change_reason: reason || 'Price creation via CMS Price Engine',
-          });
+          })
+          .select('id, amount, status')
+          .single();
 
-        if (insertErr) {
-          return { success: false, error: getErrMsg(insertErr, 'Failed to insert price') };
+        if (insertErr || !data) {
+          return { success: false, error: getErrMsg(insertErr, 'Failed to insert and read back price') };
         }
+        savedPrice = data;
+      }
+
+      if (savedPrice.status !== 'active' || Number(savedPrice.amount) !== Number(amount)) {
+        return { success: false, error: 'Product price persisted but failed active-price read-back verification.' };
       }
 
       notifySyncEvent('product_prices', { productId, amount }, 'UPDATE');
@@ -665,14 +773,19 @@ export const productsService = {
         }
       }
 
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from('products')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .eq('tenant_id', TENANT_ID);
+        .eq('tenant_id', TENANT_ID)
+        .select('id, status')
+        .single();
 
-      if (error) {
-        return { success: false, error: getErrMsg(error, 'Failed to set status') };
+      if (error || !updated) {
+        return { success: false, error: getErrMsg(error, 'Failed to set status or verify the updated product') };
+      }
+      if (updated.status !== status) {
+        return { success: false, error: `Product status read-back mismatch: expected ${status}, received ${updated.status}` };
       }
 
       notifySyncEvent('products', { id, status }, 'UPDATE');

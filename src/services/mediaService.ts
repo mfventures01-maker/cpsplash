@@ -385,16 +385,16 @@ export async function inspectFileSignature(
 ): Promise<{ detectedMime?: string; isValid: boolean; error?: string }> {
   try {
     if (!file || typeof (file as { slice?: unknown }).slice !== 'function') {
-      return { isValid: true };
+      return { isValid: false, error: 'File signature inspection is unavailable' };
     }
     const slice = file.slice(0, 32);
     if (!slice || typeof (slice as { arrayBuffer?: unknown }).arrayBuffer !== 'function') {
-      return { isValid: true };
+      return { isValid: false, error: 'File signature data could not be read' };
     }
     const buffer = await slice.arrayBuffer();
     const bytes = new Uint8Array(buffer);
     if (bytes.length < 3) {
-      return { isValid: true };
+      return { isValid: false, error: 'File signature is too short to validate' };
     }
 
     // JPEG: FF D8 FF
@@ -441,9 +441,9 @@ export async function inspectFileSignature(
       return { detectedMime: 'video/webm', isValid: true };
     }
 
-    return { isValid: true };
+    return { isValid: false, error: 'Unrecognized file signature for the declared media format' };
   } catch {
-    return { isValid: true };
+    return { isValid: false, error: 'Unable to inspect file signature' };
   }
 }
 
@@ -502,6 +502,18 @@ export const mediaService = {
 
         return { data: null, error: validation.error || 'Invalid media file' };
 
+      }
+
+      // 1b. Reject a readable file signature that contradicts the declared format.
+      const signatureCheck = await inspectFileSignature(file);
+      if (!signatureCheck.isValid) {
+        return { data: null, error: signatureCheck.error || 'File signature validation failed' };
+      }
+      if (signatureCheck.detectedMime && signatureCheck.detectedMime !== validation.mimeType) {
+        return {
+          data: null,
+          error: `File signature mismatch: detected ${signatureCheck.detectedMime}, expected ${validation.mimeType}`,
+        };
       }
 
       // 2. Authoritative product existence and tenant authorization check
@@ -655,59 +667,38 @@ export const mediaService = {
 
         : 1;
 
-      // 6. If isPrimary, clear existing primary flags
-
-      if (isPrimary) {
-
-        const { error: clearPrimaryErr } = await supabase
-
-          .from('product_media')
-
-          .update({ is_primary: false })
-
-          .eq('product_id', productId);
-
-        if (clearPrimaryErr) {
-
-          await safeCleanupUnreferencedAsset(mediaAsset.id, storagePath);
-
-          return {
-
-            data: null,
-
-            error: getErrMsg(clearPrimaryErr, 'Failed to update existing primary media'),
-
-          };
-
-        }
-
-      }
-
-      // 7. Link in product_media
-
+      // 6. Link the media. Primary assignment and relation creation share one
+      // database transaction through the RPC, so a failed insert cannot clear
+      // the product's existing primary media.
       const productMediaRecord = {
-
         product_id: productId,
-
         media_id: mediaAsset.id,
-
         sort_order: nextOrder,
-
         is_primary: isPrimary,
-
       };
 
-      const { data: linkCreated, error: linkErr } = await supabase
+      const { data: linkCreated, error: linkErr } = isPrimary
+        ? await supabase.rpc('set_product_primary_media', {
+            p_product_id: productId,
+            p_media_id: mediaAsset.id,
+            p_create_link: true,
+            p_sort_order: nextOrder,
+          })
+        : await supabase
+            .from('product_media')
+            .insert(productMediaRecord)
+            .select('*, media_assets(*)')
+            .single();
 
-        .from('product_media')
+      const rpcRow = Array.isArray(linkCreated) ? linkCreated[0] : linkCreated;
+      // The atomic RPC intentionally returns the relation row only. Preserve
+      // the service contract used by AdminProductEditor by attaching the
+      // asset record already confirmed above, without an extra network read.
+      const linkedRow = rpcRow
+        ? { ...rpcRow, media_assets: mediaAsset }
+        : null;
 
-        .insert(productMediaRecord)
-
-        .select('*, media_assets(*)')
-
-        .single();
-
-      if (linkErr || !linkCreated) {
+      if (linkErr || !linkedRow) {
 
         await safeCleanupUnreferencedAsset(mediaAsset.id, storagePath);
 
@@ -725,7 +716,7 @@ export const mediaService = {
 
       notifySyncEvent('product_media', { productId, mediaId: mediaAsset.id }, 'INSERT');
 
-      return { data: linkCreated as ProductMediaRelation, error: null };
+      return { data: linkedRow as ProductMediaRelation, error: null };
 
     } catch (err: unknown) {
 
@@ -845,34 +836,21 @@ export const mediaService = {
 
       }
 
-      const { error: clearErr } = await supabase
+      const { data, error } = await supabase.rpc('set_product_primary_media', {
+        p_product_id: productId,
+        p_media_id: mediaId,
+        p_create_link: false,
+        p_sort_order: null,
+      });
 
-        .from('product_media')
-
-        .update({ is_primary: false })
-
-        .eq('product_id', productId);
-
-      if (clearErr) {
-
-        return { success: false, error: getErrMsg(clearErr, 'Failed to clear primary media') };
-
-      }
-
-      const { error } = await supabase
-
-        .from('product_media')
-
-        .update({ is_primary: true })
-
-        .eq('product_id', productId)
-
-        .eq('media_id', mediaId);
-
-      if (error) {
-
-        return { success: false, error: getErrMsg(error, 'Failed to set primary media') };
-
+      const confirmed = Array.isArray(data) ? data.length === 1 : Boolean(data);
+      if (error || !confirmed) {
+        return {
+          success: false,
+          error: error
+            ? getErrMsg(error, 'Failed to set primary media')
+            : 'Primary media update was not confirmed; existing primary state was preserved',
+        };
       }
 
       notifySyncEvent('product_media', { productId, mediaId }, 'UPDATE');
@@ -988,6 +966,9 @@ export const mediaService = {
 
       // 2. File signature validation where feasible
       const signatureCheck = await inspectFileSignature(file);
+      if (!signatureCheck.isValid) {
+        return { data: null, error: signatureCheck.error || 'File signature validation failed' };
+      }
       if (signatureCheck.detectedMime && signatureCheck.detectedMime !== validation.mimeType) {
         const isJpegAlias =
           (signatureCheck.detectedMime === 'image/jpeg' && validation.mimeType === 'image/jpeg') ||
@@ -1083,19 +1064,19 @@ export const mediaService = {
         .single();
 
       if (assetErr || !assetCreated) {
-        // Safe compensation: Remove newly uploaded storage object
+        // The insert outcome may be ambiguous: the database can commit the row
+        // while the response is lost or the client receives an error. Deleting
+        // Storage here could create a dangling media_assets record. Preserve the
+        // object and require reconciliation before any destructive cleanup.
         console.error(
-          '[HOEOS RECOVERY] General asset insert failed; cleaning up newly uploaded Storage object.',
+          '[HOEOS RECOVERY] Asset insert was not confirmed; preserving Storage object for reconciliation.',
           { storagePath, assetErr: assetErr ?? null }
         );
-        try {
-          await supabase.storage.from(BUCKET_NAME).remove([storagePath]);
-        } catch (cleanupErr) {
-          console.error('[HOEOS RECOVERY] Failed to compensate storage object:', cleanupErr);
-        }
         return {
           data: null,
-          error: assetErr ? getErrMsg(assetErr, 'Failed to create media asset record') : 'Failed to create media asset',
+          error: assetErr
+            ? `${getErrMsg(assetErr, 'Failed to create media asset record')}; uploaded object preserved for reconciliation`
+            : 'Failed to create media asset; uploaded object preserved for reconciliation',
         };
       }
 
@@ -1188,10 +1169,26 @@ export const mediaService = {
       const nextOrder = mediaArr.length > 0 ? (Number((mediaArr[0] as { sort_order?: number }).sort_order || 0) + 1) : 1;
 
       if (isPrimary) {
-        await supabase
-          .from('product_media')
-          .update({ is_primary: false })
-          .eq('product_id', productId);
+        const { data, error } = await supabase.rpc('set_product_primary_media', {
+          p_product_id: productId,
+          p_media_id: mediaId,
+          p_create_link: true,
+          p_sort_order: nextOrder,
+        });
+        const rpcRow = Array.isArray(data) ? data[0] : data;
+        if (error || !rpcRow) {
+          return {
+            data: null,
+            error: error
+              ? getErrMsg(error, 'Failed to atomically link primary product media')
+              : 'Primary media link was not confirmed; existing primary state was preserved',
+          };
+        }
+        // The asset was fetched and tenant/status-validated above. Attach it
+        // so primary and non-primary linking return the same relation shape.
+        const link = { ...rpcRow, media_assets: asset };
+        notifySyncEvent('product_media', { productId, mediaId }, 'INSERT');
+        return { data: link as ProductMediaRelation, error: null };
       }
 
       const { data: link, error: linkErr } = await supabase
@@ -1200,7 +1197,7 @@ export const mediaService = {
           product_id: productId,
           media_id: mediaId,
           sort_order: nextOrder,
-          is_primary: isPrimary,
+          is_primary: false,
         })
         .select('*, media_assets(*)')
         .single();

@@ -90,7 +90,9 @@ export function notifySyncEvent(table: string, payload?: unknown, action: 'INSER
   }
 }
 
-if (typeof BroadcastChannel !== 'undefined') {
+// The receive channel is a browser-only cross-tab listener. Avoid creating
+// a persistent Node.js BroadcastChannel during SSR or mock-only test runs.
+if (typeof window !== 'undefined' && typeof BroadcastChannel !== 'undefined') {
   try {
     const rxBc = new BroadcastChannel('cp_splash_sync');
     rxBc.onmessage = (ev) => {
