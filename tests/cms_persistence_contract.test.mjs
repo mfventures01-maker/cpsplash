@@ -30,6 +30,7 @@ assert.doesNotMatch(products, /Number\(productData\.price\) \|\| 0/);
 
 assert.match(pageService, /\.from\('cms_pages'\)/);
 assert.match(pageService, /\.from\('cms_page_sections'\)/);
+assert.match(pageAdmin, /section_key: String\(section\.key/);
 assert.match(pageService, /notifySyncEvent\('cms_pages'/);
 assert.match(pageAdmin, /Save page to Supabase/);
 assert.match(pageAdmin, /JSON\.parse\(content\)/);
