@@ -10,6 +10,7 @@ import { AdminPriceManager } from '../components/admin/AdminPriceManager';
 import { AdminClaimsManager } from '../components/admin/AdminClaimsManager';
 import { AdminMediaManager } from '../components/admin/AdminMediaManager';
 import { AdminBlogManager } from '../components/admin/AdminBlogManager';
+import { AdminPagesManager } from '../components/admin/AdminPagesManager';
 import { AdminSocialManager } from '../components/admin/AdminSocialManager';
 import { AdminCampaignManager } from '../components/admin/AdminCampaignManager';
 import { AdminRetailerManager } from '../components/admin/AdminRetailerManager';
@@ -103,6 +104,8 @@ export function AdminApp({ onExitAdmin, onNavigatePublic, onNavigateAdmin, initi
       {currentTab === 'media' && (
         <AdminMediaManager />
       )}
+
+      {currentTab === 'pages' && <AdminPagesManager />}
 
       {currentTab === 'blog' && (
         <AdminBlogManager />
