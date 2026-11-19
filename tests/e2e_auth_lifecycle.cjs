@@ -31,8 +31,8 @@ async function run() {
 
     // Client initialisation must succeed before the login form can be used.
     await page.locator('input[type="email"]').waitFor({ state: 'visible', timeout: 20000 });
-    const clientReady = await page.evaluate(() => Boolean(window.supabase && window.supabase.auth));
-    if (!clientReady) throw new Error('window.supabase client was not initialised.');
+    // The application intentionally does not expose its Supabase client on window.
+    // Reaching the login form without a page error is the public initialisation check.
 
     await page.locator('input[type="email"]').fill(EMAIL);
     await page.locator('input[type="password"]').fill(PASSWORD);
@@ -41,28 +41,26 @@ async function run() {
     // This verifies both password authentication and tenant-role authorisation.
     await page.getByRole('button', { name: /Sign Out from CMS/i }).waitFor({ state: 'visible', timeout: 30000 });
 
-    const firstSession = await page.evaluate(async () => {
-      const { data, error } = await window.supabase.auth.getSession();
-      if (error) throw new Error(error.message);
-      return data.session ? { userId: data.session.user.id, email: data.session.user.email } : null;
-    });
-    if (!firstSession || firstSession.email?.toLowerCase() !== EMAIL.toLowerCase()) {
-      throw new Error('Login did not produce the expected authenticated browser session.');
-    }
-
     const authStorageKey = `sb-${PROJECT_REF}-auth-token`;
-    const storedAfterLogin = await page.evaluate(key => Boolean(localStorage.getItem(key)), authStorageKey);
-    if (!storedAfterLogin) throw new Error('Supabase session was not persisted in browser storage.');
+    const firstSession = await page.evaluate(key => {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed.user ? { userId: parsed.user.id, email: parsed.user.email } : null;
+    }, authStorageKey);
+    if (!firstSession || firstSession.email?.toLowerCase() !== EMAIL.toLowerCase()) {
+      throw new Error('Login did not produce the expected persisted Supabase browser session.');
+    }
 
     // Reload proves the persisted session is restored, not merely held in React state.
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.getByRole('button', { name: /Sign Out from CMS/i }).waitFor({ state: 'visible', timeout: 30000 });
 
-    const restoredSession = await page.evaluate(async () => {
-      const { data, error } = await window.supabase.auth.getSession();
-      if (error) throw new Error(error.message);
-      return data.session ? data.session.user.id : null;
-    });
+    const restoredSession = await page.evaluate(key => {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      return JSON.parse(raw).user?.id || null;
+    }, authStorageKey);
     if (restoredSession !== firstSession.userId) {
       throw new Error('Session did not survive page reload with the same user identity.');
     }
@@ -71,14 +69,10 @@ async function run() {
     await page.getByRole('button', { name: /Sign Out from CMS/i }).click();
     await page.locator('input[type="email"]').waitFor({ state: 'visible', timeout: 20000 });
 
-    const finalState = await page.evaluate(async key => {
-      const { data, error } = await window.supabase.auth.getSession();
-      if (error) throw new Error(error.message);
-      return { hasSession: Boolean(data.session), hasStoredSession: Boolean(localStorage.getItem(key)) };
-    }, authStorageKey);
+    const finalState = await page.evaluate(key => Boolean(localStorage.getItem(key)), authStorageKey);
 
-    if (finalState.hasSession || finalState.hasStoredSession) {
-      throw new Error('Logout did not clear the Supabase session and persisted auth token.');
+    if (finalState) {
+      throw new Error('Logout did not clear the persisted Supabase auth token.');
     }
 
     if (pageErrors.length) {
