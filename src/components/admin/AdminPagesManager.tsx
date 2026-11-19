@@ -8,6 +8,7 @@ const EMPTY_CONTENT = JSON.stringify({ sections: [] }, null, 2);
 export function AdminPagesManager() {
   const [pages, setPages] = useState<CmsPageRecord[]>([]);
   const [editing, setEditing] = useState<CmsPageRecord | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [path, setPath] = useState('/');
@@ -31,6 +32,7 @@ export function AdminPagesManager() {
 
   const reset = () => {
     setEditing(null);
+    setIsEditing(false);
     setTitle('');
     setSlug('');
     setPath('/');
@@ -42,6 +44,7 @@ export function AdminPagesManager() {
   };
 
   const beginEdit = (page: CmsPageRecord) => {
+    setIsEditing(true);
     setEditing(page);
     setTitle(page.title);
     setSlug(page.slug);
@@ -102,12 +105,12 @@ export function AdminPagesManager() {
           <h1 className="text-3xl font-black tracking-tight text-stone-900">Website Pages</h1>
           <p className="mt-1 text-xs text-stone-500">Persist page content, routes and SEO metadata independently of frontend releases.</p>
         </div>
-        {!editing && <button onClick={reset} className="rounded-xl bg-rose-700 px-4 py-2.5 text-xs font-bold text-white">Create Page</button>}
+        {!isEditing && <button onClick={() => { reset(); setIsEditing(true); }} className="rounded-xl bg-rose-700 px-4 py-2.5 text-xs font-bold text-white">Create Page</button>}
       </header>
 
       {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">{error}</div>}
 
-      {editing !== null || title !== '' ? (
+      {isEditing ? (
         <form onSubmit={save} className="space-y-4 rounded-2xl border border-stone-200 bg-white p-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="space-y-1 text-xs font-bold text-stone-700">Page title
