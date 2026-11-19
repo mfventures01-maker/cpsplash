@@ -555,84 +555,38 @@ export const productsService = {
     reason?: string
   ): Promise<{ success: boolean; error: string | null }> {
     try {
-      // Find variant for product
-      const { data: variants, error: varErr } = await supabase
-        .from('product_variants')
-        .select('id')
-        .eq('product_id', productId)
-        .eq('tenant_id', TENANT_ID)
-        .limit(1);
-
-      if (varErr) {
-        return { success: false, error: getErrMsg(varErr, 'Variant lookup failed') };
+      if (!isValidUuid(productId)) return { success: false, error: 'Invalid product ID.' };
+      if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+        return { success: false, error: 'Product price must be a positive number.' };
+      }
+      if (compareAtAmount != null && (!Number.isFinite(Number(compareAtAmount)) || Number(compareAtAmount) < Number(amount))) {
+        return { success: false, error: 'Compare-at price must be greater than or equal to the active price.' };
       }
 
-      let variantId = variants && variants.length > 0 ? (variants[0] as { id: string }).id : null;
-
-      // If no variant exists, create default
-      if (!variantId) {
-        const { data: newVar, error: newVarErr } = await supabase
-          .from('product_variants')
-          .insert({
-            tenant_id: TENANT_ID,
-            product_id: productId,
-            name: 'Standard 500ml',
-            volume: 500,
-            volume_unit: 'ml',
-            status: 'active',
-            metadata: {},
-          })
-          .select('id')
-          .single();
-
-        if (newVarErr || !newVar) {
-          return { success: false, error: getErrMsg(newVarErr, 'Failed to create variant for price') };
-        }
-        variantId = (newVar as { id: string }).id;
+      const { data: savedId, error: saveErr } = await supabase.rpc('cms_save_product', {
+        p_product_id: productId,
+        p_product: {},
+        p_variant: {},
+        p_price: {
+          amount: Number(amount),
+          compare_at_amount: compareAtAmount ?? null,
+          change_reason: reason || 'Price update via CMS Price Engine',
+        },
+      });
+      if (saveErr || !savedId) {
+        return { success: false, error: getErrMsg(saveErr, 'Atomic price update failed') };
       }
 
-      const priceListId = await this.ensureDefaultPriceList();
-
-      // Check existing price record
-      const { data: existingPrices } = await supabase
-        .from('product_prices')
-        .select('id')
-        .eq('variant_id', variantId)
-        .eq('price_list_id', priceListId)
-        .eq('tenant_id', TENANT_ID)
-        .limit(1);
-
-      if (existingPrices && existingPrices.length > 0) {
-        const priceId = (existingPrices[0] as { id: string }).id;
-        const { error: updateErr } = await supabase
-          .from('product_prices')
-          .update({
-            amount: Number(amount),
-            compare_at_amount: compareAtAmount !== undefined ? compareAtAmount : null,
-            status: 'active',
-            change_reason: reason || 'Price update via CMS Price Engine',
-          })
-          .eq('id', priceId);
-
-        if (updateErr) {
-          return { success: false, error: getErrMsg(updateErr, 'Failed to update price') };
-        }
-      } else {
-        const { error: insertErr } = await supabase
-          .from('product_prices')
-          .insert({
-            tenant_id: TENANT_ID,
-            price_list_id: priceListId,
-            variant_id: variantId,
-            amount: Number(amount),
-            compare_at_amount: compareAtAmount !== undefined ? compareAtAmount : null,
-            status: 'active',
-            change_reason: reason || 'Price creation via CMS Price Engine',
-          });
-
-        if (insertErr) {
-          return { success: false, error: getErrMsg(insertErr, 'Failed to insert price') };
-        }
+      const readBack = await this.getProductById(productId);
+      if (readBack.error || !readBack.data) {
+        return { success: false, error: `Price update read-back failed: ${readBack.error || 'Product not found'}` };
+      }
+      const savedPrice = readBack.data.variants
+        ?.filter(variant => variant.status === 'active')
+        .flatMap(variant => variant.prices || [])
+        .find(price => price.status === 'active');
+      if (!savedPrice || Number(savedPrice.amount) !== Number(amount)) {
+        return { success: false, error: 'Price write was not confirmed by authoritative database read-back.' };
       }
 
       notifySyncEvent('product_prices', { productId, amount }, 'UPDATE');
@@ -641,7 +595,6 @@ export const productsService = {
       return { success: false, error: err instanceof Error ? err.message : 'Price update failed' };
     }
   },
-
   /**
    * Change Publish Status (draft -> published -> archived)
    */
