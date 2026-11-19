@@ -77,6 +77,15 @@ export function AdminPagesManager() {
       seo_title: seoTitle || null,
       seo_description: seoDescription || null,
       content: parsedContent,
+      sections: Array.isArray(parsedContent.sections)
+        ? (parsedContent.sections as Record<string, unknown>[]).map((section, index) => ({
+            section_key: String(section.key || `section-${index + 1}`),
+            section_type: String(section.type || 'content'),
+            sort_order: index,
+            enabled: section.enabled !== false,
+            content: section,
+          }))
+        : [],
     });
     setSaving(false);
     if (result.error) {
