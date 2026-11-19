@@ -11,6 +11,7 @@ import { FindRetailersPage } from './pages/FindRetailersPage';
 import { ClaimsPage } from './pages/ClaimsPage';
 import { StoryPage } from './pages/StoryPage';
 import { CertificationPage } from './pages/CertificationPage';
+import { CmsPublicPage } from './pages/CmsPublicPage';
 import { AdminApp } from './pages/AdminApp';
 import { AdminAuthProvider } from './auth/AdminAuthContext';
 import { AdminAuthGate } from './components/auth/AdminAuthGate';
@@ -20,7 +21,7 @@ import { AdminTab } from './components/admin/AdminLayout';
 
 const ADMIN_TABS: AdminTab[] = [
   'dashboard', 'commercial_brain', 'sales_leads', 'orders', 'products',
-  'pricing', 'claims', 'media', 'blog', 'social', 'campaigns',
+  'pricing', 'claims', 'media', 'blog', 'pages', 'social', 'campaigns',
   'retailers', 'analytics', 'settings',
 ];
 
@@ -170,11 +171,11 @@ export default function App() {
       return <CertificationPage onNavigate={navigate} />;
     }
 
-    // Default Home Page
+    // Any unmatched public route may be a CMS-managed page. Fall back to the homepage only when no published page exists.
     return (
-      <HomePage
-        onNavigate={navigate}
-        onOpenOrderModal={setOrderModalProduct}
+      <CmsPublicPage
+        path={currentPath}
+        fallback={<HomePage onNavigate={navigate} onOpenOrderModal={setOrderModalProduct} />}
       />
     );
   };
