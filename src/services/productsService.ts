@@ -646,14 +646,19 @@ export const productsService = {
         }
       }
 
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from('products')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .eq('tenant_id', TENANT_ID);
+        .eq('tenant_id', TENANT_ID)
+        .select('id, status')
+        .single();
 
-      if (error) {
-        return { success: false, error: getErrMsg(error, 'Failed to set status') };
+      if (error || !updated) {
+        return { success: false, error: getErrMsg(error, 'Failed to set status or verify product publication') };
+      }
+      if (updated.id !== id || updated.status !== status) {
+        return { success: false, error: 'Product publication status read-back did not match the requested status.' };
       }
 
       notifySyncEvent('products', { id, status }, 'UPDATE');

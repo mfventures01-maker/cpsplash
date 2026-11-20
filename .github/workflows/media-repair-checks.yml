@@ -1,0 +1,73 @@
+name: CP Splash media repair checks
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Type-check application source
+        run: npm run lint
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Run mock-only media contract tests
+        run: npm run test:media:mock
+        timeout-minutes: 2
+
+      - name: Run isolated media pipeline and placements tests
+        run: npm run test:media:pipeline:mock
+        timeout-minutes: 3
+
+      - name: Verify primary-media migration contract
+        run: npm run test:media:migration:contract
+        timeout-minutes: 1
+
+      - name: Verify product publishing-to-WhatsApp contract
+        run: npm run test:products:contract
+        timeout-minutes: 1
+
+      - name: Verify safe product content rendering
+        run: npm run test:content:rendering
+        timeout-minutes: 1
+
+  browser-e2e:
+    if: ${{ vars.CP_SPLASH_E2E_BASE_URL != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify five funnels and WhatsApp browser handoff against isolated staging
+        run: npm run test:e2e:mvp
+        env:
+          CP_SPLASH_E2E_BASE_URL: ${{ vars.CP_SPLASH_E2E_BASE_URL }}

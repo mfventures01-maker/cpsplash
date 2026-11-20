@@ -24,13 +24,13 @@ export function getProductPrice(product?: Product | null): ResolvedProductPricin
   }
 
   // Find active variant
-  const variant = product.variants.find(v => v.status === 'active') || product.variants[0];
+  const variant = product.variants.find(v => v.status === 'active');
   if (!variant || !variant.prices || variant.prices.length === 0) {
     return { amount: 0, compare_at_amount: null, currency: DEFAULT_CURRENCY };
   }
 
-  // Find active price
-  const price = variant.prices.find(p => p.status === 'active') || variant.prices[0];
+  // Never display an archived price as a public fallback.
+  const price = variant.prices.find(p => p.status === 'active');
   if (!price) {
     return { amount: 0, compare_at_amount: null, currency: DEFAULT_CURRENCY };
   }
@@ -156,7 +156,7 @@ export function getProductPrimaryVariant(product?: Product | null): ProductVaria
   if (!product || !product.variants || product.variants.length === 0) {
     return undefined;
   }
-  return product.variants.find(v => v.status === 'active') || product.variants[0];
+  return product.variants.find(v => v.status === 'active');
 }
 
 /**
@@ -179,3 +179,29 @@ export function getBlogFeaturedImageUrl(post?: BlogPost | null): string {
   return '';
 }
 
+
+/**
+ * Converts CMS Markdown/plain text into a short, customer-facing excerpt.
+ * This is text-only presentation; full product stories use SafeMarkdown.
+ */
+export function getProductCopyExcerpt(
+  value?: string | null,
+  fallback = '',
+  maxLength = 220
+): string {
+  const plain = String(value || '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/^\s*\d+[.)]\s+/gm, '')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/[*_~`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const text = plain || fallback;
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(1, maxLength - 1)).trimEnd()}…`;
+}

@@ -10,6 +10,7 @@ import { analyticsService } from '../services/analyticsService';
 import { getProductPrice, getProductVolume } from '../services/productHelpers';
 import { MessageCircle, ShieldCheck, ArrowLeft, Share2, MapPin, CheckCircle } from 'lucide-react';
 import { BUSINESS_CONFIG } from '../services/businessConfig';
+import { SafeMarkdown } from '../components/content/SafeMarkdown';
 
 interface ProductDetailPageProps {
   slug: string;
@@ -213,9 +214,10 @@ export function ProductDetailPage({ slug, onNavigate, onOpenOrderModal }: Produc
               <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">
                 About The Blend & Formulation
               </h3>
-              <div className="text-sm text-stone-700 leading-relaxed space-y-2 whitespace-pre-line bg-white p-5 rounded-3xl border border-stone-200">
-                {product.description || 'Natural Nigerian botanical blend handcrafted in Sapele, Delta State.'}
-              </div>
+              <SafeMarkdown
+                content={product.description || 'Product details are being updated. Contact CP Splash for current product information.'}
+                className="text-sm text-stone-700 leading-relaxed bg-white p-5 rounded-3xl border border-stone-200"
+              />
             </div>
 
             {/* Delivery & Flagship Assurance */}
