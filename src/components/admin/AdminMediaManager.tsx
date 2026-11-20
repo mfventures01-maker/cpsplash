@@ -190,7 +190,7 @@ export function AdminMediaManager() {
     setModalMediaId(assetId);
     setModalScopeType('homepage_hero');
     setModalScopeId('');
-    setModalPlacementKey(`placement_${Date.now()}`);
+    setModalPlacementKey('');
     setModalSortOrder(placements.length + 1);
     setModalAltOverride('');
     setPlacementError(null);
@@ -1201,11 +1201,12 @@ export function AdminMediaManager() {
                 <label className="block text-xs font-bold text-stone-700 mb-1">
                   Unique Placement Key
                 </label>
+                <p className="text-[10px] text-stone-500 mb-1">Use a stable logical key for this slot. Active duplicate keys are rejected by the database.</p>
                 <input
                   type="text"
                   value={modalPlacementKey}
                   onChange={(e) => setModalPlacementKey(e.target.value)}
-                  placeholder="e.g. hero_slide_1, menu_banner, sports_hero"
+                  placeholder="e.g. homepage.hero.primary, funnel.sports.hero"
                   className="w-full text-xs p-2.5 rounded-xl border border-stone-300 focus:outline-rose-500"
                   required
                 />
