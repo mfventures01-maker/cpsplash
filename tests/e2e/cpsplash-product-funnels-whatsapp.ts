@@ -17,6 +17,16 @@ const funnels = [
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage();
+
+  // Protected Vercel previews can be tested with a local automation bypass secret.
+  // Public isolated staging URLs continue to work without this optional variable.
+  const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+  if (bypassSecret) {
+    await page.setExtraHTTPHeaders({
+      'x-vercel-protection-bypass': bypassSecret,
+      'x-vercel-set-bypass-cookie': 'true',
+    });
+  }
   let referenceProductName = '';
 
   for (const route of funnels) {
@@ -48,7 +58,7 @@ try {
     assert.match(message, /Quantity: 1/);
     assert.match(message, /Unit price: ₦[\d,]+/);
     assert.match(message, /Total: ₦[\d,]+/);
-    assert.match(message, /Product link: https?:\\/\\//);
+    assert.match(message, /Product link: https?:\/\//);
     console.log(`[PASS] ${route}: shared product, loaded image, active price and WhatsApp handoff`);
   }
 } finally {
