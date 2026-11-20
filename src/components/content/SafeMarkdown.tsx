@@ -25,7 +25,7 @@ function renderInline(source: string, keyPrefix: string): React.ReactNode[] {
 }
 
 /**
- * Safe, deliberately small Markdown renderer for CMS product copy.
+ * HOEOS reusable content primitive: safe Markdown renderer for ecommerce product copy.
  * Raw HTML is never interpreted. React escapes all text nodes.
  */
 export function SafeMarkdown({ content, className = '' }: { content: string; className?: string }) {
