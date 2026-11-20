@@ -33,7 +33,8 @@ const adminEditor = source('../src/components/admin/AdminProductEditor.tsx');
 
 assert.match(productsService, /product_prices\(id, amount, status\)/, 'publication gate must query persisted prices');
 assert.match(productsService, /price\.status === 'active'.*Number\(price\.amount\) > 0/, 'publication gate must require a positive active price');
-assert.match(productsService, /select\('id, amount, status'\)/, 'price writes must be read back');
+assert.match(productsService, /product_prices\(id, amount, status\)/, 'publication must read persisted price records');
+assert.match(productsService, /readBack\.data/, 'price writes must be confirmed by an authoritative product read-back');
 assert.match(productsService, /asset\.bucket === BUCKET_NAME/, 'public catalog must require the approved storage bucket');
 assert.match(productsService, /asset\.path\?\.startsWith/, 'public catalog must require product-linked storage paths');
 assert.match(productsService, /media\/\$\{TENANT_ID\}/, 'publication and catalog gates must also accept the approved tenant-scoped CMS media path');
