@@ -83,6 +83,12 @@ const originalStorageFrom = supabase.storage.from.bind(supabase.storage);
       mockStorage.set(`${bucket}/${path}`, { path, data: file, contentType: options?.contentType });
       return { data: { path }, error: null };
     },
+    download: async (path: string) => {
+      const stored = mockStorage.get(`${bucket}/${path}`);
+      if (!stored) return { data: null, error: { message: 'Mock Storage object not found' } };
+      const size = Number((stored.data as { size?: number })?.size || 0);
+      return { data: new Blob([new Uint8Array(size)], { type: stored.contentType }), error: null };
+    },
     remove: async (paths: string[]) => {
       storageDeletions.push(...paths);
       for (const p of paths) {
