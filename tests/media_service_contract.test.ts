@@ -1,25 +1,16 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 
-// 1. Setup environment before importing service
-const envContent = fs.readFileSync('C:/Projects/cp-splash/.env', 'utf-8');
-const envVars: Record<string, string> = {};
-envContent.split('\n').forEach(line => {
-  const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-  if (match) {
-    let val = match[2] || '';
-    if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-    if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
-    envVars[match[1]] = val.trim();
-  }
-});
-
-Object.assign(process.env, envVars);
+// This suite is mock-only. Never read local env files or inherit remote
+// Supabase credentials. Live certification is a separately authorized task.
+process.env.HOEOS_MOCK_ONLY = '1';
+process.env.VITE_SUPABASE_URL = 'http://127.0.0.1:54321';
+process.env.VITE_SUPABASE_ANON_KEY = 'mock-anon-key-not-valid';
+process.env.VITE_CP_SPLASH_TENANT_ID = '4b9995ce-0000-4000-8000-000000000001';
 
 (import.meta as unknown as { env: Record<string, string> }).env = {
-  VITE_SUPABASE_URL: envVars.VITE_SUPABASE_URL || 'https://efvvczmopacoroudzfnl.supabase.co',
-  VITE_SUPABASE_ANON_KEY: envVars.VITE_SUPABASE_ANON_KEY || '',
-  VITE_CP_SPLASH_TENANT_ID: envVars.VITE_CP_SPLASH_TENANT_ID || '42d36cee-4cd6-43d1-af5d-334e5a07e37c',
+  VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
+  VITE_SUPABASE_ANON_KEY: 'mock-anon-key-not-valid',
+  VITE_CP_SPLASH_TENANT_ID: '4b9995ce-0000-4000-8000-000000000001',
 };
 
 // 2. Import service and validation helpers
@@ -41,6 +32,18 @@ class MockFile {
     this.name = name;
     this.size = size;
     this.type = type;
+  }
+  slice(): { arrayBuffer: () => Promise<ArrayBuffer> } {
+    const signatures: Record<string, number[]> = {
+      'image/jpeg': [0xff, 0xd8, 0xff, 0xdb],
+      'image/png': [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+      'image/webp': [0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50],
+      'image/gif': [0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
+      'video/mp4': [0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70],
+      'video/webm': [0x1a, 0x45, 0xdf, 0xa3],
+    };
+    const bytes = Uint8Array.from(signatures[this.type] || []);
+    return { arrayBuffer: async () => bytes.buffer as ArrayBuffer };
   }
 }
 
@@ -296,16 +299,39 @@ function createSupabaseMock(options: {
   assetDeleteRows?: Array<{ id: string }> | null;
   storageRemoveError?: unknown | null;
   storageRemoveData?: Array<{ name?: string }> | null;
+  primaryRpcError?: unknown | null;
 }) {
+  const storageObjects = new Map<string, Blob>();
   const calls = {
     storageUploads: [] as StorageUploadCall[],
     storageRemovals: [] as string[],
     dbInserts: [] as DbInsertCall[],
     dbUpdates: [] as Array<{ table: string; values: Record<string, unknown> }>,
     dbDeletes: [] as Array<{ table: string; id: string }>,
+    rpcCalls: [] as Array<{ name: string; args: Record<string, unknown> }>,
   };
 
   const mockClient = {
+    rpc: async (name: string, args: Record<string, unknown>) => {
+      calls.rpcCalls.push({ name, args });
+      if (name === 'reorder_product_media') {
+        if (options.primaryRpcError) return { data: null, error: options.primaryRpcError };
+        return { data: Array.isArray(args.p_media_ids) ? args.p_media_ids.length : 0, error: null };
+      }
+      if (options.primaryRpcError) {
+        return { data: null, error: options.primaryRpcError };
+      }
+      return {
+        data: [{
+          product_id: args.p_product_id,
+          media_id: args.p_media_id,
+          sort_order: args.p_sort_order ?? 3,
+          is_primary: true,
+          created_at: new Date().toISOString(),
+        }],
+        error: null,
+      };
+    },
     storage: {
       from: (bucketName: string) => ({
         upload: async (path: string, _file: unknown, opts: { contentType?: string; upsert?: boolean }) => {
@@ -313,8 +339,14 @@ function createSupabaseMock(options: {
           if (options.storageUploadError) {
             return { data: null, error: options.storageUploadError };
           }
+          const fileSize = Number((_file as { size?: number })?.size || 0);
+          storageObjects.set(path, new Blob([new Uint8Array(fileSize)], { type: opts.contentType }));
           return { data: { path }, error: null };
         },
+        download: async (path: string) => ({
+          data: storageObjects.get(path) || null,
+          error: storageObjects.has(path) ? null : { message: 'Mock Storage object not found' },
+        }),
         remove: async (paths: string[]) => {
           calls.storageRemovals.push(...paths);
           if (options.storageRemoveError) {
@@ -432,6 +464,7 @@ function createSupabaseMock(options: {
 }
 // Helper to replace supabase client temporarily
 const originalFrom = supabase.from.bind(supabase);
+const originalRpc = supabase.rpc.bind(supabase);
 const originalStorage = supabase.storage;
 
 async function withMockedSupabase(
@@ -439,11 +472,13 @@ async function withMockedSupabase(
   fn: () => Promise<void>
 ) {
   (supabase as unknown as { from: unknown }).from = mock.from;
+  (supabase as unknown as { rpc: unknown }).rpc = mock.rpc;
   (supabase as unknown as { storage: unknown }).storage = mock.storage;
   try {
     await fn();
   } finally {
     (supabase as unknown as { from: unknown }).from = originalFrom;
+    (supabase as unknown as { rpc: unknown }).rpc = originalRpc;
     (supabase as unknown as { storage: unknown }).storage = originalStorage;
   }
 }
@@ -474,12 +509,16 @@ await runTest('Metadata test: Upload WebP creates exact canonical metadata', asy
     assert.equal(assetCall.record.size_bytes, 2048);
     assert.equal(assetCall.record.status, 'active');
 
-    // Verify product_media link
-    const linkCall = calls.dbInserts.find(c => c.table === 'product_media');
-    assert.ok(linkCall);
-    assert.equal(linkCall.record.product_id, VALID_PRODUCT_ID);
-    assert.equal(linkCall.record.is_primary, true);
-    assert.equal(linkCall.record.sort_order, 3); // 2 + 1 from mock
+    // Verify atomic product_media link + primary switch RPC
+    assert.equal(calls.rpcCalls.length, 1);
+    assert.equal(calls.rpcCalls[0].name, 'set_product_primary_media');
+    assert.equal(calls.rpcCalls[0].args.p_product_id, VALID_PRODUCT_ID);
+    assert.equal(calls.rpcCalls[0].args.p_media_id, res.data.media_id);
+    assert.equal(calls.rpcCalls[0].args.p_create_link, true);
+    assert.equal(calls.rpcCalls[0].args.p_sort_order, 3); // 2 + 1 from mock
+    assert.equal(res.data.is_primary, true);
+    assert.equal(res.data.media_assets?.id, 'asset-uuid-999');
+    assert.equal(res.data.media_assets?.filename, 'hero_specimen.webp');
   });
 });
 
@@ -543,6 +582,24 @@ await runTest('Failure 2: Product belongs to different tenant -> rejected before
   });
 });
 
+await runTest('Failure 2b: Signature mismatch is rejected before product lookup or Storage upload', async () => {
+  const { mockClient, calls } = createSupabaseMock({});
+  await withMockedSupabase(mockClient, async () => {
+    const jpegBytes = Uint8Array.from([0xff, 0xd8, 0xff, 0x00]);
+    const spoofedGif = {
+      name: 'spoofed.gif',
+      size: jpegBytes.byteLength,
+      type: 'image/gif',
+      slice: () => ({ arrayBuffer: async () => jpegBytes.buffer as ArrayBuffer }),
+    } as unknown as File;
+    const res = await mediaService.uploadMedia(VALID_PRODUCT_ID, spoofedGif);
+    assert.equal(res.data, null);
+    assert.match(res.error || '', /signature mismatch/i);
+    assert.equal(calls.storageUploads.length, 0);
+    assert.equal(calls.dbInserts.length, 0);
+  });
+});
+
 await runTest('Failure 3: Storage upload fails -> no media_assets record created', async () => {
   const { mockClient, calls } = createSupabaseMock({
     storageUploadError: { message: 'Storage bucket quota exceeded' }
@@ -600,16 +657,18 @@ await runTest('Failure 6: Preservation rule -> if asset is referenced elsewhere,
   });
 });
 
-await runTest('Failure 7: Clear primary fails -> aborts and cleans up new asset safely', async () => {
+await runTest('Failure 7: Atomic primary RPC fails -> aborts and safely compensates the unlinked asset', async () => {
   const { mockClient, calls } = createSupabaseMock({
-    clearPrimaryError: { message: 'RLS update denied on product_media' },
+    primaryRpcError: { message: 'RLS authorization denied by atomic primary RPC' },
     existingRefs: []
   });
   await withMockedSupabase(mockClient, async () => {
     const file = new MockFile('test.jpg', 1000, 'image/jpeg') as unknown as File;
     const res = await mediaService.uploadMedia(VALID_PRODUCT_ID, file, 'image', '', true);
     assert.equal(res.data, null);
-    assert.match(res.error || '', /RLS update denied|Failed to update existing primary media/i);
+    assert.match(res.error || '', /RLS authorization denied by atomic primary RPC/i);
+    assert.equal(calls.rpcCalls.length, 1);
+    assert.equal(calls.rpcCalls[0].name, 'set_product_primary_media');
     assert.equal(calls.storageRemovals.length, 1);
   });
 });
@@ -750,6 +809,8 @@ try {
   supabase.realtime.disconnect();
 } catch {}
 
-process.exitCode = passedTests === totalTests ? 0 : 1;
+// This file is a standalone Node test runner. Exit explicitly after cleanup so
+// platform handles cannot keep a mock-only CI process alive indefinitely.
+process.exit(passedTests === totalTests ? 0 : 1);
 
 
