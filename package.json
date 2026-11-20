@@ -9,7 +9,11 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test:cms-persistence": "node tests/cms_persistence_contract.test.mjs"
+    "test:cms-persistence": "node tests/cms_persistence_contract.test.mjs",
+    "test:media:mock": "tsx tests/media_service_contract.test.ts",
+    "test:media:pipeline:mock": "tsx tests/media_pipeline_placements.test.ts",
+    "test:media:migration:contract": "tsx tests/primary_media_migration_contract.test.ts",
+    "test:products:contract": "tsx tests/product_publish_whatsapp_contract.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
