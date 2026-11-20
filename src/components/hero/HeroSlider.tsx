@@ -6,6 +6,7 @@ import {
   getProductPrice,
   getProductVolume,
   getProductHeroMediaUrl,
+  getProductCopyExcerpt,
   BRAND_PLACEHOLDER_IMAGE
 } from '../../services/productHelpers';
 import { mediaService } from '../../services/mediaService';
@@ -77,8 +78,8 @@ export function HeroSlider({ products, onNavigate, onOpenOrderModal }: HeroSlide
       id: `slide-${p.id}`,
       title: p.brand || 'CP Fruit Splash',
       headline: p.name,
-      subheadline: p.short_description || p.seo_title || 'Cold-Crafted Natural Beverage',
-      description: p.description || p.short_description || 'Cold-crafted in Sapele, Delta State with pure natural ingredients and verified health claims.',
+      subheadline: getProductCopyExcerpt(p.short_description, 'Cold-Crafted Natural Beverage', 140),
+      description: getProductCopyExcerpt(p.description, p.short_description || 'Discover the CP Fruit Splash range, crafted in Sapele.', 220),
       cta: `Discover ${p.name}`,
       secondaryCta: 'Order on WhatsApp',
       product: p,
