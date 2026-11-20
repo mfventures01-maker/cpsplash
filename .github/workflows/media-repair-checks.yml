@@ -47,6 +47,10 @@ jobs:
         run: npm run test:products:contract
         timeout-minutes: 1
 
+      - name: Verify safe product content rendering
+        run: npm run test:content:rendering
+        timeout-minutes: 1
+
   browser-e2e:
     if: ${{ vars.CP_SPLASH_E2E_BASE_URL != '' }}
     runs-on: ubuntu-latest
