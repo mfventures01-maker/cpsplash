@@ -25,27 +25,17 @@
  */
 
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-
-// 1. Setup environment before importing service
-const envContent = fs.readFileSync('C:/Projects/cp-splash/.env', 'utf-8');
-const envVars: Record<string, string> = {};
-envContent.split('\n').forEach(line => {
-  const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-  if (match) {
-    let val = match[2] || '';
-    if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-    if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
-    envVars[match[1]] = val.trim();
-  }
-});
-
-Object.assign(process.env, envVars);
+// This suite is mock-only. Never read local env files or inherit remote
+// Supabase credentials. Live certification is a separately authorized task.
+process.env.HOEOS_MOCK_ONLY = '1';
+process.env.VITE_SUPABASE_URL = 'http://127.0.0.1:54321';
+process.env.VITE_SUPABASE_ANON_KEY = 'mock-anon-key-not-valid';
+process.env.VITE_CP_SPLASH_TENANT_ID = '4b9995ce-0000-4000-8000-000000000001';
 
 (import.meta as unknown as { env: Record<string, string> }).env = {
-  VITE_SUPABASE_URL: envVars.VITE_SUPABASE_URL || 'https://efvvczmopacoroudzfnl.supabase.co',
-  VITE_SUPABASE_ANON_KEY: envVars.VITE_SUPABASE_ANON_KEY || '',
-  VITE_CP_SPLASH_TENANT_ID: envVars.VITE_CP_SPLASH_TENANT_ID || '42d36cee-4cd6-43d1-af5d-334e5a07e37c',
+  VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
+  VITE_SUPABASE_ANON_KEY: 'mock-anon-key-not-valid',
+  VITE_CP_SPLASH_TENANT_ID: '4b9995ce-0000-4000-8000-000000000001',
 };
 
 const { mediaService, BUCKET_NAME } = await import('../src/services/mediaService');
@@ -77,6 +67,7 @@ let forceStorageError = false;
 let forceAssetInsertError = false;
 let forcePlacementInsertError = false;
 let forcePlacementReloadError = false;
+let forcePrimaryRpcError = false;
 let storageDeletions: string[] = [];
 
 // Intercept Supabase Storage methods
@@ -381,6 +372,40 @@ supabase.from = (table: string) => {
   return originalFrom(table);
 };
 
+// Mock the transaction-backed primary-media RPC. Mutations happen only
+// after all simulated checks pass, mirroring PostgreSQL transaction rollback.
+(supabase as any).rpc = async (fn: string, args: Record<string, unknown>) => {
+  if (fn !== 'set_product_primary_media') {
+    return { data: null, error: { message: `Unexpected RPC: ${fn}` } };
+  }
+  if (forcePrimaryRpcError) {
+    return { data: null, error: { message: 'Simulated atomic primary switch failure' } };
+  }
+
+  const productId = String(args.p_product_id);
+  const mediaId = String(args.p_media_id);
+  let relation = mockProductMedia.find(m => m.product_id === productId && m.media_id === mediaId);
+  if (!args.p_create_link && !relation) {
+    return { data: null, error: { message: 'Media asset is not linked to this product' } };
+  }
+
+  if (args.p_create_link && !relation) {
+    relation = {
+      product_id: productId,
+      media_id: mediaId,
+      sort_order: Number(args.p_sort_order ?? 0),
+      is_primary: true,
+    };
+    mockProductMedia.push(relation);
+  }
+
+  for (const item of mockProductMedia) {
+    if (item.product_id === productId) item.is_primary = item.media_id === mediaId;
+  }
+  if (relation) relation.is_primary = true;
+  return { data: relation ? [{ ...relation }] : [], error: null };
+};
+
 // Test Runner
 console.log('======================================================================');
 console.log('HOEOS TEST SUITE: CMS MEDIA PIPELINE & PERSISTENT PLACEMENTS');
@@ -401,14 +426,23 @@ async function test(name: string, fn: () => Promise<void> | void) {
   }
 }
 
-class MockFile {
+class MockFile extends Blob {
   name: string;
-  size: number;
-  type: string;
+
   constructor(name: string, size: number, type: string) {
+    const signatures: Record<string, number[]> = {
+      'image/jpeg': [0xff, 0xd8, 0xff, 0xe0],
+      'image/png': [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+      'image/gif': [0x47, 0x49, 0x46, 0x38, 0x39, 0x61],
+      'image/webp': [0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50],
+      'video/mp4': [0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70],
+      'video/webm': [0x1a, 0x45, 0xdf, 0xa3],
+    };
+    const bytes = new Uint8Array(Math.max(size, 1));
+    const signature = signatures[type] ?? [];
+    bytes.set(signature.slice(0, bytes.length));
+    super([bytes], { type });
     this.name = name;
-    this.size = size;
-    this.type = type;
   }
 }
 
@@ -508,17 +542,19 @@ await test('6. Storage upload failure returns structured error and aborts persis
 // ----------------------------------------------------------------------------
 // 7. media_assets Insert Failure & Safe Compensation
 // ----------------------------------------------------------------------------
-await test('7. DB insert failure safely deletes uploaded storage object (compensation)', async () => {
+await test('7. Ambiguous DB insert failure preserves uploaded Storage object for reconciliation', async () => {
   forceAssetInsertError = true;
   storageDeletions = [];
-  const file = new MockFile('compensate.jpg', 30000, 'image/jpeg') as unknown as File;
+  const file = new MockFile('preserve-on-uncertain-insert.jpg', 30000, 'image/jpeg') as unknown as File;
   const res = await mediaService.uploadAsset(file);
   forceAssetInsertError = false;
 
   assert.equal(res.data, null);
   assert.ok(res.error);
-  // Compensation assertion: Storage object must have been cleaned up
-  assert.ok(storageDeletions.length > 0, 'Storage object should be deleted during compensation');
+  assert.match(res.error, /preserved for reconciliation/i);
+  // The insert may have committed even when its response reports failure.
+  // Never delete the Storage object until database state is independently reconciled.
+  assert.equal(storageDeletions.length, 0, 'Storage must be preserved when asset-row persistence is unconfirmed');
 });
 
 // ----------------------------------------------------------------------------
@@ -550,11 +586,35 @@ await test('9a. Link existing asset to product via linkAssetToProduct', async ()
   assert.equal(linkRes.data.is_primary, false);
 });
 
-await test('9b. Set primary media sets is_primary=true for target asset and clears prior primary', async () => {
+await test('9b. Primary asset linking uses the atomic RPC and leaves exactly one primary', async () => {
   const linkRes = await mediaService.linkAssetToProduct(TEST_PRODUCT_ID, createdAssetId, true);
   assert.equal(linkRes.error, null);
   assert.ok(linkRes.data);
   assert.equal(linkRes.data.is_primary, true);
+  assert.equal(linkRes.data.media_assets?.id, createdAssetId);
+  assert.equal(linkRes.data.media_assets?.status, 'active');
+  const primaries = mockProductMedia.filter(m => m.product_id === TEST_PRODUCT_ID && m.is_primary);
+  assert.equal(primaries.length, 1);
+  assert.equal(primaries[0].media_id, createdAssetId);
+});
+
+await test('9c. Failed atomic primary switch preserves the previous primary', async () => {
+  const otherFile = new MockFile('alternate_primary.jpg', 12000, 'image/jpeg') as unknown as File;
+  const otherAsset = await mediaService.uploadAsset(otherFile);
+  assert.ok(otherAsset.data);
+  const otherLink = await mediaService.linkAssetToProduct(TEST_PRODUCT_ID, otherAsset.data.id, true);
+  assert.equal(otherLink.error, null);
+  assert.equal(otherLink.data?.is_primary, true);
+
+  forcePrimaryRpcError = true;
+  const failedSwitch = await mediaService.setPrimaryMedia(TEST_PRODUCT_ID, createdAssetId);
+  forcePrimaryRpcError = false;
+
+  assert.equal(failedSwitch.success, false);
+  assert.match(failedSwitch.error || '', /Simulated atomic primary switch failure/i);
+  const primaries = mockProductMedia.filter(m => m.product_id === TEST_PRODUCT_ID && m.is_primary);
+  assert.equal(primaries.length, 1);
+  assert.equal(primaries[0].media_id, otherAsset.data.id);
 });
 
 // ----------------------------------------------------------------------------
