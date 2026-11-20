@@ -52,7 +52,8 @@ export const placementService = {
       if (activeOnly) {
         return list.filter(p => {
           const asset = p.media_assets || p.asset;
-          return !asset || (asset.status === 'active' && asset.bucket === 'cp-public');
+          // Public placement must resolve to a real, active asset in the approved bucket.
+          return Boolean(asset && asset.status === 'active' && asset.bucket === 'cp-public');
         });
       }
 
