@@ -14,7 +14,8 @@
     "test:media:pipeline:mock": "tsx tests/media_pipeline_placements.test.ts",
     "test:media:migration:contract": "tsx tests/primary_media_migration_contract.test.ts",
     "test:products:contract": "tsx tests/product_publish_whatsapp_contract.test.ts",
-    "test:e2e:mvp": "tsx tests/e2e/cpsplash-product-funnels-whatsapp.ts"
+    "test:e2e:mvp": "tsx tests/e2e/cpsplash-product-funnels-whatsapp.ts",
+    "test:content:rendering": "tsx tests/product_content_rendering.test.tsx"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
