@@ -24,13 +24,13 @@ export function getProductPrice(product?: Product | null): ResolvedProductPricin
   }
 
   // Find active variant
-  const variant = product.variants.find(v => v.status === 'active') || product.variants[0];
+  const variant = product.variants.find(v => v.status === 'active');
   if (!variant || !variant.prices || variant.prices.length === 0) {
     return { amount: 0, compare_at_amount: null, currency: DEFAULT_CURRENCY };
   }
 
-  // Find active price
-  const price = variant.prices.find(p => p.status === 'active') || variant.prices[0];
+  // Never display an archived price as a public fallback.
+  const price = variant.prices.find(p => p.status === 'active');
   if (!price) {
     return { amount: 0, compare_at_amount: null, currency: DEFAULT_CURRENCY };
   }
@@ -156,7 +156,7 @@ export function getProductPrimaryVariant(product?: Product | null): ProductVaria
   if (!product || !product.variants || product.variants.length === 0) {
     return undefined;
   }
-  return product.variants.find(v => v.status === 'active') || product.variants[0];
+  return product.variants.find(v => v.status === 'active');
 }
 
 /**
