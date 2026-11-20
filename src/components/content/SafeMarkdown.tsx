@@ -33,11 +33,15 @@ export function SafeMarkdown({ content, className = '' }: { content: string; cla
   const blocks: React.ReactNode[] = [];
   let paragraph: string[] = [];
   let index = 0;
+  let blockIndex = 0;
 
   const flushParagraph = () => {
     if (!paragraph.length) return;
     const text = paragraph.join(' ').trim();
-    if (text) blocks.push(<p key={`paragraph-${index++}`}>{renderInline(text, `p-${index}`)}</p>);
+    if (text) {
+      const paragraphKey = blockIndex++;
+      blocks.push(<p key={`paragraph-${paragraphKey}`}>{renderInline(text, `p-${paragraphKey}`)}</p>);
+    }
     paragraph = [];
   };
 
