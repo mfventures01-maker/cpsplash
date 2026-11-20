@@ -343,10 +343,13 @@ function createSupabaseMock(options: {
           storageObjects.set(path, new Blob([new Uint8Array(fileSize)], { type: opts.contentType }));
           return { data: { path }, error: null };
         },
-        download: async (path: string) => ({
-          data: storageObjects.get(path) || null,
-          error: storageObjects.has(path) ? null : { message: 'Mock Storage object not found' },
-        }),
+        download: async (path: string) => {
+          if (options.storageDownloadError) return { data: null, error: options.storageDownloadError };
+          return {
+            data: storageObjects.get(path) || null,
+            error: storageObjects.has(path) ? null : { message: 'Mock Storage object not found' },
+          };
+        },
         remove: async (paths: string[]) => {
           calls.storageRemovals.push(...paths);
           if (options.storageRemoveError) {
@@ -431,6 +434,10 @@ function createSupabaseMock(options: {
                 ? options.assetDeleteRows
                 : [{ id }];
               resolve({ data: rows, error: null });
+              return;
+            }
+            if (table === 'product_media') {
+              resolve({ data: [{ media_id: String(queryState.media_id || '') }], error: null });
               return;
             }
             resolve({ data: [], error: null });
@@ -597,6 +604,21 @@ await runTest('Failure 2b: Signature mismatch is rejected before product lookup 
     assert.match(res.error || '', /signature mismatch/i);
     assert.equal(calls.storageUploads.length, 0);
     assert.equal(calls.dbInserts.length, 0);
+  });
+});
+
+await runTest('Failure 2c: Storage upload read-back failure blocks media_assets and product_media writes', async () => {
+  const { mockClient, calls } = createSupabaseMock({
+    storageDownloadError: { message: 'Simulated Storage read-back failure' },
+  });
+  await withMockedSupabase(mockClient, async () => {
+    const file = new MockFile('readback.png', 2048, 'image/png') as unknown as File;
+    const res = await mediaService.uploadMedia(VALID_PRODUCT_ID, file, 'image', 'Readback test', false);
+    assert.equal(res.data, null);
+    assert.match(res.error || '', /Simulated Storage read-back failure/i);
+    assert.equal(calls.storageUploads.length, 1);
+    assert.equal(calls.dbInserts.filter(row => row.table === 'media_assets').length, 0);
+    assert.equal(calls.storageRemovals.length, 0, 'ambiguous Storage object is preserved for reconciliation');
   });
 });
 
@@ -802,6 +824,31 @@ await runTest('Tenant Boundary: Unauthenticated user cannot upload to cp-public 
 console.log('\n======================================================================');
 console.log(`HOEOS TEST SUMMARY: ${passedTests}/${totalTests} TESTS PASSED`);
 console.log('======================================================================\n');
+
+await runTest('Atomic reorder submits the complete ordered media set in one RPC', async () => {
+  const { mockClient, calls } = createSupabaseMock({});
+  await withMockedSupabase(mockClient, async () => {
+    const ids = [
+      'aaaaaaaa-1111-4111-8111-111111111111',
+      'bbbbbbbb-2222-4222-8222-222222222222',
+    ];
+    const result = await mediaService.reorderMedia(VALID_PRODUCT_ID, ids);
+    assert.equal(result.success, true);
+    assert.equal(calls.rpcCalls.length, 1);
+    assert.equal(calls.rpcCalls[0].name, 'reorder_product_media');
+    assert.deepEqual(calls.rpcCalls[0].args.p_media_ids, ids);
+  });
+});
+
+await runTest('Media unlink changes UI state only after exactly one relation is confirmed deleted', async () => {
+  const { mockClient, calls } = createSupabaseMock({});
+  await withMockedSupabase(mockClient, async () => {
+    const mediaId = 'cccccccc-3333-4333-8333-333333333333';
+    const result = await mediaService.deleteMedia(VALID_PRODUCT_ID, mediaId);
+    assert.equal(result.success, true);
+    assert.equal(calls.dbDeletes.some(row => row.table === 'product_media'), true);
+  });
+});
 
 try {
   supabase.auth.stopAutoRefresh();
